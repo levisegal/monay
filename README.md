@@ -43,6 +43,10 @@ If it works on your home server, it's production.
 | **Household Filter** | Single-household view for screen sharing with family |
 | **Performance Tracking** | Daily/weekly/monthly gains across accounts |
 | **Live Prices** | Current quotes via market data API (replaces checking Schwab) |
+| **Intra-Year Tax Calculator** | Real-time capital gains vs ordinary income tracking based on holding periods |
+| **Growth Projector** | Compound growth calculator given yield over N years |
+| **Liability-Based Planning** | Retirement income planning with spending needs, guardrails, and runway |
+| **Contribution Reminders** | Track 529, IRA, HSA, 401k contributions vs annual limits with deadline alerts |
 
 ## Target Institutions
 
