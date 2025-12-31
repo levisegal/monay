@@ -14,7 +14,7 @@ RUN go mod download
 COPY ./holdings .
 
 HEALTHCHECK --interval=10s --start-period=15s --retries=5 --timeout=5s \
-    CMD curl --json '{}' http://localhost:8080/grpc.health.v1.Health/Check || exit 1
+    CMD curl --json '{}' http://localhost:8888/grpc.health.v1.Health/Check || exit 1
 
 RUN go install github.com/air-verse/air@v1.61.1
 CMD ["air", "-c", "./build/.air.toml"]
