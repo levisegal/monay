@@ -1,0 +1,11 @@
+# ngrok configuration for local development
+# Set NGROK_AUTHTOKEN in your .envrc, then run:
+#   ngrok start monay --config ngrok.yml
+
+version: "3"
+
+tunnels:
+  monay:
+    addr: 8888
+    proto: http
+    domain: periproctic-triangulately-matha.ngrok-free.dev

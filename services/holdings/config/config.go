@@ -39,7 +39,7 @@ func NewConfig() (*Config, error) {
 
 func defaultConfig() *Config {
 	return &Config{
-		ListenAddr:   ":8080",
+		ListenAddr:   ":8888",
 		LoggingLevel: "info",
 		Plaid: Plaid{
 			Env: "sandbox",
@@ -54,7 +54,8 @@ type Config struct {
 }
 
 type Plaid struct {
-	ClientID string `env:"CLIENT_ID"`
-	Secret   string `env:"SECRET"`
-	Env      string `env:"ENV"`
+	ClientID    string `env:"CLIENT_ID"`
+	Secret      string `env:"SECRET"`
+	Env         string `env:"ENV"`
+	RedirectURI string `env:"REDIRECT_URI"` // Required for OAuth institutions in production (must be HTTPS)
 }

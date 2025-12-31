@@ -81,7 +81,7 @@ docker.buildx.create:
 
 # --- tools --------------------------------------------------------------------
 
-.PHONY: proto.generate run
+.PHONY: proto.generate run ngrok
 
 proto.generate:
 	@if [ -z $(shell buf --version | grep $(BUF_VERSION)) ]; then \
@@ -103,3 +103,6 @@ proto.generate:
 
 run:
 	@go run $(GO_BUILD_SRC) server
+
+ngrok:
+	@ngrok start monay --config ngrok.yml
