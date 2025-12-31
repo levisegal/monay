@@ -1,0 +1,12 @@
+name: monay
+
+# Requires Docker Compose v2.20+
+include:
+  - compose.database.yaml
+  - compose.monay-apis.yaml
+
+networks:
+  monay: {}
+
+volumes:
+  postgres_data: {}

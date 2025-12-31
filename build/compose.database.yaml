@@ -1,0 +1,26 @@
+services:
+  postgres:
+    build:
+      context: ./postgres
+      dockerfile: postgres.dev.Dockerfile
+    container_name: monay-postgres
+    ports:
+      - "${MONAY_POSTGRES_PORT:-6432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=monay
+    labels:
+      - dev.orbstack.domains=postgres.monay.local
+    networks:
+      - monay
+    profiles:
+      - database
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d monay"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
