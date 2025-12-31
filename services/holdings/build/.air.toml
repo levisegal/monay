@@ -1,0 +1,13 @@
+root = "."
+
+tmp_dir = "tmp"
+
+[build]
+cmd = "make clean && make build.linux-arm64"
+full_bin = "export $(grep -v '^#' .env | xargs) && ./dist/holdings-arm64"
+args_bin = ["server"]
+include_ext = ["go", "env"]
+exclude_dir = ["dist"]
+rerun = true
+rerun_delay = 10000
+
