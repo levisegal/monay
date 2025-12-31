@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+import "monay/v1beta1/link.proto";
+import "monay/v1beta1/holdings.proto";
+
+service PlaidService {
+  // CreateLinkToken generates a Plaid Link token for the frontend
+  rpc CreateLinkToken(CreateLinkTokenRequest) returns (CreateLinkTokenResponse);
+  
+  // ExchangePublicToken exchanges a public token for an access token and stores it
+  rpc ExchangePublicToken(ExchangePublicTokenRequest) returns (ExchangePublicTokenResponse);
+  
+  // GetHoldings fetches investment holdings for a linked account
+  rpc GetHoldings(GetHoldingsRequest) returns (GetHoldingsResponse);
+}
+

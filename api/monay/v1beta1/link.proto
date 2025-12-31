@@ -1,0 +1,22 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+message CreateLinkTokenRequest {
+  string user_id = 1;
+}
+
+message CreateLinkTokenResponse {
+  string link_token = 1;
+}
+
+message ExchangePublicTokenRequest {
+  string public_token = 1;
+}
+
+message ExchangePublicTokenResponse {
+  // Empty - access token is stored server-side
+}
+

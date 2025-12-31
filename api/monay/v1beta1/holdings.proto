@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+message GetHoldingsRequest {
+  // Empty for now - will use stored access token
+}
+
+message GetHoldingsResponse {
+  repeated Account accounts = 1;
+  repeated Holding holdings = 2;
+}
+
+message Account {
+  string account_id = 1;
+  string name = 2;
+  string type = 3;
+  string subtype = 4;
+  double balance = 5;
+}
+
+message Holding {
+  string account_id = 1;
+  string security_id = 2;
+  string symbol = 3;
+  string name = 4;
+  double quantity = 5;
+  double price = 6;
+  double value = 7;
+}
+
