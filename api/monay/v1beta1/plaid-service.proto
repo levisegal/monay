@@ -4,10 +4,14 @@ package monay.v1beta1;
 
 option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
 
+import "google/protobuf/empty.proto";
 import "monay/v1beta1/link.proto";
 import "monay/v1beta1/holdings.proto";
+import "monay/v1beta1/version.proto";
 
 service PlaidService {
+  rpc GetVersion(google.protobuf.Empty) returns (GetVersionResponse);
+  
   // CreateLinkToken generates a Plaid Link token for the frontend
   rpc CreateLinkToken(CreateLinkTokenRequest) returns (CreateLinkTokenResponse);
   

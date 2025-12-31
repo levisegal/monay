@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+message GetVersionResponse {
+  string version = 1;
+  string revision = 2;
+}
+
