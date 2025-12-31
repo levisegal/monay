@@ -31,11 +31,15 @@ If it works on your home server, it's production.
 - Manual OTP flows (family texts you codes when needed)
 - CSV fallback for institutions with poor API support
 
+**Cost awareness:**
+- Plaid Investments Holdings: $0.18/account/month (flat rate, auto-refreshed daily)
+- Plaid Balance: $0.10/call — cache aggressively, avoid polling. Fetch on-demand or weekly, not daily.
+
 ## Features
 
 | Feature | Description |
 |---------|-------------|
-| **Account Aggregation** | Plaid + CSV imports from Schwab, ETrade, Fidelity, LPL |
+| **Account Aggregation** | Plaid (Investments + Balance) + CSV imports from Schwab, ETrade, Fidelity, LPL |
 | **Conversational Queries** | Ask questions about holdings, performance, allocation |
 | **Daily Snapshots** | Track portfolio changes over time |
 | **Rebalancing** | Generate trade recommendations to hit target allocations |
