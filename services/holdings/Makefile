@@ -79,6 +79,14 @@ docker.buildx.create:
 		--bootstrap \
 		--use
 
+# --- database -----------------------------------------------------------------
+
+.PHONY: db.generate
+
+db.generate:
+	@echo "Generating sqlc code..."
+	@cd database/sql && sqlc generate
+
 # --- tools --------------------------------------------------------------------
 
 .PHONY: proto.generate run ngrok
