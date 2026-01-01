@@ -18,3 +18,4 @@ COPY ${BIN_FILE} /usr/local/bin/holdings
 
 CMD ["holdings", "server"]
 
+

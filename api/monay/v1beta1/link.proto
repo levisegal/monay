@@ -20,3 +20,4 @@ message ExchangePublicTokenResponse {
   // Empty - access token is stored server-side
 }
 
+

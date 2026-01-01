@@ -256,7 +256,10 @@ const testPageHTML = `<!DOCTYPE html>
         
         log('\nHoldings:', 'success');
         for (const h of data.holdings || []) {
-          log('  ' + h.symbol + ': ' + h.quantity + ' @ $' + h.price.toFixed(2) + ' = $' + h.value.toFixed(2));
+          const qty = (h.quantity || 0).toFixed(4);
+          const price = (h.price || 0).toFixed(2);
+          const value = (h.value || 0).toFixed(2);
+          log('  ' + (h.symbol || h.name || 'Unknown') + ': ' + qty + ' @ $' + price + ' = $' + value);
         }
       } catch (err) {
         log('Error: ' + err.message, 'error');
