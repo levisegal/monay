@@ -24,6 +24,7 @@ func holdingsCommand() *cobra.Command {
 	}
 
 	cmd.AddCommand(listHoldingsCommand())
+	cmd.AddCommand(positionsCommand())
 
 	return cmd
 }
@@ -154,6 +155,61 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 	fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
 
 	return nil
+}
+
+func positionsCommand() *cobra.Command {
+	cmd := &cobra.Command{
+		Use:   "positions",
+		Short: "List positions aggregated by symbol",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+
+			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			queries := db.New(conn)
+
+			positions, err := queries.ListPositions(ctx)
+			if err != nil {
+				return fmt.Errorf("failed to list positions: %w", err)
+			}
+
+			fmt.Printf("\n=== Positions (by Symbol) ===\n\n")
+
+			tbl := table.New("Symbol", "Quantity", "Cost Basis", "Accounts", "Acquired")
+			tbl.WithWriter(os.Stdout)
+
+			var totalCostBasis int64
+			for _, p := range positions {
+				qty := float64(p.QuantityMicros) / 1_000_000
+				cost := float64(p.CostBasisMicros) / 1_000_000
+				totalCostBasis += p.CostBasisMicros
+
+				acquired := ""
+				if t, ok := p.EarliestAcquired.(time.Time); ok {
+					acquired = t.Format("2006-01-02")
+				}
+
+				tbl.AddRow(p.Symbol, formatQty(qty), formatCurrency(cost), p.AccountCount, acquired)
+			}
+
+			tbl.Print()
+
+			fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+
+			return nil
+		},
+	}
+
+	return cmd
 }
 
 func formatCurrency(amount float64) string {

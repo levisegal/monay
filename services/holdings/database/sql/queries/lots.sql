@@ -163,3 +163,22 @@ where l.remaining_micros > 0
 group by a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc;
 
+-- name: ListPositions :many
+select
+    s.symbol,
+    s.name as security_name,
+    count(distinct a.id)::int as account_count,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+join monay.accounts a on a.id = l.account_id
+where l.remaining_micros > 0
+group by s.symbol, s.name
+order by cost_basis_micros desc;
+

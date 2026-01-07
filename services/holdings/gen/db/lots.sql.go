@@ -517,6 +517,62 @@ func (q *Queries) ListLotsByAccountAndSecurity(ctx context.Context, arg ListLots
 	return items, nil
 }
 
+const listPositions = `-- name: ListPositions :many
+select
+    s.symbol,
+    s.name as security_name,
+    count(distinct a.id)::int as account_count,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+join monay.accounts a on a.id = l.account_id
+where l.remaining_micros > 0
+group by s.symbol, s.name
+order by cost_basis_micros desc
+`
+
+type ListPositionsRow struct {
+	Symbol           string      `json:"symbol"`
+	SecurityName     pgtype.Text `json:"security_name"`
+	AccountCount     int32       `json:"account_count"`
+	QuantityMicros   int64       `json:"quantity_micros"`
+	CostBasisMicros  int64       `json:"cost_basis_micros"`
+	EarliestAcquired interface{} `json:"earliest_acquired"`
+}
+
+func (q *Queries) ListPositions(ctx context.Context) ([]ListPositionsRow, error) {
+	rows, err := q.db.Query(ctx, listPositions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListPositionsRow{}
+	for rows.Next() {
+		var i ListPositionsRow
+		if err := rows.Scan(
+			&i.Symbol,
+			&i.SecurityName,
+			&i.AccountCount,
+			&i.QuantityMicros,
+			&i.CostBasisMicros,
+			&i.EarliestAcquired,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const sumRealizedGainsByYear = `-- name: SumRealizedGainsByYear :one
 select
     coalesce(sum(case when holding_period = 'short_term' then realized_gain_micros else 0 end), 0)::bigint as short_term_gains,
