@@ -129,6 +129,14 @@ func mapLPLTransactionType(activity string, value decimal.Decimal) TransactionTy
 		return TransactionTypeBuy
 	case "sell":
 		return TransactionTypeSell
+	case "dividend reinvest":
+		// DRIP - dividend used to buy more shares
+		return TransactionTypeBuy
+	case "stock dividend/split":
+		// Shares received from split - treat as buy with $0 cost
+		return TransactionTypeBuy
+	case "cash dividend":
+		return TransactionTypeDividend
 	case "interest":
 		return TransactionTypeInterest
 	case "reinvest interest":
