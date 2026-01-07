@@ -145,6 +145,7 @@ order by s.symbol;
 
 -- name: ListAllHoldings :many
 select
+    a.institution_name as broker,
     a.name as account_name,
     s.symbol,
     s.name as security_name,
@@ -159,6 +160,6 @@ from monay.lots l
 join monay.securities s on s.id = l.security_id
 join monay.accounts a on a.id = l.account_id
 where l.remaining_micros > 0
-group by a.name, s.symbol, s.name
+group by a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc;
 

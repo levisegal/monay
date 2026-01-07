@@ -23,6 +23,7 @@ func Command() *cobra.Command {
 	command.AddCommand(importCommand())
 	command.AddCommand(lotsCommand())
 	command.AddCommand(holdingsCommand())
+	command.AddCommand(accountsCommand())
 
 	return command
 }

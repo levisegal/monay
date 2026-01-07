@@ -28,6 +28,53 @@ func lotsCommand() *cobra.Command {
 	cmd.AddCommand(processLotsCommand())
 	cmd.AddCommand(createLotsCommand())
 	cmd.AddCommand(checkLotsCommand())
+	cmd.AddCommand(clearLotsCommand())
+
+	return cmd
+}
+
+func clearLotsCommand() *cobra.Command {
+	var accountName string
+
+	cmd := &cobra.Command{
+		Use:   "clear",
+		Short: "Clear all transactions and lots for an account",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+
+			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			if err != nil {
+				return err
+			}
+			defer conn.Close()
+
+			queries := db.New(conn)
+
+			account, err := queries.GetAccountByName(ctx, accountName)
+			if err != nil {
+				return fmt.Errorf("account not found: %s", accountName)
+			}
+
+			if err := queries.DeleteLotsByAccount(ctx, account.ID); err != nil {
+				return fmt.Errorf("failed to delete lots: %w", err)
+			}
+
+			if err := queries.DeleteTransactionsByAccount(ctx, account.ID); err != nil {
+				return fmt.Errorf("failed to delete transactions: %w", err)
+			}
+
+			slog.Info("cleared account data", "account", account.Name)
+			return nil
+		},
+	}
+
+	cmd.Flags().StringVar(&accountName, "account-name", "", "Account name to clear")
+	cmd.MarkFlagRequired("account-name")
 
 	return cmd
 }

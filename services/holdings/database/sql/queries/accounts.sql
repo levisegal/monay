@@ -41,10 +41,10 @@ returning *;
 -- name: UpdateAccount :one
 update monay.accounts
 set
-    name = coalesce(@name, name),
-    institution_name = coalesce(@institution_name, institution_name),
+    name = coalesce(nullif(@name, ''), name),
+    institution_name = coalesce(nullif(@institution_name, ''), institution_name),
     external_account_number = coalesce(@external_account_number, external_account_number),
-    account_type = coalesce(@account_type, account_type),
+    account_type = coalesce(nullif(@account_type, ''), account_type),
     updated_at = now()
 where id = @id
 returning *;

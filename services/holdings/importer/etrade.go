@@ -118,7 +118,13 @@ func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) 
 		return TransactionTypeBuy
 	case "Sold":
 		return TransactionTypeSell
-	case "Dividend", "Qualified Dividend":
+	case "Dividend":
+		// DRIP: quantity > 0 means reinvesting dividend into shares (buy)
+		if quantity.IsPositive() {
+			return TransactionTypeBuy
+		}
+		return TransactionTypeDividend
+	case "Qualified Dividend":
 		return TransactionTypeDividend
 	case "Interest Income", "Interest":
 		return TransactionTypeInterest

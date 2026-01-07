@@ -1,0 +1,20 @@
+For Account:,#####3652
+
+
+TransactionDate,TransactionType,SecurityType,Symbol,Quantity,Amount,Price,Commission,Description
+
+12/29/22,Dividend,EQ,GILD,38.32078,-3259.66,0,0,GILEAD SCIENCES INC           REIN @  85.0624               REC 12/15/22 PAY 12/29/22
+12/29/22,Dividend,EQ,GILD,0,2596.61,0,0,GILEAD SCIENCES INC           CASH DIV  ON    3557 SHS      REC 12/15/22 PAY 12/29/22
+12/29/22,Dividend,EQ,GILD,0,663.05,0,0,GILEAD SCIENCES INC           CASH DIV  ON                  908.28299 SHS                 REC 12/15/22 PAY 12/29/22
+09/29/22,Dividend,EQ,GILD,51.4397,-3222.11,0,0,GILEAD SCIENCES INC           REIN @  62.6385               REC 09/15/22 PAY 09/29/22
+09/29/22,Dividend,EQ,GILD,0,2596.61,0,0,GILEAD SCIENCES INC           CASH DIV  ON    3557 SHS      REC 09/15/22 PAY 09/29/22
+09/29/22,Dividend,EQ,GILD,0,625.5,0,0,GILEAD SCIENCES INC           CASH DIV  ON                  856.84329 SHS                 REC 09/15/22 PAY 09/29/22
+06/29/22,Dividend,EQ,GILD,51.27924,-3184.67,0,0,GILEAD SCIENCES INC           REIN @  62.1044               REC 06/15/22 PAY 06/29/22
+06/29/22,Dividend,EQ,GILD,0,2596.61,0,0,GILEAD SCIENCES INC           CASH DIV  ON    3557 SHS      REC 06/15/22 PAY 06/29/22
+06/29/22,Dividend,EQ,GILD,0,588.06,0,0,GILEAD SCIENCES INC           CASH DIV  ON                  805.56405 SHS                 REC 06/15/22 PAY 06/29/22
+03/30/22,Dividend,EQ,GILD,52.2818,-3146.51,0,0,GILEAD SCIENCES INC           REIN @  60.1836               REC 03/15/22 PAY 03/30/22
+03/30/22,Dividend,EQ,GILD,0,2596.61,0,0,GILEAD SCIENCES INC           CASH DIV  ON    3557 SHS      REC 03/15/22 PAY 03/30/22
+03/30/22,Dividend,EQ,GILD,0,549.9,0,0,GILEAD SCIENCES INC           CASH DIV  ON                  753.28225 SHS                 REC 03/15/22 PAY 03/30/22
+
+
+

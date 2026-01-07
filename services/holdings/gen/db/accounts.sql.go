@@ -183,20 +183,20 @@ func (q *Queries) ListAccounts(ctx context.Context) ([]MonayAccount, error) {
 const updateAccount = `-- name: UpdateAccount :one
 update monay.accounts
 set
-    name = coalesce($1, name),
-    institution_name = coalesce($2, institution_name),
+    name = coalesce(nullif($1, ''), name),
+    institution_name = coalesce(nullif($2, ''), institution_name),
     external_account_number = coalesce($3, external_account_number),
-    account_type = coalesce($4, account_type),
+    account_type = coalesce(nullif($4, ''), account_type),
     updated_at = now()
 where id = $5
 returning id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
 `
 
 type UpdateAccountParams struct {
-	Name                  string      `json:"name"`
-	InstitutionName       string      `json:"institution_name"`
+	Name                  interface{} `json:"name"`
+	InstitutionName       interface{} `json:"institution_name"`
 	ExternalAccountNumber pgtype.Text `json:"external_account_number"`
-	AccountType           string      `json:"account_type"`
+	AccountType           interface{} `json:"account_type"`
 	ID                    string      `json:"id"`
 }
 
