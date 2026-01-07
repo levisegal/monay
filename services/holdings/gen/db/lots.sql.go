@@ -179,6 +179,62 @@ func (q *Queries) GetLot(ctx context.Context, id string) (MonayLot, error) {
 	return i, err
 }
 
+const listAllHoldings = `-- name: ListAllHoldings :many
+select
+    a.name as account_name,
+    s.symbol,
+    s.name as security_name,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+join monay.accounts a on a.id = l.account_id
+where l.remaining_micros > 0
+group by a.name, s.symbol, s.name
+order by cost_basis_micros desc
+`
+
+type ListAllHoldingsRow struct {
+	AccountName      string      `json:"account_name"`
+	Symbol           string      `json:"symbol"`
+	SecurityName     pgtype.Text `json:"security_name"`
+	QuantityMicros   int64       `json:"quantity_micros"`
+	CostBasisMicros  int64       `json:"cost_basis_micros"`
+	EarliestAcquired interface{} `json:"earliest_acquired"`
+}
+
+func (q *Queries) ListAllHoldings(ctx context.Context) ([]ListAllHoldingsRow, error) {
+	rows, err := q.db.Query(ctx, listAllHoldings)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllHoldingsRow{}
+	for rows.Next() {
+		var i ListAllHoldingsRow
+		if err := rows.Scan(
+			&i.AccountName,
+			&i.Symbol,
+			&i.SecurityName,
+			&i.QuantityMicros,
+			&i.CostBasisMicros,
+			&i.EarliestAcquired,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listDispositionsBySellTransaction = `-- name: ListDispositionsBySellTransaction :many
 select
     d.id, d.lot_id, d.sell_transaction_id, d.disposed_date, d.quantity_micros, d.cost_basis_micros, d.proceeds_micros, d.realized_gain_micros, d.holding_period, d.created_at,
