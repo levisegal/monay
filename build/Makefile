@@ -1,4 +1,4 @@
-.PHONY: build build.nocache build.db build.api build.service build.service.nocache up down down.clean logs
+.PHONY: build build.nocache build.db build.api build.service build.service.nocache up down down.clean logs db.reinit
 
 build:
 	docker compose \
@@ -46,3 +46,6 @@ down.clean:
 
 logs:
 	docker compose logs -f
+
+db.reinit:
+	./postgres/reinit.sh

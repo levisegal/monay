@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"sync"
 
 	"dario.cat/mergo"
@@ -41,6 +42,12 @@ func defaultConfig() *Config {
 	return &Config{
 		ListenAddr:   ":8888",
 		LoggingLevel: "info",
+		Database: Database{
+			Host: "postgres.monay.local",
+			Port: "5432",
+			Name: "monay",
+			User: "monay_admin",
+		},
 		Plaid: Plaid{
 			Env: "sandbox",
 		},
@@ -48,9 +55,35 @@ func defaultConfig() *Config {
 }
 
 type Config struct {
-	ListenAddr   string `env:"LISTEN_ADDR"`
-	LoggingLevel string `env:"LOGGING_LEVEL"`
-	Plaid        Plaid  `envPrefix:"PLAID_"`
+	ListenAddr   string   `env:"LISTEN_ADDR"`
+	LoggingLevel string   `env:"LOGGING_LEVEL"`
+	Database     Database `envPrefix:"POSTGRES_"`
+	Plaid        Plaid    `envPrefix:"PLAID_"`
+}
+
+type Database struct {
+	Host   string `env:"HOST"`
+	Port   string `env:"PORT"`
+	Name   string `env:"DATABASE"`
+	User   string `env:"USER"`
+	Region string `env:"REGION"`
+	// If set, the password to use to connect to the database.
+	// If nil, will use RDS IAM authentication in production.
+	Password *string `env:"PASSWORD"`
+}
+
+func (d Database) ConnStringWithoutPassword() string {
+	return fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable",
+		d.Host, d.Port, d.User, d.Name,
+	)
+}
+
+func (d Database) ConnString() string {
+	connString := d.ConnStringWithoutPassword()
+	if d.Password != nil {
+		connString = fmt.Sprintf("%s password=%s", connString, *d.Password)
+	}
+	return connString
 }
 
 type Plaid struct {

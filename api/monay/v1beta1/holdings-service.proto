@@ -1,0 +1,11 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+import "monay/v1beta1/transactions.proto";
+
+service HoldingsService {
+  rpc BatchUpsertTransactions(BatchUpsertTransactionsRequest) returns (BatchUpsertTransactionsResponse);
+}

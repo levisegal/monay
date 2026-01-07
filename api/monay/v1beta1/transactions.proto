@@ -1,0 +1,30 @@
+syntax = "proto3";
+
+package monay.v1beta1;
+
+option go_package = "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1;monayv1beta1";
+
+message BatchUpsertTransactionsRequest {
+  string institution_name = 1;
+  string external_account_number = 2;
+  string account_name = 3;            // optional friendly name for creation
+  repeated Transaction transactions = 4;
+}
+
+message Transaction {
+  string symbol = 1;
+  string security_name = 2;
+  string transaction_type = 3;
+  string transaction_date = 4;        // ISO format: "2025-01-15"
+  int64 quantity_micros = 5;          // quantity * 1,000,000
+  int64 price_micros = 6;             // price * 1,000,000
+  int64 amount_micros = 7;            // amount * 1,000,000
+  int64 fees_micros = 8;              // fees * 1,000,000
+  string description = 9;
+}
+
+message BatchUpsertTransactionsResponse {
+  string account_id = 1;
+  int32 transactions_created = 2;
+  int32 securities_created = 3;
+}

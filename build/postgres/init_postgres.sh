@@ -21,4 +21,9 @@ psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" <<-'
   ALTER USER monay_readonly  SET search_path = monay, public;
   ALTER USER monay_readwrite SET search_path = monay, public;
   ALTER USER monay_admin     SET search_path = monay, public;
+
+  -- Grant on future tables
+  ALTER DEFAULT PRIVILEGES IN SCHEMA monay GRANT ALL ON TABLES TO monay_admin;
+  ALTER DEFAULT PRIVILEGES IN SCHEMA monay GRANT SELECT ON TABLES TO monay_readonly;
+  ALTER DEFAULT PRIVILEGES IN SCHEMA monay GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO monay_readwrite;
 EOSQL
