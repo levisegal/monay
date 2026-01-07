@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-const createTransaction = `-- name: CreateTransaction :one
+const createTransaction = `-- name: CreateTransaction :exec
 insert into monay.transactions (
     id,
     account_id,
@@ -35,7 +35,7 @@ insert into monay.transactions (
     $9,
     $10
 )
-returning id, account_id, security_id, transaction_type, transaction_date, quantity_micros, price_micros, amount_micros, fees_micros, description, created_at
+on conflict do nothing
 `
 
 type CreateTransactionParams struct {
@@ -51,8 +51,8 @@ type CreateTransactionParams struct {
 	Description     pgtype.Text `json:"description"`
 }
 
-func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) (MonayTransaction, error) {
-	row := q.db.QueryRow(ctx, createTransaction,
+func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) error {
+	_, err := q.db.Exec(ctx, createTransaction,
 		arg.ID,
 		arg.AccountID,
 		arg.SecurityID,
@@ -64,21 +64,7 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 		arg.FeesMicros,
 		arg.Description,
 	)
-	var i MonayTransaction
-	err := row.Scan(
-		&i.ID,
-		&i.AccountID,
-		&i.SecurityID,
-		&i.TransactionType,
-		&i.TransactionDate,
-		&i.QuantityMicros,
-		&i.PriceMicros,
-		&i.AmountMicros,
-		&i.FeesMicros,
-		&i.Description,
-		&i.CreatedAt,
-	)
-	return i, err
+	return err
 }
 
 const deleteTransaction = `-- name: DeleteTransaction :exec

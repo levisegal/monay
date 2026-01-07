@@ -73,7 +73,7 @@ func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, e
 func parseETradeRow(record []string) (*Transaction, error) {
 	dateStr := strings.TrimSpace(record[0])
 	txnType := strings.TrimSpace(record[1])
-	symbol := strings.TrimSpace(record[3])
+	symbol := normalizeSymbol(strings.TrimSpace(record[3]))
 	quantityStr := strings.TrimSpace(record[4])
 	amountStr := strings.TrimSpace(record[5])
 	priceStr := strings.TrimSpace(record[6])
@@ -135,7 +135,10 @@ func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) 
 		}
 		return TransactionTypeTransferOut
 	case "Reorganization":
-		return TransactionTypeReorg
+		if quantity.IsPositive() {
+			return TransactionTypeReorgIn
+		}
+		return TransactionTypeReorgOut
 	case "LT Cap Gain Distribution", "ST Cap Gain Distribution":
 		return TransactionTypeCapGain
 	case "Misc Trade", "Adjustment":
@@ -155,4 +158,27 @@ func extractSecurityName(description string) string {
 
 func toMicros(d decimal.Decimal) int64 {
 	return d.Mul(decimal.NewFromInt(microsMultiplier)).IntPart()
+}
+
+// normalizeSymbol handles CUSIP-to-ticker mapping and cleanup
+func normalizeSymbol(symbol string) string {
+	// Skip empty or whitespace-only
+	if strings.TrimSpace(symbol) == "" {
+		return ""
+	}
+
+	// Known CUSIP mappings (E*TRADE sometimes uses CUSIPs for reorgs)
+	cusipMap := map[string]string{
+		"74374N102": "PRVB", // Provention Bio
+	}
+	if ticker, ok := cusipMap[symbol]; ok {
+		return ticker
+	}
+
+	// Skip internal account references like #2145605
+	if strings.HasPrefix(symbol, "#") {
+		return ""
+	}
+
+	return symbol
 }

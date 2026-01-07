@@ -112,3 +112,53 @@ select
 from monay.lot_dispositions
 where extract(year from disposed_date) = @year;
 
+-- name: SumRemainingBySymbol :many
+select
+    s.symbol,
+    s.id as security_id,
+    coalesce(sum(l.remaining_micros), 0)::bigint as remaining_micros
+from monay.securities s
+left join monay.lots l on l.security_id = s.id and l.account_id = @account_id
+where s.id in (
+    select distinct security_id
+    from monay.transactions
+    where account_id = @account_id and security_id is not null
+)
+group by s.symbol, s.id;
+
+-- name: ListHoldingsByAccount :many
+select
+    s.symbol,
+    s.name as security_name,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+where l.account_id = @account_id and l.remaining_micros > 0
+group by s.symbol, s.name
+order by s.symbol;
+
+-- name: ListAllHoldings :many
+select
+    a.name as account_name,
+    s.symbol,
+    s.name as security_name,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+join monay.accounts a on a.id = l.account_id
+where l.remaining_micros > 0
+group by a.name, s.symbol, s.name
+order by cost_basis_micros desc;
+

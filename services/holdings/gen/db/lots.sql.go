@@ -304,6 +304,58 @@ func (q *Queries) ListDispositionsByYear(ctx context.Context, year pgtype.Date) 
 	return items, nil
 }
 
+const listHoldingsByAccount = `-- name: ListHoldingsByAccount :many
+select
+    s.symbol,
+    s.name as security_name,
+    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(
+        case when l.remaining_micros > 0 
+        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        else 0 end
+    )::bigint as cost_basis_micros,
+    min(l.acquired_date) as earliest_acquired
+from monay.lots l
+join monay.securities s on s.id = l.security_id
+where l.account_id = $1 and l.remaining_micros > 0
+group by s.symbol, s.name
+order by s.symbol
+`
+
+type ListHoldingsByAccountRow struct {
+	Symbol           string      `json:"symbol"`
+	SecurityName     pgtype.Text `json:"security_name"`
+	QuantityMicros   int64       `json:"quantity_micros"`
+	CostBasisMicros  int64       `json:"cost_basis_micros"`
+	EarliestAcquired interface{} `json:"earliest_acquired"`
+}
+
+func (q *Queries) ListHoldingsByAccount(ctx context.Context, accountID string) ([]ListHoldingsByAccountRow, error) {
+	rows, err := q.db.Query(ctx, listHoldingsByAccount, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListHoldingsByAccountRow{}
+	for rows.Next() {
+		var i ListHoldingsByAccountRow
+		if err := rows.Scan(
+			&i.Symbol,
+			&i.SecurityName,
+			&i.QuantityMicros,
+			&i.CostBasisMicros,
+			&i.EarliestAcquired,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listLotsByAccount = `-- name: ListLotsByAccount :many
 select
     l.id, l.account_id, l.security_id, l.transaction_id, l.acquired_date, l.quantity_micros, l.remaining_micros, l.cost_basis_micros, l.created_at,
@@ -426,6 +478,47 @@ func (q *Queries) SumRealizedGainsByYear(ctx context.Context, year pgtype.Date) 
 	var i SumRealizedGainsByYearRow
 	err := row.Scan(&i.ShortTermGains, &i.LongTermGains, &i.TotalGains)
 	return i, err
+}
+
+const sumRemainingBySymbol = `-- name: SumRemainingBySymbol :many
+select
+    s.symbol,
+    s.id as security_id,
+    coalesce(sum(l.remaining_micros), 0)::bigint as remaining_micros
+from monay.securities s
+left join monay.lots l on l.security_id = s.id and l.account_id = $1
+where s.id in (
+    select distinct security_id
+    from monay.transactions
+    where account_id = $1 and security_id is not null
+)
+group by s.symbol, s.id
+`
+
+type SumRemainingBySymbolRow struct {
+	Symbol          string `json:"symbol"`
+	SecurityID      string `json:"security_id"`
+	RemainingMicros int64  `json:"remaining_micros"`
+}
+
+func (q *Queries) SumRemainingBySymbol(ctx context.Context, accountID string) ([]SumRemainingBySymbolRow, error) {
+	rows, err := q.db.Query(ctx, sumRemainingBySymbol, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []SumRemainingBySymbolRow{}
+	for rows.Next() {
+		var i SumRemainingBySymbolRow
+		if err := rows.Scan(&i.Symbol, &i.SecurityID, &i.RemainingMicros); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
 }
 
 const updateLotRemaining = `-- name: UpdateLotRemaining :exec

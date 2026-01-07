@@ -67,3 +67,4 @@ go.work.sum
 # .vscode/
 dist/
 tmp/
+.cursor/

@@ -22,6 +22,7 @@ func Command() *cobra.Command {
 	command.AddCommand(plaidCommand())
 	command.AddCommand(importCommand())
 	command.AddCommand(lotsCommand())
+	command.AddCommand(holdingsCommand())
 
 	return command
 }

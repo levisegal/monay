@@ -18,8 +18,11 @@ const (
 	TransactionTypeTransferIn       TransactionType = "transfer_in"
 	TransactionTypeTransferOut      TransactionType = "transfer_out"
 	TransactionTypeSecurityTransfer TransactionType = "security_transfer" // shares transferred in
-	TransactionTypeReorg            TransactionType = "reorg"             // splits, mergers, spin-offs
+	TransactionTypeReorgIn          TransactionType = "reorg_in"          // shares received from reorg
+	TransactionTypeReorgOut         TransactionType = "reorg_out"         // shares removed from reorg (cash merger, etc)
 	TransactionTypeCapGain          TransactionType = "cap_gain"          // capital gain distributions
+	TransactionTypeOpeningBalance   TransactionType = "opening_balance"   // manual opening lot
+	TransactionTypeFee              TransactionType = "fee"               // advisory fees, etc
 	TransactionTypeOther            TransactionType = "other"
 )
 
@@ -57,6 +60,7 @@ const (
 	BrokerSchwab   Broker = "schwab"
 	BrokerFidelity Broker = "fidelity"
 	BrokerVanguard Broker = "vanguard"
+	BrokerLPL      Broker = "lpl"
 )
 
 type Parser interface {
@@ -73,6 +77,8 @@ func GetParser(broker Broker) (Parser, error) {
 		return &FidelityParser{}, nil
 	case BrokerVanguard:
 		return &VanguardParser{}, nil
+	case BrokerLPL:
+		return &LPLParser{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported broker: %s", broker)
 	}

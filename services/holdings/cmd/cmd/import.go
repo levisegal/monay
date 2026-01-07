@@ -18,13 +18,13 @@ import (
 func importCommand() *cobra.Command {
 	var (
 		broker      string
-		file        string
+		files       []string
 		accountName string
 	)
 
 	cmd := &cobra.Command{
 		Use:   "import",
-		Short: "Import transactions from a CSV file",
+		Short: "Import transactions from CSV files",
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -33,12 +33,17 @@ func importCommand() *cobra.Command {
 				return err
 			}
 
-			return runImport(ctx, cfg, broker, file, accountName)
+			for _, file := range files {
+				if err := runImport(ctx, cfg, broker, file, accountName); err != nil {
+					return err
+				}
+			}
+			return nil
 		},
 	}
 
-	cmd.Flags().StringVar(&broker, "broker", "", "Broker name (etrade, schwab, fidelity, vanguard)")
-	cmd.Flags().StringVar(&file, "file", "", "Path to CSV file")
+	cmd.Flags().StringVar(&broker, "broker", "", "Broker name (etrade, schwab, fidelity, vanguard, lpl)")
+	cmd.Flags().StringArrayVar(&files, "file", nil, "Path to CSV file(s) - can be repeated")
 	cmd.Flags().StringVar(&accountName, "account-name", "", "Account name for imported data")
 
 	cmd.MarkFlagRequired("broker")
@@ -107,7 +112,7 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 			securityID = pgtype.Text{String: sec.ID, Valid: true}
 		}
 
-		_, err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+		err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
 			ID:              database.NewID(database.PrefixTransaction),
 			AccountID:       account.ID,
 			SecurityID:      securityID,

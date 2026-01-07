@@ -41,12 +41,11 @@ func (p *Processor) ProcessTransactions(ctx context.Context, accountID string) e
 		}
 
 		switch txn.TransactionType {
-		case "buy", "security_transfer":
-			// Both buys and security transfers create lots
+		case "buy", "security_transfer", "opening_balance", "reorg_in":
 			if err := p.processBuy(ctx, txn); err != nil {
 				return fmt.Errorf("failed to process buy %s: %w", txn.ID, err)
 			}
-		case "sell":
+		case "sell", "reorg_out":
 			if err := p.processSell(ctx, txn); err != nil {
 				return fmt.Errorf("failed to process sell %s: %w", txn.ID, err)
 			}
