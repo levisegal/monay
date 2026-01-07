@@ -1,0 +1,10 @@
+For Account:,#####3652
+
+
+TransactionDate,TransactionType,SecurityType,Symbol,Quantity,Amount,Price,Commission,Description
+
+01/01/20,Opening Balance,EQ,GILD,3248,394177.28,121.36,0,RSU - Restricted Stock vested shares
+01/01/20,Opening Balance,EQ,GILD,309,37500.24,121.36,0,ESPP - Employee Stock Purchase Plan shares
+
+
+

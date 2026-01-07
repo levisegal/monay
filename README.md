@@ -61,6 +61,37 @@ If it works on your home server, it's production.
 | Fidelity | Plaid + CSV | Medium |
 | LPL | CSV only | Medium |
 
+## Account Types
+
+### Standard Brokerage
+Normal buy/sell transactions with full CSV export support. Import transactions → process lots → done.
+
+### DRIP Accounts (Dividend Reinvestment)
+Dividends automatically purchase additional shares. E*Trade exports these as "Dividend" transactions with positive quantity. The importer detects DRIP (qty > 0) and treats them as buys.
+
+**Gotcha:** DRIP accounts often predate transaction history. Use `lots check` to identify gaps and add opening balances for shares acquired before your earliest CSV.
+
+### Stock Plan Accounts (RSUs, ESPP)
+Employer equity compensation accounts. These are **linked** to a regular brokerage account (shares transfer there when sold).
+
+| Type | How it works | Cost Basis |
+|------|--------------|------------|
+| **RSUs** | Shares "vest" on schedule, no buy transaction | FMV at vest date (taxable as income) |
+| **ESPP** | Periodic purchases at discount | Purchase price (often 85% of FMV) |
+| **Stock Options** | Exercise creates shares | Strike price × shares |
+
+**The problem:** Stock Plan portals don't export standard transaction CSVs. Vest/purchase data lives in separate reports (Tax Information, Gains & Losses).
+
+**Current approach:** Manual lot creation from vest schedules. 
+
+**TODO:** Build a Stock Plan importer that:
+1. Parses E*Trade Stock Plan "Gains & Losses" or "Tax Information" exports
+2. Auto-creates lots for each vest/purchase event
+3. Links to the associated brokerage account for transfer tracking
+
+### Bond Accounts
+Fixed income with unique characteristics (accrued interest, coupons, maturity). Not yet fully supported—see `docs/cash-tracking.md`.
+
 ## Architecture
 
 ```

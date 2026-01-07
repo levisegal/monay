@@ -3,9 +3,11 @@ package cmd
 import (
 	"context"
 	"fmt"
+	"os"
 	"sort"
 	"time"
 
+	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
@@ -68,11 +70,10 @@ func listHoldingsCommand() *cobra.Command {
 				return fmt.Errorf("failed to list holdings: %w", err)
 			}
 
-			p := message.NewPrinter(language.English)
-
 			fmt.Printf("\n=== %s: Current Holdings ===\n\n", account.Name)
-			fmt.Printf("  %-8s %14s %16s %12s\n", "Symbol", "Quantity", "Cost Basis", "Acquired")
-			fmt.Printf("  %-8s %14s %16s %12s\n", "------", "--------", "----------", "--------")
+
+			tbl := table.New("Symbol", "Quantity", "Cost Basis", "Acquired")
+			tbl.WithWriter(os.Stdout)
 
 			var totalCostBasis int64
 			for _, h := range holdings {
@@ -85,10 +86,12 @@ func listHoldingsCommand() *cobra.Command {
 					acquired = t.Format("2006-01-02")
 				}
 
-				p.Printf("  %-8s %14.2f %16s %12s\n", h.Symbol, qty, formatCurrency(cost), acquired)
+				tbl.AddRow(h.Symbol, formatQty(qty), formatCurrency(cost), acquired)
 			}
 
-			p.Printf("\n  %-8s %14s %16s\n", "TOTAL", "", formatCurrency(float64(totalCostBasis)/1_000_000))
+			tbl.Print()
+
+			fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
 
 			return nil
 		},
@@ -107,7 +110,6 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 		return fmt.Errorf("failed to list holdings: %w", err)
 	}
 
-	// Sort based on flag
 	switch sortBy {
 	case "symbol":
 		sort.Slice(holdings, func(i, j int) bool {
@@ -117,17 +119,16 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 		sort.Slice(holdings, func(i, j int) bool {
 			return holdings[i].AccountName < holdings[j].AccountName
 		})
-	default: // cost (descending)
+	default:
 		sort.Slice(holdings, func(i, j int) bool {
 			return holdings[i].CostBasisMicros > holdings[j].CostBasisMicros
 		})
 	}
 
-	p := message.NewPrinter(language.English)
-
 	fmt.Printf("\n=== All Holdings ===\n\n")
-	fmt.Printf("  %-10s %-12s %-8s %14s %16s %12s\n", "Broker", "Account", "Symbol", "Quantity", "Cost Basis", "Acquired")
-	fmt.Printf("  %-10s %-12s %-8s %14s %16s %12s\n", "------", "-------", "------", "--------", "----------", "--------")
+
+	tbl := table.New("Broker", "Account", "Symbol", "Quantity", "Cost Basis", "Acquired")
+	tbl.WithWriter(os.Stdout)
 
 	var totalCostBasis int64
 	for _, h := range holdings {
@@ -145,10 +146,12 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 			broker = "-"
 		}
 
-		p.Printf("  %-10s %-12s %-8s %14.2f %16s %12s\n", broker, h.AccountName, h.Symbol, qty, formatCurrency(cost), acquired)
+		tbl.AddRow(broker, h.AccountName, h.Symbol, formatQty(qty), formatCurrency(cost), acquired)
 	}
 
-	p.Printf("\n  %-10s %-12s %-8s %14s %16s\n", "", "TOTAL", "", "", formatCurrency(float64(totalCostBasis)/1_000_000))
+	tbl.Print()
+
+	fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
 
 	return nil
 }
@@ -156,4 +159,9 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 func formatCurrency(amount float64) string {
 	p := message.NewPrinter(language.English)
 	return p.Sprintf("$%.2f", amount)
+}
+
+func formatQty(qty float64) string {
+	p := message.NewPrinter(language.English)
+	return p.Sprintf("%.2f", qty)
 }
