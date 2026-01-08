@@ -133,6 +133,9 @@ func parseMerrillRow(record []string) (*Transaction, error) {
 		return nil, nil
 	}
 
+	// Normalize CUSIP to symbol for known securities
+	symbol = normalizeMerrillSymbol(symbol)
+
 	// Skip internal cash account transactions
 	if symbol == "990286916" || strings.Contains(symbol, "TMCXX") {
 		if transactionType != TransactionTypeInterest {
@@ -229,6 +232,18 @@ func mapMerrillTransactionType(description string, quantity, amount decimal.Deci
 	}
 }
 
+// normalizeMerrillSymbol maps CUSIPs to symbols for securities that Merrill
+// reports inconsistently (e.g., using CUSIP at maturity but symbol elsewhere)
+func normalizeMerrillSymbol(symbol string) string {
+	cusipToSymbol := map[string]string{
+		"46435U432": "IBMN", // iShares iBonds Dec 2025 Term Muni
+	}
+	if mapped, ok := cusipToSymbol[symbol]; ok {
+		return mapped
+	}
+	return symbol
+}
+
 func cleanMerrillAmount(s string) string {
 	s = strings.TrimSpace(s)
 	s = strings.ReplaceAll(s, "$", "")
@@ -277,4 +292,3 @@ func extractMerrillSecurityName(description string) string {
 
 	return strings.TrimSpace(desc)
 }
-
