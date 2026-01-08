@@ -84,3 +84,4 @@ Scripts to transform brokerage transaction exports into Wealthfolio's import for
 - Journal entries for distributions
 - Corporate actions (mergers, spinoffs)
 
+

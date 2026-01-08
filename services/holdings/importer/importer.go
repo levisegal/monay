@@ -61,6 +61,7 @@ const (
 	BrokerFidelity Broker = "fidelity"
 	BrokerVanguard Broker = "vanguard"
 	BrokerLPL      Broker = "lpl"
+	BrokerMerrill  Broker = "merrill"
 )
 
 type Parser interface {
@@ -79,6 +80,8 @@ func GetParser(broker Broker) (Parser, error) {
 		return &VanguardParser{}, nil
 	case BrokerLPL:
 		return &LPLParser{}, nil
+	case BrokerMerrill:
+		return &MerrillParser{}, nil
 	default:
 		return nil, fmt.Errorf("unsupported broker: %s", broker)
 	}

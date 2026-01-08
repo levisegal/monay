@@ -53,3 +53,4 @@ EOSQL
 echo "monay schema and roles initialized"
 
 
+

@@ -30,10 +30,8 @@ if [ ! -d "$DATA_PATH" ]; then
     exit 1
 fi
 
-# Build file arguments
-FILES=$(find "$DATA_PATH" -name "transactions_*.csv" | sort | while read f; do
-    echo "--file $f"
-done | tr '\n' ' ')
+# Find transaction files
+FILES=$(find "$DATA_PATH" -name "transactions_*.csv" | sort)
 
 if [ -z "$FILES" ]; then
     echo "Error: No transactions_*.csv files found in $DATA_PATH"
@@ -42,14 +40,21 @@ fi
 
 echo "=== Importing $ACCOUNT_NAME from $BROKER ==="
 echo ""
+echo "Files to import:"
+echo "$FILES" | while read f; do echo "  - $(basename $f)"; done
+echo ""
 
-# Clear existing data
+# Clear existing data (lots AND transactions)
 echo "Clearing existing data..."
-go run cmd/main.go lots clear --account-name "$ACCOUNT_NAME" 2>/dev/null || true
+go run cmd/main.go lots clear --account-name "$ACCOUNT_NAME"
 
-# Import all transaction files
+# Import each transaction file
+echo ""
 echo "Importing transactions..."
-eval "go run cmd/main.go import --broker $BROKER --account-name \"$ACCOUNT_NAME\" $FILES"
+echo "$FILES" | while read f; do
+    echo "  → $(basename $f)"
+    go run cmd/main.go import --broker $BROKER --account-name "$ACCOUNT_NAME" --file "$f"
+done
 
 # Process lots
 echo ""
@@ -64,4 +69,5 @@ go run cmd/main.go holdings list --account-name "$ACCOUNT_NAME"
 echo ""
 echo "Checking for gaps..."
 go run cmd/main.go lots check --account-name "$ACCOUNT_NAME"
+
 
