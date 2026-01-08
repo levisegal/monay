@@ -44,9 +44,9 @@ echo "Files to import:"
 echo "$FILES" | while read f; do echo "  - $(basename $f)"; done
 echo ""
 
-# Clear existing data (lots AND transactions)
+# Clear existing data (lots AND transactions) - ignore if account doesn't exist yet
 echo "Clearing existing data..."
-go run cmd/main.go lots clear --account-name "$ACCOUNT_NAME"
+go run cmd/main.go lots clear --account-name "$ACCOUNT_NAME" 2>/dev/null || echo "  (new account, nothing to clear)"
 
 # Import each transaction file
 echo ""
