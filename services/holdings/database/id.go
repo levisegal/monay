@@ -11,6 +11,7 @@ const (
 	PrefixTransaction    IDPrefix = "txn"
 	PrefixLot            IDPrefix = "lot"
 	PrefixLotDisposition IDPrefix = "disp"
+	PrefixCashTxn        IDPrefix = "cash"
 )
 
 func NewID(prefix IDPrefix) string {

@@ -70,6 +70,56 @@ make proto.generate # Regenerate protobuf code
 make test           # Run tests
 ```
 
+## CSV Import & Cash Tracking
+
+### Import Transactions from CSV
+
+```bash
+# Import an account (auto-processes lots and generates cash transactions)
+./scripts/import-account.sh <broker> "<account-name>" <testdata-path>
+
+# Examples:
+./scripts/import-account.sh etrade "Joint 2060" importer/testdata/etrade/joint-2060
+./scripts/import-account.sh lpl "Bond Portfolio" importer/testdata/lpl/bond-5516
+./scripts/import-account.sh merrill "Managed 2241" importer/testdata/merrill/managed-2241
+```
+
+### Set Opening Cash Balance
+
+After importing, set the opening cash balance from a statement dated at/before your earliest transaction:
+
+```bash
+# Find opening balance from a statement (look for "Cash", "Money Market", or "Sweep" balance)
+go run cmd/main.go cash set --account-name "Joint 2060" --date 2020-12-31 --balance 10000.00
+
+# Regenerate cash transactions
+go run cmd/main.go cash generate --account-name "Joint 2060"
+```
+
+### View Holdings & Cash
+
+```bash
+# View current holdings
+go run cmd/main.go holdings list --account-name "Joint 2060"
+
+# View cash balance
+go run cmd/main.go cash balance --account-name "Joint 2060"
+
+# View cash ledger (all transactions)
+go run cmd/main.go cash ledger --account-name "Joint 2060"
+go run cmd/main.go cash ledger --account-name "Joint 2060" --year 2024
+```
+
+### Re-import an Account
+
+```bash
+# Delete and re-import (use when importer logic has changed)
+go run cmd/main.go accounts delete --name "Joint 2060"
+./scripts/import-account.sh etrade "Joint 2060" importer/testdata/etrade/joint-2060
+go run cmd/main.go cash set --account-name "Joint 2060" --date 2020-12-31 --balance 10000.00
+go run cmd/main.go cash generate --account-name "Joint 2060"
+```
+
 
 
 

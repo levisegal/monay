@@ -70,4 +70,18 @@ echo ""
 echo "Checking for gaps..."
 go run cmd/main.go lots check --account-name "$ACCOUNT_NAME"
 
+# Generate cash transactions
+echo ""
+echo "Generating cash transactions..."
+go run cmd/main.go cash generate --account-name "$ACCOUNT_NAME"
+
+# Show cash balance
+echo ""
+go run cmd/main.go cash balance --account-name "$ACCOUNT_NAME"
+
+echo ""
+echo "NOTE: If this is a new account, set opening cash balance from a statement:"
+echo "  go run cmd/main.go cash set --account-name \"$ACCOUNT_NAME\" --date YYYY-MM-DD --balance AMOUNT"
+echo "  go run cmd/main.go cash generate --account-name \"$ACCOUNT_NAME\""
+
 

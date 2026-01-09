@@ -19,6 +19,18 @@ type MonayAccount struct {
 	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
 }
 
+type MonayCashTransaction struct {
+	ID              string             `json:"id"`
+	AccountID       string             `json:"account_id"`
+	TransactionID   pgtype.Text        `json:"transaction_id"`
+	TransactionDate pgtype.Date        `json:"transaction_date"`
+	CashType        string             `json:"cash_type"`
+	AmountMicros    int64              `json:"amount_micros"`
+	SecurityID      pgtype.Text        `json:"security_id"`
+	Description     pgtype.Text        `json:"description"`
+	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+}
+
 type MonayLot struct {
 	ID              string             `json:"id"`
 	AccountID       string             `json:"account_id"`

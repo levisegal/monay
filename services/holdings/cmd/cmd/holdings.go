@@ -71,6 +71,8 @@ func listHoldingsCommand() *cobra.Command {
 				return fmt.Errorf("failed to list holdings: %w", err)
 			}
 
+			cashBalance, _ := queries.GetCashBalance(ctx, account.ID)
+
 			fmt.Printf("\n=== %s: Current Holdings ===\n\n", account.Name)
 
 			tbl := table.New("Symbol", "Quantity", "Cost Basis", "Acquired")
@@ -92,7 +94,9 @@ func listHoldingsCommand() *cobra.Command {
 
 			tbl.Print()
 
-			fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+			fmt.Printf("\nPositions (cost basis): %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+			fmt.Printf("Cash:                   %s\n", formatCurrency(float64(cashBalance)/1_000_000))
+			fmt.Printf("TOTAL (cost + cash):    %s\n", formatCurrency(float64(totalCostBasis+cashBalance)/1_000_000))
 
 			return nil
 		},
@@ -109,6 +113,19 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 	holdings, err := queries.ListAllHoldings(ctx)
 	if err != nil {
 		return fmt.Errorf("failed to list holdings: %w", err)
+	}
+
+	accounts, err := queries.ListAccounts(ctx)
+	if err != nil {
+		return fmt.Errorf("failed to list accounts: %w", err)
+	}
+
+	var totalCash int64
+	cashByAccount := make(map[string]int64)
+	for _, a := range accounts {
+		cash, _ := queries.GetCashBalance(ctx, a.ID)
+		cashByAccount[a.ID] = cash
+		totalCash += cash
 	}
 
 	switch sortBy {
@@ -152,7 +169,9 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 
 	tbl.Print()
 
-	fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+	fmt.Printf("\nPositions (cost basis): %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+	fmt.Printf("Cash:                   %s\n", formatCurrency(float64(totalCash)/1_000_000))
+	fmt.Printf("TOTAL (cost + cash):    %s\n", formatCurrency(float64(totalCostBasis+totalCash)/1_000_000))
 
 	return nil
 }
