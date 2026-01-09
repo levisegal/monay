@@ -9,6 +9,8 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
+	"golang.org/x/text/language"
+	"golang.org/x/text/message"
 
 	"github.com/levisegal/monay/services/holdings/config"
 	"github.com/levisegal/monay/services/holdings/database"
@@ -416,9 +418,11 @@ func normalizeCashAmount(cashType string, amountMicros int64) int64 {
 
 func formatMicros(micros int64) string {
 	d := decimal.NewFromInt(micros).Div(decimal.NewFromInt(1_000_000))
+	f, _ := d.Float64()
+	p := message.NewPrinter(language.English)
 	if micros >= 0 {
-		return fmt.Sprintf("$%s", d.StringFixed(2))
+		return p.Sprintf("$%.2f", f)
 	}
-	return fmt.Sprintf("-$%s", d.Abs().StringFixed(2))
+	return p.Sprintf("-$%.2f", -f)
 }
 

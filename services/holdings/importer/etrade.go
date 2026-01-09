@@ -114,8 +114,10 @@ func parseETradeRow(record []string) (*Transaction, error) {
 
 func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) TransactionType {
 	switch txnType {
-	case "Bought", "Opening Balance":
+	case "Bought":
 		return TransactionTypeBuy
+	case "Opening Balance":
+		return TransactionTypeOpeningBalance
 	case "Sold":
 		return TransactionTypeSell
 	case "Dividend":

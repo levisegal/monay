@@ -1,0 +1,5 @@
+For Account:,#####3652
+
+
+TransactionDate,TransactionType,SecurityType,Symbol,Quantity,Amount,Price,Commission,Description
+01/01/21,Opening Balance,EQ,GILD,580.9241,38270.91,65.88,0,Opening position - Cash type shares from 12/31/20 statement
