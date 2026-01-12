@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Skill(planning)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:steve-yegge.medium.com)",
+      "WebFetch(domain:deepwiki.com)",
+      "Bash(bd --version:*)",
+      "Bash(bd init:*)",
+      "Bash(bd doctor:*)",
+      "Bash(bd create:*)",
+      "Bash(bd sync:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
