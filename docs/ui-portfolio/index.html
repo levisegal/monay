@@ -1,0 +1,587 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UI Portfolio - Financial Dashboard Designs</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Work+Sans:wght@300;400;600;700&family=IBM+Plex+Sans:wght@300;400;600&family=Lora:wght@400;600&family=Courier+Prime:wght@400;700&family=Space+Mono:wght@400;700&family=Oswald:wght@400;700&family=Bebas+Neue&family=Archivo:wght@300;400;600;900&family=Atkinson+Hyperlegible:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Work Sans', sans-serif; }
+        .hidden { display: none !important; }
+        .dashboard-screen { min-height: 100vh; }
+
+        /* Selection Screen */
+        #selection-screen { padding: 3rem 2rem; max-width: 1400px; margin: 0 auto; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; }
+        .design-card { cursor: pointer; transition: transform 0.2s, box-shadow 0.2s; background: white; border-radius: 12px; padding: 2rem; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .design-card:hover { transform: translateY(-4px); box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+
+        /* Bauhaus specific */
+        .bauhaus-bg { background: #FFFFFF; }
+        .bauhaus-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 2px; background: #000; }
+
+        /* Paper texture */
+        .paper-texture { background: #FBF8F3; background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100"><filter id="noise"><feTurbulence baseFrequency="0.65" /></filter><rect width="100" height="100" filter="url(%23noise)" opacity="0.03"/></svg>'); }
+
+        /* Crystal effects */
+        .crystal { background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.18); }
+
+        /* Terminal scanlines */
+        .terminal-scanline { position: relative; overflow: hidden; }
+        .terminal-scanline::before { content: ""; position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: repeating-linear-gradient(0deg, rgba(0, 255, 0, 0.05) 0px, transparent 1px, transparent 2px, rgba(0, 255, 0, 0.05) 3px); pointer-events: none; }
+    </style>
+</head>
+<body>
+    <!-- Selection Screen -->
+    <div id="selection-screen">
+        <div class="text-center mb-12">
+            <h1 class="text-5xl font-bold text-white mb-4">UI Portfolio - Financial Dashboard</h1>
+            <p class="text-xl text-white opacity-90">10 Unique Design Directions (Generated Fresh)</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <!-- 1. Bauhaus Precision -->
+            <div class="design-card" onclick="showDashboard('bauhaus')">
+                <div class="text-4xl mb-3">📊</div>
+                <h3 class="text-xl font-bold mb-2">Bauhaus Precision</h3>
+                <p class="text-sm text-gray-600 mb-3">Geometric clarity, primary colors, grid layouts</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded" style="background: #E1000F;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #005CAB;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #FFCC00;"></div>
+                </div>
+            </div>
+
+            <!-- 2. Alpine Capital -->
+            <div class="design-card" onclick="showDashboard('alpine')">
+                <div class="text-4xl mb-3">🏔️</div>
+                <h3 class="text-xl font-bold mb-2">Alpine Capital</h3>
+                <p class="text-sm text-gray-600 mb-3">Swiss precision, sophisticated neutrals</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded" style="background: #1A2332;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #4A90A4;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #D4A574;"></div>
+                </div>
+            </div>
+
+            <!-- 3. Deep Ocean Analytics -->
+            <div class="design-card" onclick="showDashboard('ocean')">
+                <div class="text-4xl mb-3">🌊</div>
+                <h3 class="text-xl font-bold mb-2">Deep Ocean Analytics</h3>
+                <p class="text-sm text-gray-600 mb-3">Layered blues, fluid animations, depth</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full" style="background: #001F3F;"></div>
+                    <div class="w-8 h-8 rounded-full" style="background: #17A2B8;"></div>
+                    <div class="w-8 h-8 rounded-full" style="background: #00B8D4;"></div>
+                </div>
+            </div>
+
+            <!-- 4. Paper Portfolio -->
+            <div class="design-card" onclick="showDashboard('paper')">
+                <div class="text-4xl mb-3">📄</div>
+                <h3 class="text-xl font-bold mb-2">Paper Portfolio</h3>
+                <p class="text-sm text-gray-600 mb-3">Print-inspired, tactile, serif typography</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded" style="background: #FBF8F3;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #1A1A1A;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #2C5F77;"></div>
+                </div>
+            </div>
+
+            <!-- 5. Crystal Clarity -->
+            <div class="design-card" onclick="showDashboard('crystal')">
+                <div class="text-4xl mb-3">💎</div>
+                <h3 class="text-xl font-bold mb-2">Crystal Clarity</h3>
+                <p class="text-sm text-gray-600 mb-3">Transparent layers, refractive effects</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-xl" style="background: rgba(74, 144, 226, 0.3); border: 1px solid rgba(74, 144, 226, 0.5);"></div>
+                    <div class="w-8 h-8 rounded-xl" style="background: rgba(155, 89, 182, 0.3); border: 1px solid rgba(155, 89, 182, 0.5);"></div>
+                    <div class="w-8 h-8 rounded-xl" style="background: rgba(26, 188, 156, 0.3); border: 1px solid rgba(26, 188, 156, 0.5);"></div>
+                </div>
+            </div>
+
+            <!-- 6. Atomic Portfolio -->
+            <div class="design-card" onclick="showDashboard('atomic')">
+                <div class="text-4xl mb-3">🎯</div>
+                <h3 class="text-xl font-bold mb-2">Atomic Portfolio</h3>
+                <p class="text-sm text-gray-600 mb-3">Mid-century modern, atomic shapes, optimism</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-full" style="background: #FF6B35;"></div>
+                    <div class="w-8 h-8 rounded-full" style="background: #4ECDC4;"></div>
+                    <div class="w-8 h-8 rounded-full" style="background: #F7B801;"></div>
+                </div>
+            </div>
+
+            <!-- 7. Constructivist Data -->
+            <div class="design-card" onclick="showDashboard('constructivist')">
+                <div class="text-4xl mb-3">📐</div>
+                <h3 class="text-xl font-bold mb-2">Constructivist Data</h3>
+                <p class="text-sm text-gray-600 mb-3">Dynamic diagonals, bold, propaganda poster</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8" style="background: #D62828; transform: rotate(15deg);"></div>
+                    <div class="w-8 h-8" style="background: #000000; transform: rotate(-15deg);"></div>
+                    <div class="w-8 h-8" style="background: #FFFFFF; border: 2px solid #000;"></div>
+                </div>
+            </div>
+
+            <!-- 8. Golden Hour Markets -->
+            <div class="design-card" onclick="showDashboard('golden')">
+                <div class="text-4xl mb-3">🌅</div>
+                <h3 class="text-xl font-bold mb-2">Golden Hour Markets</h3>
+                <p class="text-sm text-gray-600 mb-3">Warm gradients, sunset palette, hopeful</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded-xl" style="background: linear-gradient(135deg, #FF6B35 0%, #E5A994 100%);"></div>
+                    <div class="w-8 h-8 rounded-xl" style="background: linear-gradient(135deg, #4A235A 0%, #2E4057 100%);"></div>
+                    <div class="w-8 h-8 rounded-xl" style="background: #FFF5E6;"></div>
+                </div>
+            </div>
+
+            <!-- 9. Terminal Finance -->
+            <div class="design-card" onclick="showDashboard('terminal')">
+                <div class="text-4xl mb-3">⚙️</div>
+                <h3 class="text-xl font-bold mb-2">Terminal Finance</h3>
+                <p class="text-sm text-gray-600 mb-3">Monospace, terminal aesthetic, power users</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8" style="background: #000000;"></div>
+                    <div class="w-8 h-8" style="background: #00FF00;"></div>
+                    <div class="w-8 h-8" style="background: #FFB000;"></div>
+                </div>
+            </div>
+
+            <!-- 10. Dyslexia-Friendly Finance -->
+            <div class="design-card" onclick="showDashboard('dyslexia')">
+                <div class="text-4xl mb-3">👁️</div>
+                <h3 class="text-xl font-bold mb-2">Accessible Finance</h3>
+                <p class="text-sm text-gray-600 mb-3">High contrast, generous spacing, inclusive</p>
+                <div class="flex gap-2">
+                    <div class="w-8 h-8 rounded border-4 border-black" style="background: #FFFFFF;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #0066CC;"></div>
+                    <div class="w-8 h-8 rounded" style="background: #000000;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 1. Bauhaus Precision Dashboard -->
+    <div id="bauhaus-dashboard" class="dashboard-screen bauhaus-bg hidden">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-2 bg-black text-white font-bold uppercase mb-8 hover:bg-red-600 transition-all" style="font-family: 'Work Sans';">← BACK</button>
+
+            <h1 class="text-5xl font-bold uppercase mb-8" style="font-family: 'Work Sans'; letter-spacing: 0.05em;">BAUHAUS PRECISION</h1>
+
+            <div class="bauhaus-grid mb-8">
+                <div class="bg-red-600 text-white p-6">
+                    <div class="text-sm font-bold uppercase mb-2">Portfolio Value</div>
+                    <div class="text-4xl font-bold">$284.5K</div>
+                </div>
+                <div class="bg-blue-700 text-white p-6">
+                    <div class="text-sm font-bold uppercase mb-2">Return YTD</div>
+                    <div class="text-4xl font-bold">+18.4%</div>
+                </div>
+                <div class="bg-yellow-400 text-black p-6">
+                    <div class="text-sm font-bold uppercase mb-2">Holdings</div>
+                    <div class="text-4xl font-bold">24</div>
+                </div>
+                <div class="bg-black text-white p-6">
+                    <div class="text-sm font-bold uppercase mb-2">Cash</div>
+                    <div class="text-4xl font-bold">$12.3K</div>
+                </div>
+            </div>
+
+            <div class="bg-white border-4 border-black p-6">
+                <h2 class="text-2xl font-bold uppercase mb-4">TOP HOLDINGS</h2>
+                <div class="space-y-2">
+                    <div class="flex justify-between items-center py-2 border-b-2 border-black">
+                        <span class="font-bold">AAPL</span>
+                        <span>$42,840 (15.1%)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b-2 border-black">
+                        <span class="font-bold">MSFT</span>
+                        <span>$38,200 (13.4%)</span>
+                    </div>
+                    <div class="flex justify-between items-center py-2 border-b-2 border-black">
+                        <span class="font-bold">GOOGL</span>
+                        <span>$29,150 (10.2%)</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. Alpine Capital Dashboard -->
+    <div id="alpine-dashboard" class="dashboard-screen hidden" style="background: #F8F9FA;">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-8 py-3 bg-navy-900 text-white font-semibold mb-8 hover:opacity-90 transition-all" style="background: #1A2332; font-family: 'IBM Plex Sans';">← Return</button>
+
+            <h1 class="text-5xl font-light mb-8" style="color: #1A2332; font-family: 'IBM Plex Sans'; letter-spacing: -0.02em;">Alpine Capital</h1>
+
+            <div class="grid grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-lg shadow-sm" style="border-left: 4px solid #1A2332;">
+                    <div class="text-sm font-medium mb-2" style="color: #4A90A4;">Total Value</div>
+                    <div class="text-3xl font-semibold" style="color: #1A2332;">$284,523</div>
+                    <div class="text-sm mt-1" style="color: #D4A574;">+18.4% YTD</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm" style="border-left: 4px solid #4A90A4;">
+                    <div class="text-sm font-medium mb-2" style="color: #4A90A4;">Annual Return</div>
+                    <div class="text-3xl font-semibold" style="color: #1A2332;">24.8%</div>
+                    <div class="text-sm mt-1 text-gray-600">vs 18.2% benchmark</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm" style="border-left: 4px solid #D4A574;">
+                    <div class="text-sm font-medium mb-2" style="color: #4A90A4;">Holdings</div>
+                    <div class="text-3xl font-semibold" style="color: #1A2332;">24</div>
+                    <div class="text-sm mt-1 text-gray-600">across 8 sectors</div>
+                </div>
+                <div class="bg-white p-6 rounded-lg shadow-sm" style="border-left: 4px solid #2C3539;">
+                    <div class="text-sm font-medium mb-2" style="color: #4A90A4;">Div Yield</div>
+                    <div class="text-3xl font-semibold" style="color: #1A2332;">2.4%</div>
+                    <div class="text-sm mt-1 text-gray-600">$6,828/year</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 rounded-lg shadow-sm">
+                <h2 class="text-2xl font-semibold mb-6" style="color: #1A2332; font-family: 'IBM Plex Sans';">Portfolio Allocation</h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Equities</span>
+                            <span class="font-semibold" style="color: #1A2332;">65%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 65%; background: #4A90A4;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Fixed Income</span>
+                            <span class="font-semibold" style="color: #1A2332;">25%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 25%; background: #D4A574;"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2">
+                            <span class="font-medium">Cash & Alternatives</span>
+                            <span class="font-semibold" style="color: #1A2332;">10%</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 10%; background: #2C3539;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. Deep Ocean Analytics Dashboard -->
+    <div id="ocean-dashboard" class="dashboard-screen hidden" style="background: linear-gradient(180deg, #0A1929 0%, #001F3F 100%);">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-3 rounded-lg text-white font-medium mb-8 hover:opacity-90 transition-all" style="background: rgba(23, 162, 184, 0.3); border: 1px solid #17A2B8;">← Back</button>
+
+            <h1 class="text-5xl font-semibold text-white mb-8">Deep Ocean Analytics</h1>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="p-6 rounded-xl" style="background: rgba(23, 162, 184, 0.1); border: 1px solid rgba(23, 162, 184, 0.3);">
+                    <div class="text-sm text-teal-300 mb-2">Portfolio Value</div>
+                    <div class="text-4xl font-bold text-white">$284.5K</div>
+                    <div class="text-sm text-cyan-400 mt-1">↑ +$42.8K (17.7%)</div>
+                </div>
+                <div class="p-6 rounded-xl" style="background: rgba(0, 184, 212, 0.1); border: 1px solid rgba(0, 184, 212, 0.3);">
+                    <div class="text-sm text-teal-300 mb-2">24h Change</div>
+                    <div class="text-4xl font-bold text-white">+2.4%</div>
+                    <div class="text-sm text-cyan-400 mt-1">$6,828 gain</div>
+                </div>
+                <div class="p-6 rounded-xl" style="background: rgba(178, 223, 219, 0.1); border: 1px solid rgba(178, 223, 219, 0.3);">
+                    <div class="text-sm text-teal-300 mb-2">Active Positions</div>
+                    <div class="text-4xl font-bold text-white">24</div>
+                    <div class="text-sm text-cyan-400 mt-1">8 sectors</div>
+                </div>
+            </div>
+
+            <div class="p-8 rounded-xl" style="background: rgba(10, 25, 41, 0.6); border: 1px solid rgba(23, 162, 184, 0.2);">
+                <h2 class="text-2xl font-semibold text-white mb-6">Top Holdings by Value</h2>
+                <div class="space-y-4">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-white font-semibold">AAPL - Apple Inc.</div>
+                            <div class="text-teal-300 text-sm">Technology</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-bold">$42,840</div>
+                            <div class="text-cyan-400 text-sm">15.1%</div>
+                        </div>
+                    </div>
+                    <div class="h-px" style="background: rgba(23, 162, 184, 0.2);"></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-white font-semibold">MSFT - Microsoft Corp.</div>
+                            <div class="text-teal-300 text-sm">Technology</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-bold">$38,200</div>
+                            <div class="text-cyan-400 text-sm">13.4%</div>
+                        </div>
+                    </div>
+                    <div class="h-px" style="background: rgba(23, 162, 184, 0.2);"></div>
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <div class="text-white font-semibold">GOOGL - Alphabet Inc.</div>
+                            <div class="text-teal-300 text-sm">Technology</div>
+                        </div>
+                        <div class="text-right">
+                            <div class="text-white font-bold">$29,150</div>
+                            <div class="text-cyan-400 text-sm">10.2%</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. Paper Portfolio Dashboard -->
+    <div id="paper-dashboard" class="dashboard-screen paper-texture hidden">
+        <div class="p-8 max-w-6xl mx-auto">
+            <button onclick="showSelection()" class="px-6 py-2 bg-black text-white mb-8 hover:opacity-90 transition-all" style="font-family: 'Lora', serif;">← Return to Selection</button>
+
+            <h1 class="text-6xl font-semibold mb-2" style="font-family: 'Lora', serif; color: #1A1A1A;">Paper Portfolio</h1>
+            <p class="text-lg mb-8" style="color: #6B6456;">Investment Statement - January 2026</p>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 shadow-md" style="border: 1px solid #E8E4DD;">
+                    <div class="text-sm mb-2" style="color: #2C5F77; font-family: 'Lora', serif;">Account Value</div>
+                    <div class="text-4xl font-semibold mb-1" style="color: #1A1A1A; font-family: 'Lora', serif;">$284,523</div>
+                    <div class="text-sm" style="color: #6B6456;">As of Jan 12, 2026</div>
+                </div>
+                <div class="bg-white p-6 shadow-md" style="border: 1px solid #E8E4DD;">
+                    <div class="text-sm mb-2" style="color: #2C5F77; font-family: 'Lora', serif;">Year-to-Date</div>
+                    <div class="text-4xl font-semibold mb-1" style="color: #1A1A1A; font-family: 'Lora', serif;">+18.4%</div>
+                    <div class="text-sm" style="color: #6B6456;">$44,128 gain</div>
+                </div>
+                <div class="bg-white p-6 shadow-md" style="border: 1px solid #E8E4DD;">
+                    <div class="text-sm mb-2" style="color: #2C5F77; font-family: 'Lora', serif;">Securities Held</div>
+                    <div class="text-4xl font-semibold mb-1" style="color: #1A1A1A; font-family: 'Lora', serif;">24</div>
+                    <div class="text-sm" style="color: #6B6456;">8 asset classes</div>
+                </div>
+            </div>
+
+            <div class="bg-white p-8 shadow-md" style="border: 1px solid #E8E4DD;">
+                <h2 class="text-2xl font-semibold mb-6" style="font-family: 'Lora', serif; color: #1A1A1A;">Holdings Statement</h2>
+                <table class="w-full">
+                    <thead style="border-bottom: 2px solid #1A1A1A;">
+                        <tr class="text-left">
+                            <th class="pb-3 font-semibold" style="font-family: 'Lora', serif;">Security</th>
+                            <th class="pb-3 font-semibold text-right" style="font-family: 'Lora', serif;">Shares</th>
+                            <th class="pb-3 font-semibold text-right" style="font-family: 'Lora', serif;">Value</th>
+                            <th class="pb-3 font-semibold text-right" style="font-family: 'Lora', serif;">Allocation</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr style="border-bottom: 1px solid #E8E4DD;">
+                            <td class="py-3">
+                                <div class="font-semibold">Apple Inc.</div>
+                                <div class="text-sm" style="color: #6B6456;">AAPL</div>
+                            </td>
+                            <td class="py-3 text-right">240</td>
+                            <td class="py-3 text-right font-semibold">$42,840</td>
+                            <td class="py-3 text-right">15.1%</td>
+                        </tr>
+                        <tr style="border-bottom: 1px solid #E8E4DD;">
+                            <td class="py-3">
+                                <div class="font-semibold">Microsoft Corp.</div>
+                                <div class="text-sm" style="color: #6B6456;">MSFT</div>
+                            </td>
+                            <td class="py-3 text-right">125</td>
+                            <td class="py-3 text-right font-semibold">$38,200</td>
+                            <td class="py-3 text-right">13.4%</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3">
+                                <div class="font-semibold">Alphabet Inc.</div>
+                                <div class="text-sm" style="color: #6B6456;">GOOGL</div>
+                            </td>
+                            <td class="py-3 text-right">210</td>
+                            <td class="py-3 text-right font-semibold">$29,150</td>
+                            <td class="py-3 text-right">10.2%</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- 5. Crystal Clarity Dashboard -->
+    <div id="crystal-dashboard" class="dashboard-screen hidden" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-3 crystal rounded-2xl text-white font-medium mb-8 hover:bg-white hover:bg-opacity-20 transition-all">← Back</button>
+
+            <h1 class="text-5xl font-bold text-white mb-8">Crystal Clarity</h1>
+
+            <div class="grid grid-cols-3 gap-6 mb-8">
+                <div class="crystal p-6 rounded-2xl">
+                    <div class="text-sm text-white opacity-80 mb-2">Portfolio Value</div>
+                    <div class="text-4xl font-bold text-white">$284.5K</div>
+                    <div class="text-sm text-white opacity-70">+18.4% YTD</div>
+                </div>
+                <div class="crystal p-6 rounded-2xl">
+                    <div class="text-sm text-white opacity-80 mb-2">Holdings</div>
+                    <div class="text-4xl font-bold text-white">24</div>
+                    <div class="text-sm text-white opacity-70">8 sectors</div>
+                </div>
+                <div class="crystal p-6 rounded-2xl">
+                    <div class="text-sm text-white opacity-80 mb-2">Day Change</div>
+                    <div class="text-4xl font-bold text-white">+2.4%</div>
+                    <div class="text-sm text-white opacity-70">$6,828</div>
+                </div>
+            </div>
+
+            <div class="crystal p-8 rounded-3xl">
+                <h2 class="text-2xl text-white mb-6 font-semibold">Asset Breakdown</h2>
+                <div class="space-y-4">
+                    <div>
+                        <div class="flex justify-between mb-2 text-white">
+                            <span>Equities</span>
+                            <span class="font-semibold">65%</span>
+                        </div>
+                        <div class="w-full bg-white bg-opacity-20 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 65%; background: linear-gradient(90deg, #4A90E2 0%, #9B59B6 100%);"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex justify-between mb-2 text-white">
+                            <span>Fixed Income</span>
+                            <span class="font-semibold">25%</span>
+                        </div>
+                        <div class="w-full bg-white bg-opacity-20 rounded-full h-2">
+                            <div class="h-2 rounded-full" style="width: 25%; background: linear-gradient(90deg, #1ABC9C 0%, #4A90E2 100%);"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 6-10 placeholders with simpler implementations -->
+    <div id="atomic-dashboard" class="dashboard-screen hidden" style="background: #FFFBF0;">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-3 rounded-full font-bold mb-8 transition-all" style="background: #FF6B35; color: white;">← Back</button>
+            <h1 class="text-5xl font-bold mb-8" style="color: #2D3142; font-family: 'Archivo';">Atomic Portfolio</h1>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-2xl shadow-lg" style="border: 3px solid #FF6B35;">
+                    <div class="text-sm mb-2" style="color: #4ECDC4;">Portfolio</div>
+                    <div class="text-4xl font-bold" style="color: #2D3142;">$284.5K</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg" style="border: 3px solid #4ECDC4;">
+                    <div class="text-sm mb-2" style="color: #F7B801;">Return</div>
+                    <div class="text-4xl font-bold" style="color: #2D3142;">+18.4%</div>
+                </div>
+                <div class="bg-white p-6 rounded-2xl shadow-lg" style="border: 3px solid #F7B801;">
+                    <div class="text-sm mb-2" style="color: #FF6B35;">Holdings</div>
+                    <div class="text-4xl font-bold" style="color: #2D3142;">24</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="constructivist-dashboard" class="dashboard-screen hidden" style="background: #FFFFFF;">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-2 bg-black text-white font-bold uppercase mb-8" style="font-family: 'Bebas Neue'; transform: skew(-5deg);">← BACK</button>
+            <h1 class="text-6xl font-bold uppercase mb-8" style="font-family: 'Bebas Neue'; color: #D62828; transform: rotate(-2deg) translateX(-10px);">CONSTRUCTIVIST DATA</h1>
+            <div class="grid grid-cols-3 gap-0">
+                <div class="bg-red-600 text-white p-8" style="clip-path: polygon(0 0, 100% 0, 95% 100%, 0 100%);">
+                    <div class="text-sm font-bold mb-2" style="font-family: 'Bebas Neue';">VALUE</div>
+                    <div class="text-5xl font-bold">$284.5K</div>
+                </div>
+                <div class="bg-black text-white p-8">
+                    <div class="text-sm font-bold mb-2" style="font-family: 'Bebas Neue';">RETURN</div>
+                    <div class="text-5xl font-bold">+18.4%</div>
+                </div>
+                <div class="bg-gray-200 text-black p-8" style="clip-path: polygon(5% 0, 100% 0, 100% 100%, 0 100%);">
+                    <div class="text-sm font-bold mb-2" style="font-family: 'Bebas Neue';">HOLDINGS</div>
+                    <div class="text-5xl font-bold">24</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="golden-dashboard" class="dashboard-screen hidden" style="background: linear-gradient(135deg, #4A235A 0%, #2E4057 50%, #FF6B35 100%);">
+        <div class="p-8">
+            <button onclick="showSelection()" class="px-6 py-3 rounded-xl text-white font-medium mb-8" style="background: rgba(255, 107, 53, 0.3);">← Back</button>
+            <h1 class="text-5xl font-bold text-white mb-8">Golden Hour Markets</h1>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="p-6 rounded-2xl" style="background: linear-gradient(135deg, rgba(255, 107, 53, 0.2), rgba(229, 169, 148, 0.2)); border: 1px solid rgba(255, 107, 53, 0.3);">
+                    <div class="text-sm text-orange-200 mb-2">Portfolio</div>
+                    <div class="text-4xl font-bold text-white">$284.5K</div>
+                </div>
+                <div class="p-6 rounded-2xl" style="background: linear-gradient(135deg, rgba(229, 169, 148, 0.2), rgba(74, 35, 90, 0.2)); border: 1px solid rgba(229, 169, 148, 0.3);">
+                    <div class="text-sm text-orange-200 mb-2">Return</div>
+                    <div class="text-4xl font-bold text-white">+18.4%</div>
+                </div>
+                <div class="p-6 rounded-2xl" style="background: rgba(255, 245, 230, 0.1); border: 1px solid rgba(255, 245, 230, 0.2);">
+                    <div class="text-sm text-orange-200 mb-2">Holdings</div>
+                    <div class="text-4xl font-bold text-white">24</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="terminal-dashboard" class="dashboard-screen terminal-scanline hidden" style="background: #000000;">
+        <div class="p-8" style="font-family: 'Space Mono', monospace;">
+            <button onclick="showSelection()" class="px-6 py-2 border-2 border-green-400 text-green-400 mb-8 hover:bg-green-400 hover:bg-opacity-10">← [BACK]</button>
+            <h1 class="text-5xl font-bold text-green-400 mb-8" style="text-shadow: 0 0 10px rgba(0, 255, 0, 0.7);">&gt; TERMINAL_FINANCE</h1>
+            <div class="grid grid-cols-3 gap-6">
+                <div class="bg-black border-2 border-green-400 p-6" style="box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);">
+                    <div class="text-sm text-green-400 mb-2">&gt; PORTFOLIO_VALUE</div>
+                    <div class="text-4xl font-bold text-green-300">$284,523</div>
+                </div>
+                <div class="bg-black border-2 border-amber-400 p-6" style="box-shadow: 0 0 20px rgba(255, 176, 0, 0.3);">
+                    <div class="text-sm text-amber-400 mb-2">&gt; YTD_RETURN</div>
+                    <div class="text-4xl font-bold text-amber-300">+18.4%</div>
+                </div>
+                <div class="bg-black border-2 border-green-400 p-6" style="box-shadow: 0 0 20px rgba(0, 255, 0, 0.3);">
+                    <div class="text-sm text-green-400 mb-2">&gt; HOLDINGS_COUNT</div>
+                    <div class="text-4xl font-bold text-green-300">24</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="dyslexia-dashboard" class="dashboard-screen hidden" style="background: #FFFFFF;">
+        <div class="p-8" style="font-family: 'Atkinson Hyperlegible', sans-serif;">
+            <button onclick="showSelection()" class="px-8 py-4 bg-black text-white font-bold mb-8" style="border: 3px solid #000; min-height: 48px;">← Back to Selection</button>
+            <h1 class="text-6xl font-bold mb-8" style="color: #000000;">Accessible Finance</h1>
+            <div class="grid grid-cols-3 gap-8">
+                <div class="bg-white p-8 rounded-lg border-4 border-black">
+                    <div class="text-lg font-bold mb-3" style="color: #0066CC;">Portfolio Value</div>
+                    <div class="text-5xl font-bold mb-2">$284,523</div>
+                    <div class="text-base">Total Assets</div>
+                </div>
+                <div class="bg-white p-8 rounded-lg border-4 border-black">
+                    <div class="text-lg font-bold mb-3" style="color: #006600;">Year Return</div>
+                    <div class="text-5xl font-bold mb-2">+18.4%</div>
+                    <div class="text-base">Gain: $44,128</div>
+                </div>
+                <div class="bg-white p-8 rounded-lg border-4 border-black">
+                    <div class="text-lg font-bold mb-3" style="color: #0066CC;">Holdings</div>
+                    <div class="text-5xl font-bold mb-2">24</div>
+                    <div class="text-base">Active Positions</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showDashboard(name) {
+            document.getElementById('selection-screen').classList.add('hidden');
+            document.getElementById(name + '-dashboard').classList.remove('hidden');
+        }
+
+        function showSelection() {
+            document.querySelectorAll('.dashboard-screen').forEach(el => el.classList.add('hidden'));
+            document.getElementById('selection-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

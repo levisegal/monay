@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>UI Portfolio Design Directions - Live Examples</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&family=Playfair+Display:wght@400;600&family=Space+Grotesk:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    .font-plex-mono { font-family: 'IBM Plex Mono', monospace; }
+    .font-plex-sans { font-family: 'IBM Plex Sans', sans-serif; }
+    .font-jetbrains { font-family: 'JetBrains Mono', monospace; }
+    .font-playfair { font-family: 'Playfair Display', serif; }
+    .font-space-grotesk { font-family: 'Space Grotesk', sans-serif; }
+
+    /* Neumorphic shadows */
+    .neuro-raised {
+      box-shadow: 8px 8px 16px rgba(0,0,0,0.1), -8px -8px 16px rgba(255,255,255,0.8);
+    }
+    .neuro-inset {
+      box-shadow: inset 4px 4px 8px rgba(0,0,0,0.1), inset -4px -4px 8px rgba(255,255,255,0.8);
+    }
+
+    /* Smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* Navigation sticky */
+    .nav-sticky {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+    }
+  </style>
+</head>
+<body class="bg-gray-50">
+
+  <!-- Navigation -->
+  <nav class="nav-sticky bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-7xl mx-auto px-6 py-4">
+      <div class="flex items-center justify-between mb-4">
+        <h1 class="text-2xl font-bold text-gray-900">UI Portfolio Design Directions</h1>
+        <a href="#" class="text-sm text-blue-600 hover:text-blue-700">monay/.claude/skills/ui-portfolio-design</a>
+      </div>
+      <div class="flex flex-wrap gap-2">
+        <a href="#precision" class="px-3 py-1 text-sm bg-blue-50 text-blue-700 rounded hover:bg-blue-100">1. Precision & Density</a>
+        <a href="#warmth" class="px-3 py-1 text-sm bg-orange-50 text-orange-700 rounded hover:bg-orange-100">2. Warmth & Approachability</a>
+        <a href="#sophistication" class="px-3 py-1 text-sm bg-slate-50 text-slate-700 rounded hover:bg-slate-100">3. Sophistication & Trust</a>
+        <a href="#boldness" class="px-3 py-1 text-sm bg-violet-50 text-violet-700 rounded hover:bg-violet-100">4. Boldness & Clarity</a>
+        <a href="#utility" class="px-3 py-1 text-sm bg-gray-50 text-gray-700 rounded hover:bg-gray-100">5. Utility & Function</a>
+        <a href="#data" class="px-3 py-1 text-sm bg-cyan-50 text-cyan-700 rounded hover:bg-cyan-100">6. Data & Analysis</a>
+        <a href="#editorial" class="px-3 py-1 text-sm bg-red-50 text-red-700 rounded hover:bg-red-100">7. Editorial Elegance</a>
+        <a href="#playful" class="px-3 py-1 text-sm bg-pink-50 text-pink-700 rounded hover:bg-pink-100">8. Playful & Dynamic</a>
+        <a href="#brutalist" class="px-3 py-1 text-sm bg-black text-white rounded hover:bg-gray-800">9. Brutalist Minimalism</a>
+        <a href="#neumorphic" class="px-3 py-1 text-sm bg-purple-50 text-purple-700 rounded hover:bg-purple-100">10. Neumorphic Softness</a>
+      </div>
+    </div>
+  </nav>
+
+  <div class="max-w-7xl mx-auto px-6 py-12 space-y-24">
+
+    <!-- 1. Precision & Density -->
+    <section id="precision" class="space-y-6">
+      <div class="border-l-4 border-blue-600 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🎯 Precision & Density</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Data dashboards, admin interfaces, analytics platforms</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Tight spacing, monospace for data, minimal shadows, functional</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Revenue Card -->
+        <div class="rounded border border-slate-200 bg-white p-3 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold text-slate-900">Revenue</h3>
+            <span class="text-xs text-slate-500">MTD</span>
+          </div>
+          <div class="font-plex-mono text-2xl font-semibold text-blue-600 mb-1">
+            $482,394.12
+          </div>
+          <div class="flex items-center text-xs text-emerald-600">
+            <span class="font-plex-mono">↑ +12.4%</span>
+          </div>
+        </div>
+
+        <!-- Users Card -->
+        <div class="rounded border border-slate-200 bg-white p-3 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold text-slate-900">Active Users</h3>
+            <span class="text-xs text-slate-500">Live</span>
+          </div>
+          <div class="font-plex-mono text-2xl font-semibold text-blue-600 mb-1">
+            3,847
+          </div>
+          <div class="flex items-center text-xs text-emerald-600">
+            <span class="font-plex-mono">↑ +8.2%</span>
+          </div>
+        </div>
+
+        <!-- Conversion Card -->
+        <div class="rounded border border-slate-200 bg-white p-3 shadow-sm">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-semibold text-slate-900">Conversion</h3>
+            <span class="text-xs text-slate-500">7d</span>
+          </div>
+          <div class="font-plex-mono text-2xl font-semibold text-blue-600 mb-1">
+            4.82%
+          </div>
+          <div class="flex items-center text-xs text-red-600">
+            <span class="font-plex-mono">↓ -1.3%</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-white border border-slate-200 rounded p-4 shadow-sm">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-sm font-semibold text-slate-900">Quick Actions</h3>
+        </div>
+        <div class="flex gap-2">
+          <button class="px-3 py-2 text-sm font-medium bg-blue-600 text-white rounded hover:bg-blue-700 transition-colors duration-100">
+            Export Data
+          </button>
+          <button class="px-3 py-2 text-sm font-medium border border-slate-300 text-slate-700 rounded hover:bg-slate-50 transition-colors duration-100">
+            Filter
+          </button>
+          <button class="px-3 py-2 text-sm font-medium border border-slate-300 text-slate-700 rounded hover:bg-slate-50 transition-colors duration-100">
+            Settings
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Warmth & Approachability -->
+    <section id="warmth" class="space-y-6">
+      <div class="border-l-4 border-orange-500 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🌟 Warmth & Approachability</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Consumer apps, social platforms, communities</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Rounded elements, warm colors, generous spacing, friendly</p>
+      </div>
+
+      <div class="max-w-md mx-auto">
+        <div class="rounded-2xl bg-white p-6 shadow-lg">
+          <div class="flex items-center space-x-4 mb-4">
+            <div class="w-16 h-16 rounded-full bg-gradient-to-br from-orange-400 to-pink-500 ring-2 ring-orange-200"></div>
+            <div>
+              <h3 class="text-xl font-semibold text-slate-900">Sarah Johnson</h3>
+              <p class="text-base text-slate-600">Product Designer</p>
+            </div>
+          </div>
+
+          <p class="text-base text-slate-700 leading-relaxed mb-6">
+            Creating delightful experiences for users worldwide. Coffee enthusiast ☕
+          </p>
+
+          <button class="w-full rounded-full bg-orange-500 hover:bg-orange-600 text-white font-medium py-3 px-6 transition-all duration-300 hover:scale-[1.02] shadow-md">
+            Send Message
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="rounded-xl bg-white p-5 shadow-md">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-teal-400"></div>
+            <div>
+              <p class="font-medium text-gray-900">Emily Chen</p>
+              <p class="text-sm text-gray-500">2 hours ago</p>
+            </div>
+          </div>
+          <p class="text-gray-700">Just launched our new feature! 🚀 So excited to share this with everyone.</p>
+        </div>
+
+        <div class="rounded-xl bg-white p-5 shadow-md">
+          <div class="flex items-center gap-3 mb-3">
+            <div class="w-10 h-10 rounded-full bg-pink-400"></div>
+            <div>
+              <p class="font-medium text-gray-900">Marcus Wright</p>
+              <p class="text-sm text-gray-500">5 hours ago</p>
+            </div>
+          </div>
+          <p class="text-gray-700">Amazing community here! Thanks for all the support 💙</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Sophistication & Trust -->
+    <section id="sophistication" class="space-y-6">
+      <div class="border-l-4 border-blue-800 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">💼 Sophistication & Trust</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Financial services, enterprise SaaS, professional tools</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Refined, trustworthy, restrained elegance</p>
+      </div>
+
+      <div class="max-w-lg mx-auto space-y-6">
+        <div class="bg-white rounded-lg shadow-[0_1px_3px_rgba(0,0,0,0.06),0_4px_12px_rgba(0,0,0,0.04)] p-6">
+          <h3 class="text-xl font-semibold text-slate-900 mb-6">Account Information</h3>
+
+          <div class="space-y-5">
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Account Number
+              </label>
+              <input
+                type="text"
+                className="w-full h-10 px-4 rounded-md border border-slate-300 focus:border-blue-800 focus:ring-2 focus:ring-blue-800/20 transition-colors duration-150"
+                placeholder="Enter account number"
+                value="****-****-1234"
+              />
+              <p class="mt-2 text-sm text-slate-600">
+                Your 10-digit account identifier
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-sm font-medium text-slate-700 mb-2">
+                Routing Number
+              </label>
+              <input
+                type="text"
+                className="w-full h-10 px-4 rounded-md border border-slate-300 focus:border-blue-800 focus:ring-2 focus:ring-blue-800/20 transition-colors duration-150"
+                placeholder="Enter routing number"
+              />
+            </div>
+
+            <button class="w-full h-10 px-5 rounded-md bg-blue-800 hover:bg-blue-900 text-white font-medium transition-colors duration-150 shadow-sm">
+              Verify Account
+            </button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-4">
+          <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+            <p class="text-2xl font-semibold text-blue-800 mb-1">$142.8K</p>
+            <p class="text-sm text-slate-600">Balance</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+            <p class="text-2xl font-semibold text-emerald-600 mb-1">+12.4%</p>
+            <p class="text-sm text-slate-600">Return</p>
+          </div>
+          <div class="bg-white rounded-lg shadow-sm p-4 text-center">
+            <p class="text-2xl font-semibold text-slate-700 mb-1">24</p>
+            <p class="text-sm text-slate-600">Holdings</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Boldness & Clarity -->
+    <section id="boldness" class="space-y-6">
+      <div class="border-l-4 border-violet-600 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">⚡ Boldness & Clarity</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Marketing sites, e-commerce, landing pages</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Large typography, bold colors, dramatic spacing</p>
+      </div>
+
+      <div class="rounded-2xl bg-gradient-to-br from-violet-600 to-fuchsia-500 p-12 text-center shadow-xl">
+        <h1 class="text-6xl font-extrabold text-white leading-tight tracking-tight mb-6">
+          Transform Your
+          <br />
+          Business Today
+        </h1>
+
+        <p class="text-xl text-violet-50 leading-relaxed mb-8 max-w-2xl mx-auto">
+          The all-in-one platform for modern teams to collaborate, ship faster, and achieve more.
+        </p>
+
+        <div class="flex justify-center gap-4">
+          <button class="h-14 px-8 rounded-xl bg-white text-violet-600 font-bold text-lg hover:scale-105 transition-transform duration-200 shadow-2xl">
+            Start Free Trial
+          </button>
+
+          <button class="h-14 px-8 rounded-xl bg-transparent border-3 border-white text-white font-bold text-lg hover:bg-white/10 transition-colors duration-200">
+            Watch Demo
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="bg-white rounded-xl p-8 shadow-lg border-t-4 border-violet-600">
+          <div class="text-4xl mb-4">⚡</div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">Lightning Fast</h3>
+          <p class="text-gray-600">Deploy in seconds, not hours. Experience unprecedented speed.</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-lg border-t-4 border-amber-500">
+          <div class="text-4xl mb-4">🔒</div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">Secure by Default</h3>
+          <p class="text-gray-600">Enterprise-grade security baked into every feature.</p>
+        </div>
+
+        <div class="bg-white rounded-xl p-8 shadow-lg border-t-4 border-emerald-500">
+          <div class="text-4xl mb-4">📈</div>
+          <h3 class="text-2xl font-bold text-gray-900 mb-3">Scale Infinitely</h3>
+          <p class="text-gray-600">From startup to enterprise, we grow with you.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Utility & Function -->
+    <section id="utility" class="space-y-6">
+      <div class="border-l-4 border-blue-500 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🛠️ Utility & Function</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Developer tools, technical products, power-user apps</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Monospace, terminal-inspired, minimal motion</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <div class="rounded bg-[#1e1e1e] p-4 border border-gray-700 shadow-sm">
+          <div class="flex items-center justify-between mb-3">
+            <span class="font-jetbrains text-xs text-gray-400">main.go</span>
+            <button class="px-2 py-1 rounded bg-gray-800 hover:bg-gray-700 font-jetbrains text-xs text-gray-300 transition-colors duration-100">
+              Copy
+            </button>
+          </div>
+
+          <pre class="font-jetbrains text-sm text-gray-100 overflow-x-auto"><code>package main
+
+import "fmt"
+
+func main() {
+    fmt.Println("Hello, World!")
+}</code></pre>
+
+          <div class="mt-3 pt-3 border-t border-gray-700">
+            <div class="flex items-center gap-2 font-jetbrains text-xs">
+              <span class="text-emerald-500">✓</span>
+              <span class="text-gray-400">Build successful</span>
+              <span class="text-gray-500">|</span>
+              <span class="text-gray-400">0.342s</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="mt-6 bg-white rounded border border-gray-300 overflow-hidden shadow-sm">
+          <div class="bg-gray-50 border-b border-gray-300 px-4 py-2">
+            <p class="font-jetbrains text-xs text-gray-600">Terminal</p>
+          </div>
+          <div class="p-4 bg-white">
+            <div class="font-jetbrains text-sm space-y-1">
+              <p class="text-gray-900">$ go run main.go</p>
+              <p class="text-blue-600">Hello, World!</p>
+              <p class="text-gray-900">$<span class="animate-pulse">_</span></p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Data & Analysis -->
+    <section id="data" class="space-y-6">
+      <div class="border-l-4 border-blue-600 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">📊 Data & Analysis</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Analytics platforms, BI tools, research applications</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Colorblind-safe palettes, sortable tables, interactive charts</p>
+      </div>
+
+      <div class="bg-white rounded-md border border-slate-200 overflow-hidden shadow-sm">
+        <table class="w-full">
+          <thead class="bg-slate-50 border-b border-slate-200">
+            <tr>
+              <th class="px-4 py-3 text-left text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Product
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                <button class="hover:text-blue-600 transition-colors">
+                  Revenue ↓
+                </button>
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Change
+              </th>
+              <th class="px-4 py-3 text-right text-xs font-semibold text-slate-700 uppercase tracking-wider">
+                Trend
+              </th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3 text-sm text-slate-900">Enterprise Plan</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-slate-900">$284,392</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-emerald-600">+12.4%</td>
+              <td class="px-4 py-3 text-right">
+                <span class="inline-block w-16 h-6 bg-gradient-to-r from-emerald-100 to-emerald-400 rounded"></span>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3 text-sm text-slate-900">Pro Plan</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-slate-900">$158,203</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-red-600">-3.2%</td>
+              <td class="px-4 py-3 text-right">
+                <span class="inline-block w-16 h-6 bg-gradient-to-r from-red-400 to-red-100 rounded"></span>
+              </td>
+            </tr>
+            <tr class="hover:bg-slate-50 transition-colors">
+              <td class="px-4 py-3 text-sm text-slate-900">Starter Plan</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-slate-900">$94,128</td>
+              <td class="px-4 py-3 text-sm font-plex-mono text-right text-emerald-600">+8.1%</td>
+              <td class="px-4 py-3 text-right">
+                <span class="inline-block w-16 h-6 bg-gradient-to-r from-emerald-100 to-emerald-300 rounded"></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="grid grid-cols-4 gap-4">
+        <div class="bg-blue-50 rounded-lg p-4 border border-blue-200">
+          <p class="text-sm text-blue-700 mb-1">Total Revenue</p>
+          <p class="text-2xl font-plex-mono font-semibold text-blue-900">$536.7K</p>
+        </div>
+        <div class="bg-emerald-50 rounded-lg p-4 border border-emerald-200">
+          <p class="text-sm text-emerald-700 mb-1">Growth</p>
+          <p class="text-2xl font-plex-mono font-semibold text-emerald-900">+18.2%</p>
+        </div>
+        <div class="bg-violet-50 rounded-lg p-4 border border-violet-200">
+          <p class="text-sm text-violet-700 mb-1">Customers</p>
+          <p class="text-2xl font-plex-mono font-semibold text-violet-900">12,847</p>
+        </div>
+        <div class="bg-amber-50 rounded-lg p-4 border border-amber-200">
+          <p class="text-sm text-amber-700 mb-1">Churn Rate</p>
+          <p class="text-2xl font-plex-mono font-semibold text-amber-900">2.4%</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Editorial Elegance -->
+    <section id="editorial" class="space-y-6">
+      <div class="border-l-4 border-red-600 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">📖 Editorial Elegance</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Content platforms, publishing, blogs, magazines</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Serif body text, generous whitespace, refined</p>
+      </div>
+
+      <article class="max-w-2xl mx-auto px-8 py-12 bg-white rounded-lg shadow-sm">
+        <header class="mb-12">
+          <h1 class="font-playfair text-5xl font-medium text-slate-900 leading-tight tracking-tight mb-4">
+            The Art of Thoughtful Design
+          </h1>
+          <p class="text-lg text-slate-600">
+            How intentional choices create meaningful experiences
+          </p>
+          <div class="flex items-center gap-4 mt-6 pt-6 border-t border-slate-200">
+            <div class="w-12 h-12 rounded-full bg-slate-200"></div>
+            <div>
+              <p class="font-medium text-slate-900">Alexandra Chen</p>
+              <p class="text-sm text-slate-500">January 12, 2026 · 8 min read</p>
+            </div>
+          </div>
+        </header>
+
+        <div class="space-y-6">
+          <p class="font-playfair text-xl leading-loose text-slate-800 first-letter:text-5xl first-letter:font-bold first-letter:float-left first-letter:mr-3 first-letter:mt-1">
+            In the world of design, the difference between good and great often
+            lies not in what we add, but in what we deliberately choose to omit.
+            Every element must earn its place.
+          </p>
+
+          <p class="font-playfair text-lg leading-loose text-slate-700">
+            This philosophy extends beyond mere aesthetics. It's about respecting
+            the reader's time, attention, and cognitive capacity. When we strip
+            away the unnecessary, what remains speaks with clarity and purpose.
+          </p>
+
+          <p class="font-playfair text-lg leading-loose text-slate-700">
+            Typography, for instance, should be felt rather than noticed. The best
+            reading experiences happen when the design disappears, leaving only
+            the content and the ideas it conveys.
+          </p>
+        </div>
+      </article>
+    </section>
+
+    <!-- 8. Playful & Dynamic -->
+    <section id="playful" class="space-y-6">
+      <div class="border-l-4 border-purple-500 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🎮 Playful & Dynamic</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Gaming, creative tools, entertainment apps</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Vibrant colors, bouncy animations, asymmetric layouts</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl p-8 text-white transform hover:scale-105 transition-all duration-300 shadow-2xl">
+          <div class="text-5xl mb-4">🎯</div>
+          <h3 class="font-space-grotesk text-3xl font-bold mb-3">Level Up!</h3>
+          <p class="text-purple-50 mb-6">You've earned 500 points and unlocked a new achievement!</p>
+          <button class="bg-white text-purple-600 font-bold px-6 py-3 rounded-full hover:scale-110 active:scale-95 transition-transform duration-200 shadow-lg">
+            Claim Reward
+          </button>
+        </div>
+
+        <div class="bg-gradient-to-br from-cyan-400 to-blue-500 rounded-3xl p-8 text-white transform hover:scale-105 transition-all duration-300 shadow-2xl">
+          <div class="text-5xl mb-4">⚡</div>
+          <h3 class="font-space-grotesk text-3xl font-bold mb-3">Streak Active</h3>
+          <p class="text-cyan-50 mb-6">7 days in a row! Keep the momentum going!</p>
+          <div class="flex gap-2">
+            <div class="w-8 h-8 rounded-full bg-white/30"></div>
+            <div class="w-8 h-8 rounded-full bg-white/30"></div>
+            <div class="w-8 h-8 rounded-full bg-white/30"></div>
+            <div class="w-8 h-8 rounded-full bg-white/90"></div>
+            <div class="w-8 h-8 rounded-full bg-white/90"></div>
+            <div class="w-8 h-8 rounded-full bg-white/90"></div>
+            <div class="w-8 h-8 rounded-full bg-white animate-pulse"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-center">
+        <button class="group relative px-8 py-4 rounded-2xl bg-gradient-to-r from-purple-500 to-pink-500 text-white font-bold text-lg shadow-[0_8px_32px_rgba(168,85,247,0.25)] hover:shadow-[0_12px_48px_rgba(168,85,247,0.4)] hover:scale-105 active:scale-95 transition-all duration-200">
+          <span class="relative z-10 flex items-center gap-2">
+            Start Adventure
+            <svg class="w-5 h-5 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </span>
+        </button>
+      </div>
+    </section>
+
+    <!-- 9. Brutalist Minimalism -->
+    <section id="brutalist" class="space-y-6">
+      <div class="border-l-4 border-black pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🔲 Brutalist Minimalism</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Art portfolios, creative agencies, experimental products</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Sharp corners, stark contrast, no shadows</p>
+      </div>
+
+      <div class="max-w-3xl mx-auto">
+        <div class="border-2 border-black bg-white p-8">
+          <h2 class="font-sans text-5xl font-bold uppercase text-black mb-8 leading-none tracking-tight">
+            PORTFOLIO
+          </h2>
+
+          <div class="space-y-0">
+            <a href="#" class="block border-t-2 border-black p-6 hover:bg-black hover:text-white transition-colors duration-0">
+              <div class="flex justify-between items-center">
+                <span class="font-sans text-xl font-bold uppercase">PROJECT 001 — IDENTITY SYSTEM</span>
+                <span class="font-plex-mono text-sm">2025</span>
+              </div>
+            </a>
+
+            <a href="#" class="block border-t-2 border-black p-6 hover:bg-black hover:text-white transition-colors duration-0">
+              <div class="flex justify-between items-center">
+                <span class="font-sans text-xl font-bold uppercase">PROJECT 002 — WEB PLATFORM</span>
+                <span class="font-plex-mono text-sm">2025</span>
+              </div>
+            </a>
+
+            <a href="#" class="block border-y-2 border-black p-6 hover:bg-black hover:text-white transition-colors duration-0">
+              <div class="flex justify-between items-center">
+                <span class="font-sans text-xl font-bold uppercase">PROJECT 003 — EXHIBITION DESIGN</span>
+                <span class="font-plex-mono text-sm">2026</span>
+              </div>
+            </a>
+          </div>
+        </div>
+
+        <div class="mt-6 grid grid-cols-2 gap-0">
+          <button class="border-2 border-black bg-black text-white font-bold uppercase py-6 hover:bg-white hover:text-black transition-colors duration-0">
+            View All Work
+          </button>
+          <button class="border-2 border-black border-l-0 bg-white text-black font-bold uppercase py-6 hover:bg-black hover:text-white transition-colors duration-0">
+            Contact
+          </button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 10. Neumorphic Softness -->
+    <section id="neumorphic" class="space-y-6 pb-20">
+      <div class="border-l-4 border-purple-500 pl-6">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">🌸 Neumorphic Softness</h2>
+        <p class="text-gray-600 mb-1"><strong>For:</strong> Health/wellness, mindfulness, lifestyle apps</p>
+        <p class="text-gray-600"><strong>Key Traits:</strong> Soft shadows, rounded shapes, tactile feel</p>
+      </div>
+
+      <div class="bg-gray-200 rounded-3xl p-12 max-w-2xl mx-auto">
+        <div class="flex items-center justify-between p-6 rounded-3xl bg-gray-200 neuro-raised mb-8">
+          <div>
+            <h3 class="text-lg font-semibold text-slate-700 mb-1">Dark Mode</h3>
+            <p class="text-sm text-slate-500">Switch to darker theme</p>
+          </div>
+
+          <button class="relative w-16 h-8 rounded-full bg-gray-200 neuro-inset transition-all duration-300">
+            <div class="absolute top-1 left-1 w-6 h-6 rounded-full bg-gray-200 neuro-raised transition-transform duration-300"></div>
+          </button>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6">
+          <button class="aspect-square rounded-3xl bg-gray-200 neuro-raised hover:neuro-inset transition-all duration-300 flex flex-col items-center justify-center text-purple-600">
+            <svg class="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+            </svg>
+            <span class="text-sm font-medium text-slate-700">Add</span>
+          </button>
+
+          <button class="aspect-square rounded-3xl bg-gray-200 neuro-raised hover:neuro-inset transition-all duration-300 flex flex-col items-center justify-center text-purple-600">
+            <svg class="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+            </svg>
+            <span class="text-sm font-medium text-slate-700">Favorites</span>
+          </button>
+
+          <button class="aspect-square rounded-3xl bg-gray-200 neuro-raised hover:neuro-inset transition-all duration-300 flex flex-col items-center justify-center text-purple-600">
+            <svg class="w-12 h-12 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+            </svg>
+            <span class="text-sm font-medium text-slate-700">Stats</span>
+          </button>
+        </div>
+
+        <div class="mt-8 p-6 rounded-3xl bg-gray-200 neuro-inset">
+          <p class="text-center text-slate-600 text-sm">
+            "Take a moment to breathe and find your center."
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- Footer -->
+  <footer class="bg-white border-t border-gray-200 py-8 mt-20">
+    <div class="max-w-7xl mx-auto px-6 text-center text-sm text-gray-600">
+      <p class="mb-2">UI Portfolio Design - Claude Code Skill</p>
+      <p>monay/.claude/skills/ui-portfolio-design</p>
+    </div>
+  </footer>
+
+</body>
+</html>

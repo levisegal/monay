@@ -68,3 +68,9 @@ go.work.sum
 dist/
 tmp/
 .cursor/
+.claude/*
+!.claude/skills/
+
+# Test data with potentially sensitive information
+**/testdata/**/*.pdf
+**/testdata/**/transactions_opening.csv

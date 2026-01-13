@@ -11,7 +11,14 @@
       "Bash(bd doctor:*)",
       "Bash(bd create:*)",
       "Bash(bd sync:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(bd list:*)",
+      "Bash(bd ready)",
+      "Bash(bd dep add:*)",
+      "Bash(bd show:*)",
+      "Bash(bd config get:*)",
+      "Bash(bd config list:*)",
+      "Bash(bd update:*)"
     ]
   }
 }
