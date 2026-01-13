@@ -4,6 +4,7 @@ import { useState } from "react";
 import { PortfolioChart } from "../components/charts/PortfolioChart";
 import { HoldingDetailPanel } from "../components/holdings/HoldingDetailPanel";
 import { GainsLossSection } from "../components/gains/GainsLossSection";
+import { RebalancingSection } from "../components/rebalancing/RebalancingSection";
 import { Header } from "../components/nav/Header";
 import { AccountSelector } from "../components/nav/AccountSelector";
 
@@ -450,6 +451,11 @@ export default function DashboardPage() {
         {/* Gains & Losses Section */}
         <div className="mt-section">
           <GainsLossSection />
+        </div>
+
+        {/* Rebalancing Section */}
+        <div className="mt-section">
+          <RebalancingSection />
         </div>
       </div>
 
