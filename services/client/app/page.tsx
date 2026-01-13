@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { PortfolioChart } from "../components/charts/PortfolioChart";
 import { HoldingDetailPanel } from "../components/holdings/HoldingDetailPanel";
+import { GainsLossSection } from "../components/gains/GainsLossSection";
 
 // Import sample data
 import portfolioHistory from "../data/portfolio/history.json";
@@ -323,6 +324,11 @@ export default function DashboardPage() {
               </tbody>
             </table>
           </div>
+        </div>
+
+        {/* Gains & Losses Section */}
+        <div className="mt-section">
+          <GainsLossSection />
         </div>
       </div>
 
