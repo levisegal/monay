@@ -1,0 +1,22 @@
+services:
+  dashboard:
+    container_name: monay-dashboard
+    build:
+      context: ../services/client
+      dockerfile: Dockerfile
+      target: dev
+    ports:
+      - "7777:3000"
+    volumes:
+      - ../services/client:/app
+      - /app/node_modules
+      - /app/.next
+    environment:
+      - NODE_ENV=development
+      - WATCHPACK_POLLING=true
+    labels:
+      - dev.orbstack.domains=dashboard.monay.local
+    networks:
+      - monay
+    profiles:
+      - dashboard

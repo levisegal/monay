@@ -4,6 +4,7 @@ name: monay
 include:
   - compose.database.yaml
   - compose.monay-apis.yaml
+  - compose.client.yaml
 
 networks:
   monay: {}

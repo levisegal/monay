@@ -91,7 +91,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen">
-      <div className="max-w-7xl mx-auto p-8">
+      <div className="max-w-7xl mx-auto px-4 py-6 sm:p-8">
         {/* Page Header */}
         <header className="mb-statement">
           <h1 className="font-serif text-3xl font-semibold text-ink mb-2">
@@ -134,18 +134,67 @@ export default function DashboardPage() {
           ))}
         </div>
 
-        {/* Holdings Table */}
-        <div className="bg-white border border-paper-gray rounded-md shadow-paper p-statement">
+        {/* Holdings */}
+        <div className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-statement">
           <div className="flex justify-between items-center mb-6">
             <h2 className="font-serif text-lg font-semibold text-ink">
               Holdings
             </h2>
-            <button className="px-6 py-2 border border-paper-gray text-ink rounded-sm hover:bg-paper-gray transition-all font-sans font-semibold text-sm">
+            <button className="px-4 sm:px-6 py-2 border border-paper-gray text-ink rounded-sm hover:bg-paper-gray transition-all font-sans font-semibold text-sm">
               Import CSV
             </button>
           </div>
 
-          <div className="overflow-x-auto">
+          {/* Mobile Card Layout */}
+          <div className="md:hidden space-y-4">
+            {holdings.map((holding) => (
+              <div
+                key={holding.symbol}
+                className="border border-paper-gray rounded-md p-4"
+              >
+                <div className="flex justify-between items-start mb-3">
+                  <div>
+                    <div className="font-semibold text-ink">{holding.name}</div>
+                    <div className="text-sm text-foreground-secondary">
+                      {holding.symbol}
+                    </div>
+                  </div>
+                  <div
+                    className={`font-semibold ${
+                      holding.positive ? "text-green-700" : "text-red-700"
+                    }`}
+                  >
+                    {holding.change}
+                  </div>
+                </div>
+                <div className="grid grid-cols-2 gap-3 text-sm">
+                  <div>
+                    <div className="text-foreground-secondary">Value</div>
+                    <div className="font-serif font-semibold text-ink">
+                      {holding.value}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-foreground-secondary">Allocation</div>
+                    <div className="font-semibold text-ink">
+                      {holding.allocation}
+                    </div>
+                  </div>
+                  <div>
+                    <div className="text-foreground-secondary">Shares</div>
+                    <div className="text-ink">{holding.shares}</div>
+                  </div>
+                  <div>
+                    <div className="text-foreground-secondary">Price</div>
+                    <div className="text-ink">{holding.price}</div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Table Layout */}
+          <div className="hidden md:block overflow-x-auto">
             <table className="w-full">
               <thead className="border-b-2 border-ink">
                 <tr className="text-left">

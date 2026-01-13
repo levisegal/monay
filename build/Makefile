@@ -1,4 +1,4 @@
-.PHONY: build build.nocache build.db build.api build.service build.service.nocache up down down.clean logs db.reinit
+.PHONY: build build.nocache build.db build.api build.dashboard build.service build.service.nocache up up.dashboard down down.clean logs db.reinit
 
 build:
 	docker compose \
@@ -18,6 +18,9 @@ build.db:
 build.api:
 	docker compose --profile monay-apis build holdings
 
+build.dashboard:
+	docker compose --profile dashboard build dashboard
+
 # Build a single service: make build.service SERVICE=holdings
 build.service:
 	docker compose --profile database --profile monay-apis build $(SERVICE)
@@ -31,6 +34,9 @@ up:
 		--profile database \
 		--profile monay-apis \
 		up
+
+up.dashboard:
+	docker compose --profile dashboard up
 
 down:
 	docker compose \
