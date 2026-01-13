@@ -23,10 +23,12 @@ interface HoldingData {
   costBasis: number;
   change: number;
   changePercent: number;
+  accountName?: string;
+  accountInstitution?: string;
 }
 
 interface HoldingDetailPanelProps {
-  holding: HoldingData | null;
+  holdings: HoldingData[]; // All positions for this symbol across accounts
   quote: StockQuote | null;
   chartData: ChartDataPoint[];
   isOpen: boolean;
@@ -34,7 +36,7 @@ interface HoldingDetailPanelProps {
 }
 
 export function HoldingDetailPanel({
-  holding,
+  holdings,
   quote,
   chartData,
   isOpen,
@@ -42,7 +44,13 @@ export function HoldingDetailPanel({
 }: HoldingDetailPanelProps) {
   const [timeRange, setTimeRange] = useState<TimeRange>("1M");
 
-  if (!holding || !quote) return null;
+  if (!holdings || holdings.length === 0 || !quote) return null;
+
+  // Aggregate totals across all accounts
+  const totalShares = holdings.reduce((sum, h) => sum + h.shares, 0);
+  const totalValue = holdings.reduce((sum, h) => sum + h.value, 0);
+  const totalCostBasis = holdings.reduce((sum, h) => sum + h.costBasis, 0);
+  const firstHolding = holdings[0]; // Use first for name/symbol
 
   const filteredData = filterByTimeRange(chartData, timeRange);
   const displayData = filteredData.map((d) => {
@@ -57,9 +65,9 @@ export function HoldingDetailPanel({
   const { changePercent: periodChangePercent, isPositive } =
     calculateChange(filteredData);
 
-  const totalGainLoss = holding.value - holding.costBasis;
-  const totalGainLossPercent = (totalGainLoss / holding.costBasis) * 100;
-  const dayGainLoss = holding.shares * quote.regularMarketChange;
+  const totalGainLoss = totalValue - totalCostBasis;
+  const totalGainLossPercent = (totalGainLoss / totalCostBasis) * 100;
+  const dayGainLoss = totalShares * quote.regularMarketChange;
 
   return (
     <SlideOver isOpen={isOpen} onClose={onClose}>
@@ -72,6 +80,9 @@ export function HoldingDetailPanel({
             </h2>
             <span className="text-sm text-foreground-secondary">
               {quote.symbol} · {quote.exchange}
+              {holdings.length > 1 && (
+                <> · {holdings.length} accounts</>
+              )}
             </span>
           </div>
           <span
@@ -106,19 +117,19 @@ export function HoldingDetailPanel({
           <div>
             <div className="text-sm text-foreground-secondary">Shares</div>
             <div className="font-serif font-semibold text-ink">
-              {holding.shares.toLocaleString()}
+              {totalShares.toLocaleString()}
             </div>
           </div>
           <div>
             <div className="text-sm text-foreground-secondary">Market Value</div>
             <div className="font-serif font-semibold text-ink">
-              {formatCurrency(holding.value)}
+              {formatCurrency(totalValue)}
             </div>
           </div>
           <div>
             <div className="text-sm text-foreground-secondary">Cost Basis</div>
             <div className="font-serif font-semibold text-ink">
-              {formatCurrency(holding.costBasis)}
+              {formatCurrency(totalCostBasis)}
             </div>
           </div>
           <div>
@@ -145,6 +156,25 @@ export function HoldingDetailPanel({
             </div>
           </div>
         </div>
+
+        {/* Account Breakdown */}
+        {holdings.length > 1 && (
+          <div className="mt-4 pt-4 border-t border-paper-gray">
+            <div className="text-sm text-foreground-secondary mb-2">By Account</div>
+            <div className="space-y-2">
+              {holdings.map((h, idx) => (
+                <div key={idx} className="flex justify-between items-center text-sm">
+                  <span className="text-ink">
+                    {h.accountName} ({h.accountInstitution?.split(" ")[0]})
+                  </span>
+                  <span className="text-foreground-secondary">
+                    {h.shares.toLocaleString()} shares · {formatCurrency(h.value)}
+                  </span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Price Chart */}
