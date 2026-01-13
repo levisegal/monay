@@ -1,0 +1,21 @@
+{
+  "symbol": "VTI",
+  "shortName": "Vanguard Total Stock Mkt",
+  "longName": "Vanguard Total Stock Market ETF",
+  "regularMarketPrice": 242.15,
+  "regularMarketChange": 2.89,
+  "regularMarketChangePercent": 1.21,
+  "regularMarketPreviousClose": 239.26,
+  "regularMarketOpen": 239.80,
+  "regularMarketDayHigh": 243.10,
+  "regularMarketDayLow": 239.50,
+  "regularMarketVolume": 3245000,
+  "fiftyTwoWeekHigh": 252.40,
+  "fiftyTwoWeekLow": 198.75,
+  "marketCap": 380000000000,
+  "trailingPE": null,
+  "dividendYield": 0.0142,
+  "currency": "USD",
+  "exchange": "NYSE",
+  "quoteType": "ETF"
+}

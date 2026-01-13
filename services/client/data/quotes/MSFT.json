@@ -1,0 +1,21 @@
+{
+  "symbol": "MSFT",
+  "shortName": "Microsoft Corp",
+  "longName": "Microsoft Corporation",
+  "regularMarketPrice": 378.91,
+  "regularMarketChange": 6.72,
+  "regularMarketChangePercent": 1.81,
+  "regularMarketPreviousClose": 372.19,
+  "regularMarketOpen": 373.50,
+  "regularMarketDayHigh": 380.45,
+  "regularMarketDayLow": 372.10,
+  "regularMarketVolume": 21456000,
+  "fiftyTwoWeekHigh": 420.82,
+  "fiftyTwoWeekLow": 309.45,
+  "marketCap": 2810000000000,
+  "trailingPE": 35.20,
+  "dividendYield": 0.0078,
+  "currency": "USD",
+  "exchange": "NASDAQ",
+  "quoteType": "EQUITY"
+}

@@ -1,0 +1,21 @@
+{
+  "symbol": "AAPL",
+  "shortName": "Apple Inc.",
+  "longName": "Apple Inc.",
+  "regularMarketPrice": 178.50,
+  "regularMarketChange": 4.20,
+  "regularMarketChangePercent": 2.41,
+  "regularMarketPreviousClose": 174.30,
+  "regularMarketOpen": 175.00,
+  "regularMarketDayHigh": 179.20,
+  "regularMarketDayLow": 174.80,
+  "regularMarketVolume": 58234500,
+  "fiftyTwoWeekHigh": 199.62,
+  "fiftyTwoWeekLow": 164.08,
+  "marketCap": 2780000000000,
+  "trailingPE": 28.45,
+  "dividendYield": 0.0053,
+  "currency": "USD",
+  "exchange": "NASDAQ",
+  "quoteType": "EQUITY"
+}

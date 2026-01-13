@@ -1,4 +1,36 @@
+"use client";
+
+import { useState } from "react";
+import { PortfolioChart } from "../components/charts/PortfolioChart";
+import { HoldingDetailPanel } from "../components/holdings/HoldingDetailPanel";
+
+// Import sample data
+import portfolioHistory from "../data/portfolio/history.json";
+import aaplQuote from "../data/quotes/AAPL.json";
+import msftQuote from "../data/quotes/MSFT.json";
+import vtiQuote from "../data/quotes/VTI.json";
+import aaplChart from "../data/charts/AAPL.json";
+import msftChart from "../data/charts/MSFT.json";
+import vtiChart from "../data/charts/VTI.json";
+
+import type { StockQuote, ChartDataPoint } from "../types/stock";
+
+// Map symbols to data
+const quotesMap: Record<string, StockQuote> = {
+  AAPL: aaplQuote as StockQuote,
+  MSFT: msftQuote as StockQuote,
+  VTI: vtiQuote as StockQuote,
+};
+
+const chartsMap: Record<string, ChartDataPoint[]> = {
+  AAPL: aaplChart.data as ChartDataPoint[],
+  MSFT: msftChart.data as ChartDataPoint[],
+  VTI: vtiChart.data as ChartDataPoint[],
+};
+
 export default function DashboardPage() {
+  const [selectedHolding, setSelectedHolding] = useState<string | null>(null);
+
   const stats = [
     {
       label: "Total Value",
@@ -30,64 +62,87 @@ export default function DashboardPage() {
     {
       name: "Apple Inc.",
       symbol: "AAPL",
-      shares: "240",
-      price: "$178.50",
-      value: "$42,840",
+      shares: 240,
+      price: 178.50,
+      value: 42840,
+      costBasis: 36000,
       allocation: "15.1%",
-      change: "+2.4%",
+      change: 2.4,
+      changePercent: 2.4,
       positive: true,
     },
     {
       name: "Microsoft Corporation",
       symbol: "MSFT",
-      shares: "180",
-      price: "$378.91",
-      value: "$68,204",
+      shares: 180,
+      price: 378.91,
+      value: 68204,
+      costBasis: 54000,
       allocation: "24.0%",
-      change: "+1.8%",
+      change: 1.8,
+      changePercent: 1.8,
       positive: true,
     },
     {
       name: "Vanguard Total Stock Market ETF",
       symbol: "VTI",
-      shares: "350",
-      price: "$242.15",
-      value: "$84,753",
+      shares: 350,
+      price: 242.15,
+      value: 84753,
+      costBasis: 70000,
       allocation: "29.8%",
-      change: "+1.2%",
+      change: 1.2,
+      changePercent: 1.2,
       positive: true,
     },
     {
       name: "iShares Core U.S. Aggregate Bond ETF",
       symbol: "AGG",
-      shares: "420",
-      price: "$98.45",
-      value: "$41,349",
+      shares: 420,
+      price: 98.45,
+      value: 41349,
+      costBasis: 42000,
       allocation: "14.5%",
-      change: "-0.3%",
+      change: -0.3,
+      changePercent: -0.3,
       positive: false,
     },
     {
       name: "Amazon.com Inc.",
       symbol: "AMZN",
-      shares: "95",
-      price: "$178.25",
-      value: "$16,934",
+      shares: 95,
+      price: 178.25,
+      value: 16934,
+      costBasis: 14000,
       allocation: "6.0%",
-      change: "+3.1%",
+      change: 3.1,
+      changePercent: 3.1,
       positive: true,
     },
     {
       name: "Alphabet Inc. Class A",
       symbol: "GOOGL",
-      shares: "110",
-      price: "$141.80",
-      value: "$15,598",
+      shares: 110,
+      price: 141.80,
+      value: 15598,
+      costBasis: 13000,
       allocation: "5.5%",
-      change: "+1.5%",
+      change: 1.5,
+      changePercent: 1.5,
       positive: true,
     },
   ];
+
+  const currentHolding = holdings.find((h) => h.symbol === selectedHolding);
+  const currentQuote = selectedHolding ? quotesMap[selectedHolding] : null;
+  const currentChartData = selectedHolding ? chartsMap[selectedHolding] : [];
+
+  const formatCurrency = (value: number) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+    }).format(value);
 
   return (
     <div className="min-h-screen">
@@ -98,7 +153,8 @@ export default function DashboardPage() {
             Portfolio Statement
           </h1>
           <p className="text-base text-foreground-secondary">
-            Investment Account - {new Date().toLocaleDateString("en-US", {
+            Investment Account -{" "}
+            {new Date().toLocaleDateString("en-US", {
               month: "long",
               day: "numeric",
               year: "numeric",
@@ -134,6 +190,11 @@ export default function DashboardPage() {
           ))}
         </div>
 
+        {/* Portfolio Chart */}
+        <div className="mb-section">
+          <PortfolioChart data={portfolioHistory.data} />
+        </div>
+
         {/* Holdings */}
         <div className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-statement">
           <div className="flex justify-between items-center mb-6">
@@ -150,7 +211,8 @@ export default function DashboardPage() {
             {holdings.map((holding) => (
               <div
                 key={holding.symbol}
-                className="border border-paper-gray rounded-md p-4"
+                onClick={() => setSelectedHolding(holding.symbol)}
+                className="border border-paper-gray rounded-md p-4 cursor-pointer hover:shadow-paper-hover transition-all"
               >
                 <div className="flex justify-between items-start mb-3">
                   <div>
@@ -164,14 +226,15 @@ export default function DashboardPage() {
                       holding.positive ? "text-green-700" : "text-red-700"
                     }`}
                   >
-                    {holding.change}
+                    {holding.positive ? "+" : ""}
+                    {holding.changePercent}%
                   </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3 text-sm">
                   <div>
                     <div className="text-foreground-secondary">Value</div>
                     <div className="font-serif font-semibold text-ink">
-                      {holding.value}
+                      {formatCurrency(holding.value)}
                     </div>
                   </div>
                   <div>
@@ -186,7 +249,9 @@ export default function DashboardPage() {
                   </div>
                   <div>
                     <div className="text-foreground-secondary">Price</div>
-                    <div className="text-ink">{holding.price}</div>
+                    <div className="text-ink">
+                      {formatCurrency(holding.price)}
+                    </div>
                   </div>
                 </div>
               </div>
@@ -222,7 +287,8 @@ export default function DashboardPage() {
                 {holdings.map((holding) => (
                   <tr
                     key={holding.symbol}
-                    className="border-b border-paper-gray hover:bg-paper-cream/50 transition-all"
+                    onClick={() => setSelectedHolding(holding.symbol)}
+                    className="border-b border-paper-gray hover:bg-paper-cream/50 transition-all cursor-pointer"
                   >
                     <td className="py-3">
                       <div className="font-semibold text-ink">
@@ -236,10 +302,10 @@ export default function DashboardPage() {
                       {holding.shares}
                     </td>
                     <td className="py-3 text-right text-foreground-secondary">
-                      {holding.price}
+                      {formatCurrency(holding.price)}
                     </td>
                     <td className="py-3 text-right font-serif font-semibold text-ink">
-                      {holding.value}
+                      {formatCurrency(holding.value)}
                     </td>
                     <td className="py-3 text-right text-foreground-secondary">
                       {holding.allocation}
@@ -249,7 +315,8 @@ export default function DashboardPage() {
                         holding.positive ? "text-green-700" : "text-red-700"
                       }`}
                     >
-                      {holding.change}
+                      {holding.positive ? "+" : ""}
+                      {holding.changePercent}%
                     </td>
                   </tr>
                 ))}
@@ -258,6 +325,28 @@ export default function DashboardPage() {
           </div>
         </div>
       </div>
+
+      {/* Holding Detail Panel */}
+      <HoldingDetailPanel
+        holding={
+          currentHolding
+            ? {
+                name: currentHolding.name,
+                symbol: currentHolding.symbol,
+                shares: currentHolding.shares,
+                price: currentHolding.price,
+                value: currentHolding.value,
+                costBasis: currentHolding.costBasis,
+                change: currentHolding.change,
+                changePercent: currentHolding.changePercent,
+              }
+            : null
+        }
+        quote={currentQuote || null}
+        chartData={currentChartData || []}
+        isOpen={selectedHolding !== null}
+        onClose={() => setSelectedHolding(null)}
+      />
     </div>
   );
 }
