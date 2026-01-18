@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lora } from "next/font/google";
 import "./globals.css";
 import "../paper-portfolio.css";
+import { Providers } from "./providers";
 
 const lora = Lora({
   subsets: ["latin"],
@@ -21,7 +22,9 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={lora.variable}>
-      <body className="paper-bg antialiased">{children}</body>
+      <body className="paper-bg antialiased">
+        <Providers>{children}</Providers>
+      </body>
     </html>
   );
 }
