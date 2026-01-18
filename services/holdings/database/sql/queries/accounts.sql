@@ -1,27 +1,27 @@
 -- name: GetAccount :one
 select *
-from monay.accounts
+from accounts
 where id = @id;
 
 -- name: GetAccountByName :one
 select *
-from monay.accounts
+from accounts
 where name = @name;
 
 -- name: GetAccountByExternalNumber :one
 select *
-from monay.accounts
+from accounts
 where
     institution_name = @institution_name
     and external_account_number = @external_account_number;
 
 -- name: ListAccounts :many
 select *
-from monay.accounts
+from accounts
 order by name;
 
 -- name: CreateAccount :one
-insert into monay.accounts (
+insert into accounts (
     id,
     user_id,
     name,
@@ -39,16 +39,16 @@ insert into monay.accounts (
 returning *;
 
 -- name: UpdateAccount :one
-update monay.accounts
+update accounts
 set
     name = coalesce(nullif(@name, ''), name),
     institution_name = coalesce(nullif(@institution_name, ''), institution_name),
     external_account_number = coalesce(@external_account_number, external_account_number),
     account_type = coalesce(nullif(@account_type, ''), account_type),
-    updated_at = now()
+    updated_at = datetime('now')
 where id = @id
 returning *;
 
 -- name: DeleteAccount :exec
-delete from monay.accounts
+delete from accounts
 where id = @id;

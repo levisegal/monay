@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"os"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/spf13/cobra"
 
 	"github.com/levisegal/monay/services/holdings/config"
@@ -75,7 +75,7 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 		"positions", len(result.Positions),
 	)
 
-	conn, err := database.Open(ctx, cfg.Database.ConnString())
+	conn, err := database.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
@@ -98,18 +98,18 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 	}
 
 	for _, txn := range result.Transactions {
-		var securityID pgtype.Text
+		var securityID sql.NullString
 
 		if txn.Symbol != "" {
 			sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
 				ID:     database.NewID(database.PrefixSecurity),
 				Symbol: txn.Symbol,
-				Name:   pgtype.Text{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+				Name:   sql.NullString{String: txn.SecurityName, Valid: txn.SecurityName != ""},
 			})
 			if err != nil {
 				return fmt.Errorf("failed to upsert security %s: %w", txn.Symbol, err)
 			}
-			securityID = pgtype.Text{String: sec.ID, Valid: true}
+			securityID = sql.NullString{String: sec.ID, Valid: true}
 		}
 
 		err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
@@ -117,12 +117,12 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 			AccountID:       account.ID,
 			SecurityID:      securityID,
 			TransactionType: string(txn.TransactionType),
-			TransactionDate: pgtype.Date{Time: txn.TransactionDate, Valid: true},
-			QuantityMicros:  int8FromMicros(txn.QuantityMicros),
-			PriceMicros:     int8FromMicros(txn.PriceMicros),
+			TransactionDate: txn.TransactionDate.Format("2006-01-02"),
+			QuantityMicros:  sql.NullInt64{Int64: txn.QuantityMicros, Valid: true},
+			PriceMicros:     sql.NullInt64{Int64: txn.PriceMicros, Valid: true},
 			AmountMicros:    txn.AmountMicros,
-			FeesMicros:      int8FromMicros(txn.FeesMicros),
-			Description:     pgtype.Text{String: txn.Description, Valid: txn.Description != ""},
+			FeesMicros:      sql.NullInt64{Int64: txn.FeesMicros, Valid: true},
+			Description:     sql.NullString{String: txn.Description, Valid: txn.Description != ""},
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create transaction: %w", err)
@@ -133,7 +133,7 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 		sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
 			ID:     database.NewID(database.PrefixSecurity),
 			Symbol: pos.Symbol,
-			Name:   pgtype.Text{String: pos.SecurityName, Valid: pos.SecurityName != ""},
+			Name:   sql.NullString{String: pos.SecurityName, Valid: pos.SecurityName != ""},
 		})
 		if err != nil {
 			return fmt.Errorf("failed to upsert security %s: %w", pos.Symbol, err)
@@ -144,9 +144,9 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 			AccountID:         account.ID,
 			SecurityID:        sec.ID,
 			QuantityMicros:    pos.QuantityMicros,
-			CostBasisMicros:   int8FromMicros(pos.CostBasisMicros),
-			MarketValueMicros: int8FromMicros(pos.MarketValueMicros),
-			AsOfDate:          pgtype.Date{Time: pos.AsOfDate, Valid: true},
+			CostBasisMicros:   sql.NullInt64{Int64: pos.CostBasisMicros, Valid: true},
+			MarketValueMicros: sql.NullInt64{Int64: pos.MarketValueMicros, Valid: true},
+			AsOfDate:          pos.AsOfDate.Format("2006-01-02"),
 		})
 		if err != nil {
 			return fmt.Errorf("failed to upsert position: %w", err)
@@ -160,8 +160,4 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 	)
 
 	return nil
-}
-
-func int8FromMicros(v int64) pgtype.Int8 {
-	return pgtype.Int8{Int64: v, Valid: true}
 }

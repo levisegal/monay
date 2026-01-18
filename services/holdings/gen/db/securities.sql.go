@@ -7,19 +7,18 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const getSecurity = `-- name: GetSecurity :one
 select id, symbol, name, security_type, cusip, created_at, updated_at
-from monay.securities
-where id = $1
+from securities
+where id = ?1
 `
 
-func (q *Queries) GetSecurity(ctx context.Context, id string) (MonaySecurity, error) {
-	row := q.db.QueryRow(ctx, getSecurity, id)
-	var i MonaySecurity
+func (q *Queries) GetSecurity(ctx context.Context, id string) (Security, error) {
+	row := q.db.QueryRowContext(ctx, getSecurity, id)
+	var i Security
 	err := row.Scan(
 		&i.ID,
 		&i.Symbol,
@@ -34,13 +33,13 @@ func (q *Queries) GetSecurity(ctx context.Context, id string) (MonaySecurity, er
 
 const getSecurityBySymbol = `-- name: GetSecurityBySymbol :one
 select id, symbol, name, security_type, cusip, created_at, updated_at
-from monay.securities
-where symbol = $1
+from securities
+where symbol = ?1
 `
 
-func (q *Queries) GetSecurityBySymbol(ctx context.Context, symbol string) (MonaySecurity, error) {
-	row := q.db.QueryRow(ctx, getSecurityBySymbol, symbol)
-	var i MonaySecurity
+func (q *Queries) GetSecurityBySymbol(ctx context.Context, symbol string) (Security, error) {
+	row := q.db.QueryRowContext(ctx, getSecurityBySymbol, symbol)
+	var i Security
 	err := row.Scan(
 		&i.ID,
 		&i.Symbol,
@@ -55,19 +54,19 @@ func (q *Queries) GetSecurityBySymbol(ctx context.Context, symbol string) (Monay
 
 const listSecurities = `-- name: ListSecurities :many
 select id, symbol, name, security_type, cusip, created_at, updated_at
-from monay.securities
+from securities
 order by symbol
 `
 
-func (q *Queries) ListSecurities(ctx context.Context) ([]MonaySecurity, error) {
-	rows, err := q.db.Query(ctx, listSecurities)
+func (q *Queries) ListSecurities(ctx context.Context) ([]Security, error) {
+	rows, err := q.db.QueryContext(ctx, listSecurities)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []MonaySecurity{}
+	items := []Security{}
 	for rows.Next() {
-		var i MonaySecurity
+		var i Security
 		if err := rows.Scan(
 			&i.ID,
 			&i.Symbol,
@@ -81,6 +80,9 @@ func (q *Queries) ListSecurities(ctx context.Context) ([]MonaySecurity, error) {
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -88,44 +90,44 @@ func (q *Queries) ListSecurities(ctx context.Context) ([]MonaySecurity, error) {
 }
 
 const upsertSecurity = `-- name: UpsertSecurity :one
-insert into monay.securities (
+insert into securities (
     id,
     symbol,
     name,
     security_type,
     cusip
 ) values (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5
+    ?1,
+    ?2,
+    ?3,
+    ?4,
+    ?5
 )
 on conflict (symbol) do update set
-    name = coalesce(excluded.name, monay.securities.name),
-    security_type = coalesce(excluded.security_type, monay.securities.security_type),
-    cusip = coalesce(excluded.cusip, monay.securities.cusip),
-    updated_at = now()
+    name = coalesce(excluded.name, securities.name),
+    security_type = coalesce(excluded.security_type, securities.security_type),
+    cusip = coalesce(excluded.cusip, securities.cusip),
+    updated_at = datetime('now')
 returning id, symbol, name, security_type, cusip, created_at, updated_at
 `
 
 type UpsertSecurityParams struct {
-	ID           string      `json:"id"`
-	Symbol       string      `json:"symbol"`
-	Name         pgtype.Text `json:"name"`
-	SecurityType pgtype.Text `json:"security_type"`
-	Cusip        pgtype.Text `json:"cusip"`
+	ID           string         `json:"id"`
+	Symbol       string         `json:"symbol"`
+	Name         sql.NullString `json:"name"`
+	SecurityType sql.NullString `json:"security_type"`
+	Cusip        sql.NullString `json:"cusip"`
 }
 
-func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) (MonaySecurity, error) {
-	row := q.db.QueryRow(ctx, upsertSecurity,
+func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) (Security, error) {
+	row := q.db.QueryRowContext(ctx, upsertSecurity,
 		arg.ID,
 		arg.Symbol,
 		arg.Name,
 		arg.SecurityType,
 		arg.Cusip,
 	)
-	var i MonaySecurity
+	var i Security
 	err := row.Scan(
 		&i.ID,
 		&i.Symbol,

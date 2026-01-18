@@ -37,7 +37,7 @@ func accountsDeleteCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -77,7 +77,7 @@ func accountsListCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -118,7 +118,7 @@ func accountsRenameCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}

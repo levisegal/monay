@@ -1,13 +1,13 @@
 -- name: DeleteLotsByAccount :exec
-DELETE FROM monay.lot_dispositions
-WHERE lot_id IN (SELECT id FROM monay.lots WHERE account_id = @account_id);
+delete from lot_dispositions
+where lot_id in (select id from lots where account_id = @account_id);
 
 -- name: DeleteLotsForAccount :exec
-DELETE FROM monay.lots
-WHERE account_id = @account_id;
+delete from lots
+where account_id = @account_id;
 
 -- name: CreateLot :one
-insert into monay.lots (
+insert into lots (
     id,
     account_id,
     security_id,
@@ -30,12 +30,12 @@ returning *;
 
 -- name: GetLot :one
 select *
-from monay.lots
+from lots
 where id = @id;
 
 -- name: ListLotsByAccountAndSecurity :many
 select *
-from monay.lots
+from lots
 where
     account_id = @account_id
     and security_id = @security_id
@@ -47,18 +47,18 @@ select
     l.*,
     s.symbol,
     s.name as security_name
-from monay.lots l
-join monay.securities s on s.id = l.security_id
+from lots l
+join securities s on s.id = l.security_id
 where l.account_id = @account_id
 order by l.acquired_date asc;
 
 -- name: UpdateLotRemaining :exec
-update monay.lots
+update lots
 set remaining_micros = @remaining_micros
 where id = @id;
 
 -- name: CreateLotDisposition :one
-insert into monay.lot_dispositions (
+insert into lot_dispositions (
     id,
     lot_id,
     sell_transaction_id,
@@ -86,8 +86,8 @@ select
     d.*,
     l.acquired_date,
     l.security_id
-from monay.lot_dispositions d
-join monay.lots l on l.id = d.lot_id
+from lot_dispositions d
+join lots l on l.id = d.lot_id
 where d.sell_transaction_id = @sell_transaction_id;
 
 -- name: ListDispositionsByYear :many
@@ -97,31 +97,31 @@ select
     l.security_id,
     s.symbol,
     s.name as security_name
-from monay.lot_dispositions d
-join monay.lots l on l.id = d.lot_id
-join monay.securities s on s.id = l.security_id
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join securities s on s.id = l.security_id
 where
-    extract(year from d.disposed_date) = @year
+    strftime('%Y', d.disposed_date) = @year
 order by d.disposed_date asc;
 
 -- name: SumRealizedGainsByYear :one
 select
-    coalesce(sum(case when holding_period = 'short_term' then realized_gain_micros else 0 end), 0)::bigint as short_term_gains,
-    coalesce(sum(case when holding_period = 'long_term' then realized_gain_micros else 0 end), 0)::bigint as long_term_gains,
-    coalesce(sum(realized_gain_micros), 0)::bigint as total_gains
-from monay.lot_dispositions
-where extract(year from disposed_date) = @year;
+    coalesce(sum(case when holding_period = 'short_term' then realized_gain_micros else 0 end), 0) as short_term_gains,
+    coalesce(sum(case when holding_period = 'long_term' then realized_gain_micros else 0 end), 0) as long_term_gains,
+    coalesce(sum(realized_gain_micros), 0) as total_gains
+from lot_dispositions
+where strftime('%Y', disposed_date) = @year;
 
 -- name: SumRemainingBySymbol :many
 select
     s.symbol,
     s.id as security_id,
-    coalesce(sum(l.remaining_micros), 0)::bigint as remaining_micros
-from monay.securities s
-left join monay.lots l on l.security_id = s.id and l.account_id = @account_id
+    coalesce(sum(l.remaining_micros), 0) as remaining_micros
+from securities s
+left join lots l on l.security_id = s.id and l.account_id = @account_id
 where s.id in (
     select distinct security_id
-    from monay.transactions
+    from transactions
     where account_id = @account_id and security_id is not null
 )
 group by s.symbol, s.id;
@@ -130,15 +130,15 @@ group by s.symbol, s.id;
 select
     s.symbol,
     s.name as security_name,
-    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(l.remaining_micros) as quantity_micros,
     sum(
-        case when l.remaining_micros > 0 
-        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        case when l.remaining_micros > 0
+        then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
-    )::bigint as cost_basis_micros,
+    ) as cost_basis_micros,
     min(l.acquired_date) as earliest_acquired
-from monay.lots l
-join monay.securities s on s.id = l.security_id
+from lots l
+join securities s on s.id = l.security_id
 where l.account_id = @account_id and l.remaining_micros > 0
 group by s.symbol, s.name
 order by s.symbol;
@@ -149,16 +149,16 @@ select
     a.name as account_name,
     s.symbol,
     s.name as security_name,
-    sum(l.remaining_micros)::bigint as quantity_micros,
+    sum(l.remaining_micros) as quantity_micros,
     sum(
-        case when l.remaining_micros > 0 
-        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        case when l.remaining_micros > 0
+        then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
-    )::bigint as cost_basis_micros,
+    ) as cost_basis_micros,
     min(l.acquired_date) as earliest_acquired
-from monay.lots l
-join monay.securities s on s.id = l.security_id
-join monay.accounts a on a.id = l.account_id
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
 where l.remaining_micros > 0
 group by a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc;
@@ -167,18 +167,17 @@ order by cost_basis_micros desc;
 select
     s.symbol,
     s.name as security_name,
-    count(distinct a.id)::int as account_count,
-    sum(l.remaining_micros)::bigint as quantity_micros,
+    count(distinct a.id) as account_count,
+    sum(l.remaining_micros) as quantity_micros,
     sum(
-        case when l.remaining_micros > 0 
-        then (l.cost_basis_micros::float / l.quantity_micros::float * l.remaining_micros::float)::bigint
+        case when l.remaining_micros > 0
+        then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
-    )::bigint as cost_basis_micros,
+    ) as cost_basis_micros,
     min(l.acquired_date) as earliest_acquired
-from monay.lots l
-join monay.securities s on s.id = l.security_id
-join monay.accounts a on a.id = l.account_id
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
 where l.remaining_micros > 0
 group by s.symbol, s.name
 order by cost_basis_micros desc;
-

@@ -72,7 +72,7 @@ func (a *Analyzer) Analyze(ctx context.Context, accountID string) (*AnalysisResu
 		}
 
 		secID := txn.SecurityID.String
-		txnDate := txn.TransactionDate.Time
+		txnDate := parseDate(txn.TransactionDate)
 
 		switch txn.TransactionType {
 		case "buy", "security_transfer", "opening_balance":
@@ -123,7 +123,7 @@ func (a *Analyzer) Analyze(ctx context.Context, accountID string) (*AnalysisResu
 		var remainingMicros int64
 		if ok {
 			symbol = row.Symbol
-			remainingMicros = row.RemainingMicros
+			remainingMicros = toInt64(row.RemainingMicros)
 		}
 
 		var earliestLotDate time.Time
@@ -179,4 +179,22 @@ type simulatedLot struct {
 	quantityMicros  int64
 	remainingMicros int64
 	acquiredDate    time.Time
+}
+
+func toInt64(v interface{}) int64 {
+	switch val := v.(type) {
+	case int64:
+		return val
+	case int:
+		return int64(val)
+	case float64:
+		return int64(val)
+	default:
+		return 0
+	}
+}
+
+func parseDate(s string) time.Time {
+	t, _ := time.Parse("2006-01-02", s)
+	return t
 }

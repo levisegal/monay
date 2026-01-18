@@ -1,11 +1,9 @@
 package cmd
 
 import (
-	"fmt"
 	"log/slog"
 
 	"github.com/levisegal/monay/services/holdings/config"
-	"github.com/levisegal/monay/services/holdings/database"
 	"github.com/levisegal/monay/services/holdings/server"
 	"github.com/spf13/cobra"
 )
@@ -22,16 +20,7 @@ func serverCommand() *cobra.Command {
 				return err
 			}
 
-			slog.Info("database config",
-				"host", cfg.Database.Host,
-				"port", cfg.Database.Port,
-				"database", cfg.Database.Name,
-				"user", cfg.Database.User,
-			)
-
-			if err := database.MigrateUp(ctx, cfg.Database.ConnString()); err != nil {
-				return fmt.Errorf("database migrations failed: %w", err)
-			}
+			slog.Info("database config", "path", cfg.DBPath)
 
 			return server.Start(ctx, cfg)
 		},

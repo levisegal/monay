@@ -19,7 +19,6 @@ func Command() *cobra.Command {
 	}
 
 	command.AddCommand(serverCommand())
-	command.AddCommand(plaidCommand())
 	command.AddCommand(importCommand())
 	command.AddCommand(lotsCommand())
 	command.AddCommand(holdingsCommand())

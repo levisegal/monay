@@ -7,12 +7,11 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const createTransaction = `-- name: CreateTransaction :exec
-insert into monay.transactions (
+insert into transactions (
     id,
     account_id,
     security_id,
@@ -24,35 +23,35 @@ insert into monay.transactions (
     fees_micros,
     description
 ) values (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7,
-    $8,
-    $9,
-    $10
+    ?1,
+    ?2,
+    ?3,
+    ?4,
+    ?5,
+    ?6,
+    ?7,
+    ?8,
+    ?9,
+    ?10
 )
 on conflict do nothing
 `
 
 type CreateTransactionParams struct {
-	ID              string      `json:"id"`
-	AccountID       string      `json:"account_id"`
-	SecurityID      pgtype.Text `json:"security_id"`
-	TransactionType string      `json:"transaction_type"`
-	TransactionDate pgtype.Date `json:"transaction_date"`
-	QuantityMicros  pgtype.Int8 `json:"quantity_micros"`
-	PriceMicros     pgtype.Int8 `json:"price_micros"`
-	AmountMicros    int64       `json:"amount_micros"`
-	FeesMicros      pgtype.Int8 `json:"fees_micros"`
-	Description     pgtype.Text `json:"description"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      sql.NullString `json:"security_id"`
+	TransactionType string         `json:"transaction_type"`
+	TransactionDate string         `json:"transaction_date"`
+	QuantityMicros  sql.NullInt64  `json:"quantity_micros"`
+	PriceMicros     sql.NullInt64  `json:"price_micros"`
+	AmountMicros    int64          `json:"amount_micros"`
+	FeesMicros      sql.NullInt64  `json:"fees_micros"`
+	Description     sql.NullString `json:"description"`
 }
 
 func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionParams) error {
-	_, err := q.db.Exec(ctx, createTransaction,
+	_, err := q.db.ExecContext(ctx, createTransaction,
 		arg.ID,
 		arg.AccountID,
 		arg.SecurityID,
@@ -68,34 +67,34 @@ func (q *Queries) CreateTransaction(ctx context.Context, arg CreateTransactionPa
 }
 
 const deleteTransaction = `-- name: DeleteTransaction :exec
-delete from monay.transactions
-where id = $1
+delete from transactions
+where id = ?1
 `
 
 func (q *Queries) DeleteTransaction(ctx context.Context, id string) error {
-	_, err := q.db.Exec(ctx, deleteTransaction, id)
+	_, err := q.db.ExecContext(ctx, deleteTransaction, id)
 	return err
 }
 
 const deleteTransactionsByAccount = `-- name: DeleteTransactionsByAccount :exec
-delete from monay.transactions
-where account_id = $1
+delete from transactions
+where account_id = ?1
 `
 
 func (q *Queries) DeleteTransactionsByAccount(ctx context.Context, accountID string) error {
-	_, err := q.db.Exec(ctx, deleteTransactionsByAccount, accountID)
+	_, err := q.db.ExecContext(ctx, deleteTransactionsByAccount, accountID)
 	return err
 }
 
 const getTransaction = `-- name: GetTransaction :one
 select id, account_id, security_id, transaction_type, transaction_date, quantity_micros, price_micros, amount_micros, fees_micros, description, created_at
-from monay.transactions
-where id = $1
+from transactions
+where id = ?1
 `
 
-func (q *Queries) GetTransaction(ctx context.Context, id string) (MonayTransaction, error) {
-	row := q.db.QueryRow(ctx, getTransaction, id)
-	var i MonayTransaction
+func (q *Queries) GetTransaction(ctx context.Context, id string) (Transaction, error) {
+	row := q.db.QueryRowContext(ctx, getTransaction, id)
+	var i Transaction
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
@@ -117,30 +116,30 @@ select
     t.id, t.account_id, t.security_id, t.transaction_type, t.transaction_date, t.quantity_micros, t.price_micros, t.amount_micros, t.fees_micros, t.description, t.created_at,
     s.symbol,
     s.name as security_name
-from monay.transactions t
-left join monay.securities s on s.id = t.security_id
-where t.account_id = $1
+from transactions t
+left join securities s on s.id = t.security_id
+where t.account_id = ?1
 order by t.transaction_date desc, t.created_at desc
 `
 
 type ListTransactionsByAccountRow struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	TransactionType string             `json:"transaction_type"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	QuantityMicros  pgtype.Int8        `json:"quantity_micros"`
-	PriceMicros     pgtype.Int8        `json:"price_micros"`
-	AmountMicros    int64              `json:"amount_micros"`
-	FeesMicros      pgtype.Int8        `json:"fees_micros"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	Symbol          pgtype.Text        `json:"symbol"`
-	SecurityName    pgtype.Text        `json:"security_name"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      sql.NullString `json:"security_id"`
+	TransactionType string         `json:"transaction_type"`
+	TransactionDate string         `json:"transaction_date"`
+	QuantityMicros  sql.NullInt64  `json:"quantity_micros"`
+	PriceMicros     sql.NullInt64  `json:"price_micros"`
+	AmountMicros    int64          `json:"amount_micros"`
+	FeesMicros      sql.NullInt64  `json:"fees_micros"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
+	Symbol          sql.NullString `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListTransactionsByAccount(ctx context.Context, accountID string) ([]ListTransactionsByAccountRow, error) {
-	rows, err := q.db.Query(ctx, listTransactionsByAccount, accountID)
+	rows, err := q.db.QueryContext(ctx, listTransactionsByAccount, accountID)
 	if err != nil {
 		return nil, err
 	}
@@ -167,6 +166,9 @@ func (q *Queries) ListTransactionsByAccount(ctx context.Context, accountID strin
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -178,39 +180,39 @@ select
     t.id, t.account_id, t.security_id, t.transaction_type, t.transaction_date, t.quantity_micros, t.price_micros, t.amount_micros, t.fees_micros, t.description, t.created_at,
     s.symbol,
     s.name as security_name
-from monay.transactions t
-left join monay.securities s on s.id = t.security_id
+from transactions t
+left join securities s on s.id = t.security_id
 where
-    t.account_id = $1
-    and t.transaction_date >= $2
-    and t.transaction_date <= $3
+    t.account_id = ?1
+    and t.transaction_date >= ?2
+    and t.transaction_date <= ?3
 order by t.transaction_date desc, t.created_at desc
 `
 
 type ListTransactionsByAccountAndDateRangeParams struct {
-	AccountID string      `json:"account_id"`
-	StartDate pgtype.Date `json:"start_date"`
-	EndDate   pgtype.Date `json:"end_date"`
+	AccountID string `json:"account_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type ListTransactionsByAccountAndDateRangeRow struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	TransactionType string             `json:"transaction_type"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	QuantityMicros  pgtype.Int8        `json:"quantity_micros"`
-	PriceMicros     pgtype.Int8        `json:"price_micros"`
-	AmountMicros    int64              `json:"amount_micros"`
-	FeesMicros      pgtype.Int8        `json:"fees_micros"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	Symbol          pgtype.Text        `json:"symbol"`
-	SecurityName    pgtype.Text        `json:"security_name"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      sql.NullString `json:"security_id"`
+	TransactionType string         `json:"transaction_type"`
+	TransactionDate string         `json:"transaction_date"`
+	QuantityMicros  sql.NullInt64  `json:"quantity_micros"`
+	PriceMicros     sql.NullInt64  `json:"price_micros"`
+	AmountMicros    int64          `json:"amount_micros"`
+	FeesMicros      sql.NullInt64  `json:"fees_micros"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
+	Symbol          sql.NullString `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListTransactionsByAccountAndDateRange(ctx context.Context, arg ListTransactionsByAccountAndDateRangeParams) ([]ListTransactionsByAccountAndDateRangeRow, error) {
-	rows, err := q.db.Query(ctx, listTransactionsByAccountAndDateRange, arg.AccountID, arg.StartDate, arg.EndDate)
+	rows, err := q.db.QueryContext(ctx, listTransactionsByAccountAndDateRange, arg.AccountID, arg.StartDate, arg.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -236,6 +238,9 @@ func (q *Queries) ListTransactionsByAccountAndDateRange(ctx context.Context, arg
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

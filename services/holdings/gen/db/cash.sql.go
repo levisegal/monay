@@ -7,12 +7,11 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const createCashTransaction = `-- name: CreateCashTransaction :exec
-insert into monay.cash_transactions (
+insert into cash_transactions (
     id,
     account_id,
     transaction_id,
@@ -22,31 +21,31 @@ insert into monay.cash_transactions (
     security_id,
     description
 ) values (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7,
-    $8
+    ?1,
+    ?2,
+    ?3,
+    ?4,
+    ?5,
+    ?6,
+    ?7,
+    ?8
 )
 on conflict do nothing
 `
 
 type CreateCashTransactionParams struct {
-	ID              string      `json:"id"`
-	AccountID       string      `json:"account_id"`
-	TransactionID   pgtype.Text `json:"transaction_id"`
-	TransactionDate pgtype.Date `json:"transaction_date"`
-	CashType        string      `json:"cash_type"`
-	AmountMicros    int64       `json:"amount_micros"`
-	SecurityID      pgtype.Text `json:"security_id"`
-	Description     pgtype.Text `json:"description"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	TransactionID   sql.NullString `json:"transaction_id"`
+	TransactionDate string         `json:"transaction_date"`
+	CashType        string         `json:"cash_type"`
+	AmountMicros    int64          `json:"amount_micros"`
+	SecurityID      sql.NullString `json:"security_id"`
+	Description     sql.NullString `json:"description"`
 }
 
 func (q *Queries) CreateCashTransaction(ctx context.Context, arg CreateCashTransactionParams) error {
-	_, err := q.db.Exec(ctx, createCashTransaction,
+	_, err := q.db.ExecContext(ctx, createCashTransaction,
 		arg.ID,
 		arg.AccountID,
 		arg.TransactionID,
@@ -60,82 +59,82 @@ func (q *Queries) CreateCashTransaction(ctx context.Context, arg CreateCashTrans
 }
 
 const deleteCashTransactionsByAccount = `-- name: DeleteCashTransactionsByAccount :exec
-delete from monay.cash_transactions
-where account_id = $1
+delete from cash_transactions
+where account_id = ?1
 `
 
 func (q *Queries) DeleteCashTransactionsByAccount(ctx context.Context, accountID string) error {
-	_, err := q.db.Exec(ctx, deleteCashTransactionsByAccount, accountID)
+	_, err := q.db.ExecContext(ctx, deleteCashTransactionsByAccount, accountID)
 	return err
 }
 
 const deleteCashTransactionsByTransactionId = `-- name: DeleteCashTransactionsByTransactionId :exec
-delete from monay.cash_transactions
-where transaction_id = $1
+delete from cash_transactions
+where transaction_id = ?1
 `
 
-func (q *Queries) DeleteCashTransactionsByTransactionId(ctx context.Context, transactionID pgtype.Text) error {
-	_, err := q.db.Exec(ctx, deleteCashTransactionsByTransactionId, transactionID)
+func (q *Queries) DeleteCashTransactionsByTransactionId(ctx context.Context, transactionID sql.NullString) error {
+	_, err := q.db.ExecContext(ctx, deleteCashTransactionsByTransactionId, transactionID)
 	return err
 }
 
 const deleteNonOpeningCashTransactionsByAccount = `-- name: DeleteNonOpeningCashTransactionsByAccount :exec
-delete from monay.cash_transactions
+delete from cash_transactions
 where
-    account_id = $1
+    account_id = ?1
     and cash_type != 'opening'
 `
 
 func (q *Queries) DeleteNonOpeningCashTransactionsByAccount(ctx context.Context, accountID string) error {
-	_, err := q.db.Exec(ctx, deleteNonOpeningCashTransactionsByAccount, accountID)
+	_, err := q.db.ExecContext(ctx, deleteNonOpeningCashTransactionsByAccount, accountID)
 	return err
 }
 
 const getCashBalance = `-- name: GetCashBalance :one
-select coalesce(sum(amount_micros), 0)::bigint as balance_micros
-from monay.cash_transactions
-where account_id = $1
+select coalesce(sum(amount_micros), 0) as balance_micros
+from cash_transactions
+where account_id = ?1
 `
 
-func (q *Queries) GetCashBalance(ctx context.Context, accountID string) (int64, error) {
-	row := q.db.QueryRow(ctx, getCashBalance, accountID)
-	var balance_micros int64
+func (q *Queries) GetCashBalance(ctx context.Context, accountID string) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getCashBalance, accountID)
+	var balance_micros interface{}
 	err := row.Scan(&balance_micros)
 	return balance_micros, err
 }
 
 const getCashBalanceAsOfDate = `-- name: GetCashBalanceAsOfDate :one
-select coalesce(sum(amount_micros), 0)::bigint as balance_micros
-from monay.cash_transactions
+select coalesce(sum(amount_micros), 0) as balance_micros
+from cash_transactions
 where
-    account_id = $1
-    and transaction_date <= $2
+    account_id = ?1
+    and transaction_date <= ?2
 `
 
 type GetCashBalanceAsOfDateParams struct {
-	AccountID string      `json:"account_id"`
-	AsOfDate  pgtype.Date `json:"as_of_date"`
+	AccountID string `json:"account_id"`
+	AsOfDate  string `json:"as_of_date"`
 }
 
-func (q *Queries) GetCashBalanceAsOfDate(ctx context.Context, arg GetCashBalanceAsOfDateParams) (int64, error) {
-	row := q.db.QueryRow(ctx, getCashBalanceAsOfDate, arg.AccountID, arg.AsOfDate)
-	var balance_micros int64
+func (q *Queries) GetCashBalanceAsOfDate(ctx context.Context, arg GetCashBalanceAsOfDateParams) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getCashBalanceAsOfDate, arg.AccountID, arg.AsOfDate)
+	var balance_micros interface{}
 	err := row.Scan(&balance_micros)
 	return balance_micros, err
 }
 
 const getOpeningCashBalance = `-- name: GetOpeningCashBalance :one
 select id, account_id, transaction_id, transaction_date, cash_type, amount_micros, security_id, description, created_at
-from monay.cash_transactions
+from cash_transactions
 where
-    account_id = $1
+    account_id = ?1
     and cash_type = 'opening'
 limit 1
 `
 
-func (q *Queries) GetOpeningCashBalance(ctx context.Context, accountID string) (MonayCashTransaction, error) {
-	row := q.db.QueryRow(ctx, getOpeningCashBalance, accountID)
-	var i MonayCashTransaction
+func (q *Queries) GetOpeningCashBalance(ctx context.Context, accountID string) (CashTransaction, error) {
+	row := q.db.QueryRowContext(ctx, getOpeningCashBalance, accountID)
+	var i CashTransaction
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
@@ -155,28 +154,28 @@ select
     ct.id, ct.account_id, ct.transaction_id, ct.transaction_date, ct.cash_type, ct.amount_micros, ct.security_id, ct.description, ct.created_at,
     s.symbol,
     s.name as security_name
-from monay.cash_transactions ct
-left join monay.securities s on s.id = ct.security_id
-where ct.account_id = $1
+from cash_transactions ct
+left join securities s on s.id = ct.security_id
+where ct.account_id = ?1
 order by ct.transaction_date desc, ct.created_at desc
 `
 
 type ListCashTransactionsRow struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	TransactionID   pgtype.Text        `json:"transaction_id"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	CashType        string             `json:"cash_type"`
-	AmountMicros    int64              `json:"amount_micros"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	Symbol          pgtype.Text        `json:"symbol"`
-	SecurityName    pgtype.Text        `json:"security_name"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	TransactionID   sql.NullString `json:"transaction_id"`
+	TransactionDate string         `json:"transaction_date"`
+	CashType        string         `json:"cash_type"`
+	AmountMicros    int64          `json:"amount_micros"`
+	SecurityID      sql.NullString `json:"security_id"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
+	Symbol          sql.NullString `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListCashTransactions(ctx context.Context, accountID string) ([]ListCashTransactionsRow, error) {
-	rows, err := q.db.Query(ctx, listCashTransactions, accountID)
+	rows, err := q.db.QueryContext(ctx, listCashTransactions, accountID)
 	if err != nil {
 		return nil, err
 	}
@@ -201,6 +200,9 @@ func (q *Queries) ListCashTransactions(ctx context.Context, accountID string) ([
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -212,37 +214,37 @@ select
     ct.id, ct.account_id, ct.transaction_id, ct.transaction_date, ct.cash_type, ct.amount_micros, ct.security_id, ct.description, ct.created_at,
     s.symbol,
     s.name as security_name
-from monay.cash_transactions ct
-left join monay.securities s on s.id = ct.security_id
+from cash_transactions ct
+left join securities s on s.id = ct.security_id
 where
-    ct.account_id = $1
-    and ct.transaction_date >= $2
-    and ct.transaction_date <= $3
+    ct.account_id = ?1
+    and ct.transaction_date >= ?2
+    and ct.transaction_date <= ?3
 order by ct.transaction_date desc, ct.created_at desc
 `
 
 type ListCashTransactionsByDateRangeParams struct {
-	AccountID string      `json:"account_id"`
-	StartDate pgtype.Date `json:"start_date"`
-	EndDate   pgtype.Date `json:"end_date"`
+	AccountID string `json:"account_id"`
+	StartDate string `json:"start_date"`
+	EndDate   string `json:"end_date"`
 }
 
 type ListCashTransactionsByDateRangeRow struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	TransactionID   pgtype.Text        `json:"transaction_id"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	CashType        string             `json:"cash_type"`
-	AmountMicros    int64              `json:"amount_micros"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
-	Symbol          pgtype.Text        `json:"symbol"`
-	SecurityName    pgtype.Text        `json:"security_name"`
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	TransactionID   sql.NullString `json:"transaction_id"`
+	TransactionDate string         `json:"transaction_date"`
+	CashType        string         `json:"cash_type"`
+	AmountMicros    int64          `json:"amount_micros"`
+	SecurityID      sql.NullString `json:"security_id"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
+	Symbol          sql.NullString `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListCashTransactionsByDateRange(ctx context.Context, arg ListCashTransactionsByDateRangeParams) ([]ListCashTransactionsByDateRangeRow, error) {
-	rows, err := q.db.Query(ctx, listCashTransactionsByDateRange, arg.AccountID, arg.StartDate, arg.EndDate)
+	rows, err := q.db.QueryContext(ctx, listCashTransactionsByDateRange, arg.AccountID, arg.StartDate, arg.EndDate)
 	if err != nil {
 		return nil, err
 	}
@@ -266,6 +268,9 @@ func (q *Queries) ListCashTransactionsByDateRange(ctx context.Context, arg ListC
 			return nil, err
 		}
 		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
 	}
 	if err := rows.Err(); err != nil {
 		return nil, err

@@ -1,20 +1,20 @@
 -- name: GetSecurity :one
 select *
-from monay.securities
+from securities
 where id = @id;
 
 -- name: GetSecurityBySymbol :one
 select *
-from monay.securities
+from securities
 where symbol = @symbol;
 
 -- name: ListSecurities :many
 select *
-from monay.securities
+from securities
 order by symbol;
 
 -- name: UpsertSecurity :one
-insert into monay.securities (
+insert into securities (
     id,
     symbol,
     name,
@@ -28,9 +28,8 @@ insert into monay.securities (
     @cusip
 )
 on conflict (symbol) do update set
-    name = coalesce(excluded.name, monay.securities.name),
-    security_type = coalesce(excluded.security_type, monay.securities.security_type),
-    cusip = coalesce(excluded.cusip, monay.securities.cusip),
-    updated_at = now()
+    name = coalesce(excluded.name, securities.name),
+    security_type = coalesce(excluded.security_type, securities.security_type),
+    cusip = coalesce(excluded.cusip, securities.cusip),
+    updated_at = datetime('now')
 returning *;
-

@@ -1,6 +1,6 @@
 -- name: GetTransaction :one
 select *
-from monay.transactions
+from transactions
 where id = @id;
 
 -- name: ListTransactionsByAccount :many
@@ -8,8 +8,8 @@ select
     t.*,
     s.symbol,
     s.name as security_name
-from monay.transactions t
-left join monay.securities s on s.id = t.security_id
+from transactions t
+left join securities s on s.id = t.security_id
 where t.account_id = @account_id
 order by t.transaction_date desc, t.created_at desc;
 
@@ -18,8 +18,8 @@ select
     t.*,
     s.symbol,
     s.name as security_name
-from monay.transactions t
-left join monay.securities s on s.id = t.security_id
+from transactions t
+left join securities s on s.id = t.security_id
 where
     t.account_id = @account_id
     and t.transaction_date >= @start_date
@@ -27,7 +27,7 @@ where
 order by t.transaction_date desc, t.created_at desc;
 
 -- name: CreateTransaction :exec
-insert into monay.transactions (
+insert into transactions (
     id,
     account_id,
     security_id,
@@ -53,9 +53,9 @@ insert into monay.transactions (
 on conflict do nothing;
 
 -- name: DeleteTransaction :exec
-delete from monay.transactions
+delete from transactions
 where id = @id;
 
 -- name: DeleteTransactionsByAccount :exec
-delete from monay.transactions
+delete from transactions
 where account_id = @account_id;

@@ -2,13 +2,13 @@ package cmd
 
 import (
 	"bufio"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"os"
 	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 
@@ -47,7 +47,7 @@ func clearLotsCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -86,7 +86,7 @@ func processLotsCommand() *cobra.Command {
 		Use:   "process",
 		Short: "Process tax lots from transactions (FIFO matching)",
 		Long: `Process transactions to create tax lots and match sells to buys using FIFO.
-		
+
 This should be run after importing all transaction history for an account.
 It will clear existing lots and recompute from scratch.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
@@ -97,7 +97,7 @@ It will clear existing lots and recompute from scratch.`,
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -136,7 +136,7 @@ func createLotsCommand() *cobra.Command {
 		Use:   "create",
 		Short: "Interactively create opening balance lots",
 		Long: `Create opening balance transactions for positions acquired before your transaction history.
-		
+
 This will prompt you for symbol, quantity, cost basis, and acquisition date for each lot.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
@@ -146,7 +146,7 @@ This will prompt you for symbol, quantity, cost basis, and acquisition date for 
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -173,7 +173,7 @@ This will prompt you for symbol, quantity, cost basis, and acquisition date for 
 				sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
 					ID:     database.NewID(database.PrefixSecurity),
 					Symbol: lot.symbol,
-					Name:   pgtype.Text{},
+					Name:   sql.NullString{},
 				})
 				if err != nil {
 					return fmt.Errorf("failed to upsert security: %w", err)
@@ -183,14 +183,14 @@ This will prompt you for symbol, quantity, cost basis, and acquisition date for 
 				err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
 					ID:              txnID,
 					AccountID:       account.ID,
-					SecurityID:      pgtype.Text{String: sec.ID, Valid: true},
+					SecurityID:      sql.NullString{String: sec.ID, Valid: true},
 					TransactionType: string(importer.TransactionTypeOpeningBalance),
-					TransactionDate: pgtype.Date{Time: lot.acquiredDate, Valid: true},
-					QuantityMicros:  pgtype.Int8{Int64: lot.quantityMicros, Valid: true},
-					PriceMicros:     pgtype.Int8{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
+					TransactionDate: lot.acquiredDate.Format("2006-01-02"),
+					QuantityMicros:  sql.NullInt64{Int64: lot.quantityMicros, Valid: true},
+					PriceMicros:     sql.NullInt64{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
 					AmountMicros:    lot.costBasisMicros,
-					FeesMicros:      pgtype.Int8{Int64: 0, Valid: true},
-					Description:     pgtype.Text{String: "Opening balance - manual entry", Valid: true},
+					FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+					Description:     sql.NullString{String: "Opening balance - manual entry", Valid: true},
 				})
 				if err != nil {
 					return fmt.Errorf("failed to create transaction: %w", err)
@@ -254,7 +254,7 @@ Use --fix to interactively add opening balances for positions needing review.`,
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -343,7 +343,7 @@ Use --fix to interactively add opening balances for positions needing review.`,
 				sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
 					ID:     database.NewID(database.PrefixSecurity),
 					Symbol: lot.symbol,
-					Name:   pgtype.Text{},
+					Name:   sql.NullString{},
 				})
 				if err != nil {
 					return fmt.Errorf("failed to upsert security: %w", err)
@@ -352,14 +352,14 @@ Use --fix to interactively add opening balances for positions needing review.`,
 				err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
 					ID:              database.NewID(database.PrefixTransaction),
 					AccountID:       account.ID,
-					SecurityID:      pgtype.Text{String: sec.ID, Valid: true},
+					SecurityID:      sql.NullString{String: sec.ID, Valid: true},
 					TransactionType: string(importer.TransactionTypeOpeningBalance),
-					TransactionDate: pgtype.Date{Time: lot.acquiredDate, Valid: true},
-					QuantityMicros:  pgtype.Int8{Int64: lot.quantityMicros, Valid: true},
-					PriceMicros:     pgtype.Int8{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
+					TransactionDate: lot.acquiredDate.Format("2006-01-02"),
+					QuantityMicros:  sql.NullInt64{Int64: lot.quantityMicros, Valid: true},
+					PriceMicros:     sql.NullInt64{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
 					AmountMicros:    lot.costBasisMicros,
-					FeesMicros:      pgtype.Int8{Int64: 0, Valid: true},
-					Description:     pgtype.Text{String: "Opening balance - manual entry", Valid: true},
+					FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+					Description:     sql.NullString{String: "Opening balance - manual entry", Valid: true},
 				})
 				if err != nil {
 					return fmt.Errorf("failed to create transaction: %w", err)

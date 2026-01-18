@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"sort"
-	"time"
 
 	"github.com/rodaine/table"
 	"github.com/spf13/cobra"
@@ -45,7 +44,7 @@ func listHoldingsCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -71,7 +70,8 @@ func listHoldingsCommand() *cobra.Command {
 				return fmt.Errorf("failed to list holdings: %w", err)
 			}
 
-			cashBalance, _ := queries.GetCashBalance(ctx, account.ID)
+			cashBalanceVal, _ := queries.GetCashBalance(ctx, account.ID)
+			cashBalance := toInt64Val(cashBalanceVal)
 
 			fmt.Printf("\n=== %s: Current Holdings ===\n\n", account.Name)
 
@@ -80,13 +80,13 @@ func listHoldingsCommand() *cobra.Command {
 
 			var totalCostBasis int64
 			for _, h := range holdings {
-				qty := float64(h.QuantityMicros) / 1_000_000
-				cost := float64(h.CostBasisMicros) / 1_000_000
-				totalCostBasis += h.CostBasisMicros
+				qty := nullFloat64ToFloat(h.QuantityMicros) / 1_000_000
+				cost := nullFloat64ToFloat(h.CostBasisMicros) / 1_000_000
+				totalCostBasis += int64(nullFloat64ToFloat(h.CostBasisMicros))
 
 				acquired := ""
-				if t, ok := h.EarliestAcquired.(time.Time); ok {
-					acquired = t.Format("2006-01-02")
+				if s, ok := h.EarliestAcquired.(string); ok {
+					acquired = s
 				}
 
 				tbl.AddRow(h.Symbol, formatQty(qty), formatCurrency(cost), acquired)
@@ -121,11 +121,9 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 	}
 
 	var totalCash int64
-	cashByAccount := make(map[string]int64)
 	for _, a := range accounts {
-		cash, _ := queries.GetCashBalance(ctx, a.ID)
-		cashByAccount[a.ID] = cash
-		totalCash += cash
+		cashVal, _ := queries.GetCashBalance(ctx, a.ID)
+		totalCash += toInt64Val(cashVal)
 	}
 
 	switch sortBy {
@@ -139,7 +137,7 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 		})
 	default:
 		sort.Slice(holdings, func(i, j int) bool {
-			return holdings[i].CostBasisMicros > holdings[j].CostBasisMicros
+			return nullFloat64ToFloat(holdings[i].CostBasisMicros) > nullFloat64ToFloat(holdings[j].CostBasisMicros)
 		})
 	}
 
@@ -150,13 +148,13 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 
 	var totalCostBasis int64
 	for _, h := range holdings {
-		qty := float64(h.QuantityMicros) / 1_000_000
-		cost := float64(h.CostBasisMicros) / 1_000_000
-		totalCostBasis += h.CostBasisMicros
+		qty := nullFloat64ToFloat(h.QuantityMicros) / 1_000_000
+		cost := nullFloat64ToFloat(h.CostBasisMicros) / 1_000_000
+		totalCostBasis += int64(nullFloat64ToFloat(h.CostBasisMicros))
 
 		acquired := ""
-		if t, ok := h.EarliestAcquired.(time.Time); ok {
-			acquired = t.Format("2006-01-02")
+		if s, ok := h.EarliestAcquired.(string); ok {
+			acquired = s
 		}
 
 		broker := h.Broker
@@ -188,7 +186,7 @@ func positionsCommand() *cobra.Command {
 				return err
 			}
 
-			conn, err := database.Open(ctx, cfg.Database.ConnString())
+			conn, err := database.Open(ctx, cfg.DBPath)
 			if err != nil {
 				return err
 			}
@@ -208,13 +206,13 @@ func positionsCommand() *cobra.Command {
 
 			var totalCostBasis int64
 			for _, p := range positions {
-				qty := float64(p.QuantityMicros) / 1_000_000
-				cost := float64(p.CostBasisMicros) / 1_000_000
-				totalCostBasis += p.CostBasisMicros
+				qty := nullFloat64ToFloat(p.QuantityMicros) / 1_000_000
+				cost := nullFloat64ToFloat(p.CostBasisMicros) / 1_000_000
+				totalCostBasis += int64(nullFloat64ToFloat(p.CostBasisMicros))
 
 				acquired := ""
-				if t, ok := p.EarliestAcquired.(time.Time); ok {
-					acquired = t.Format("2006-01-02")
+				if s, ok := p.EarliestAcquired.(string); ok {
+					acquired = s
 				}
 
 				tbl.AddRow(p.Symbol, formatQty(qty), formatCurrency(cost), p.AccountCount, acquired)
@@ -239,4 +237,28 @@ func formatCurrency(amount float64) string {
 func formatQty(qty float64) string {
 	p := message.NewPrinter(language.English)
 	return p.Sprintf("%.2f", qty)
+}
+
+func nullFloat64ToFloat(nf interface{}) float64 {
+	switch v := nf.(type) {
+	case float64:
+		return v
+	case int64:
+		return float64(v)
+	default:
+		return 0
+	}
+}
+
+func toInt64Val(v interface{}) int64 {
+	switch val := v.(type) {
+	case int64:
+		return val
+	case int:
+		return int64(val)
+	case float64:
+		return int64(val)
+	default:
+		return 0
+	}
 }

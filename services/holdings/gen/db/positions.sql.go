@@ -7,29 +7,28 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const deletePosition = `-- name: DeletePosition :exec
-delete from monay.positions
-where id = $1
+delete from positions
+where id = ?1
 `
 
 func (q *Queries) DeletePosition(ctx context.Context, id string) error {
-	_, err := q.db.Exec(ctx, deletePosition, id)
+	_, err := q.db.ExecContext(ctx, deletePosition, id)
 	return err
 }
 
 const getPosition = `-- name: GetPosition :one
 select id, account_id, security_id, quantity_micros, cost_basis_micros, market_value_micros, as_of_date, created_at, updated_at
-from monay.positions
-where id = $1
+from positions
+where id = ?1
 `
 
-func (q *Queries) GetPosition(ctx context.Context, id string) (MonayPosition, error) {
-	row := q.db.QueryRow(ctx, getPosition, id)
-	var i MonayPosition
+func (q *Queries) GetPosition(ctx context.Context, id string) (Position, error) {
+	row := q.db.QueryRowContext(ctx, getPosition, id)
+	var i Position
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,
@@ -44,33 +43,96 @@ func (q *Queries) GetPosition(ctx context.Context, id string) (MonayPosition, er
 	return i, err
 }
 
+const listAllPositions = `-- name: ListAllPositions :many
+select
+    p.id, p.account_id, p.security_id, p.quantity_micros, p.cost_basis_micros, p.market_value_micros, p.as_of_date, p.created_at, p.updated_at,
+    s.symbol,
+    s.name as security_name,
+    a.name as account_name
+from positions p
+join securities s on s.id = p.security_id
+join accounts a on a.id = p.account_id
+order by a.name, s.symbol
+`
+
+type ListAllPositionsRow struct {
+	ID                string         `json:"id"`
+	AccountID         string         `json:"account_id"`
+	SecurityID        string         `json:"security_id"`
+	QuantityMicros    int64          `json:"quantity_micros"`
+	CostBasisMicros   sql.NullInt64  `json:"cost_basis_micros"`
+	MarketValueMicros sql.NullInt64  `json:"market_value_micros"`
+	AsOfDate          string         `json:"as_of_date"`
+	CreatedAt         string         `json:"created_at"`
+	UpdatedAt         string         `json:"updated_at"`
+	Symbol            string         `json:"symbol"`
+	SecurityName      sql.NullString `json:"security_name"`
+	AccountName       string         `json:"account_name"`
+}
+
+func (q *Queries) ListAllPositions(ctx context.Context) ([]ListAllPositionsRow, error) {
+	rows, err := q.db.QueryContext(ctx, listAllPositions)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListAllPositionsRow{}
+	for rows.Next() {
+		var i ListAllPositionsRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.SecurityID,
+			&i.QuantityMicros,
+			&i.CostBasisMicros,
+			&i.MarketValueMicros,
+			&i.AsOfDate,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+			&i.Symbol,
+			&i.SecurityName,
+			&i.AccountName,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listPositionsByAccount = `-- name: ListPositionsByAccount :many
 select
     p.id, p.account_id, p.security_id, p.quantity_micros, p.cost_basis_micros, p.market_value_micros, p.as_of_date, p.created_at, p.updated_at,
     s.symbol,
     s.name as security_name
-from monay.positions p
-join monay.securities s on s.id = p.security_id
-where p.account_id = $1
+from positions p
+join securities s on s.id = p.security_id
+where p.account_id = ?1
 order by s.symbol
 `
 
 type ListPositionsByAccountRow struct {
-	ID                string             `json:"id"`
-	AccountID         string             `json:"account_id"`
-	SecurityID        string             `json:"security_id"`
-	QuantityMicros    int64              `json:"quantity_micros"`
-	CostBasisMicros   pgtype.Int8        `json:"cost_basis_micros"`
-	MarketValueMicros pgtype.Int8        `json:"market_value_micros"`
-	AsOfDate          pgtype.Date        `json:"as_of_date"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	Symbol            string             `json:"symbol"`
-	SecurityName      pgtype.Text        `json:"security_name"`
+	ID                string         `json:"id"`
+	AccountID         string         `json:"account_id"`
+	SecurityID        string         `json:"security_id"`
+	QuantityMicros    int64          `json:"quantity_micros"`
+	CostBasisMicros   sql.NullInt64  `json:"cost_basis_micros"`
+	MarketValueMicros sql.NullInt64  `json:"market_value_micros"`
+	AsOfDate          string         `json:"as_of_date"`
+	CreatedAt         string         `json:"created_at"`
+	UpdatedAt         string         `json:"updated_at"`
+	Symbol            string         `json:"symbol"`
+	SecurityName      sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListPositionsByAccount(ctx context.Context, accountID string) ([]ListPositionsByAccountRow, error) {
-	rows, err := q.db.Query(ctx, listPositionsByAccount, accountID)
+	rows, err := q.db.QueryContext(ctx, listPositionsByAccount, accountID)
 	if err != nil {
 		return nil, err
 	}
@@ -95,6 +157,9 @@ func (q *Queries) ListPositionsByAccount(ctx context.Context, accountID string) 
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -106,33 +171,33 @@ select
     p.id, p.account_id, p.security_id, p.quantity_micros, p.cost_basis_micros, p.market_value_micros, p.as_of_date, p.created_at, p.updated_at,
     s.symbol,
     s.name as security_name
-from monay.positions p
-join monay.securities s on s.id = p.security_id
-where p.account_id = $1 and p.as_of_date = $2
+from positions p
+join securities s on s.id = p.security_id
+where p.account_id = ?1 and p.as_of_date = ?2
 order by s.symbol
 `
 
 type ListPositionsByAccountAndDateParams struct {
-	AccountID string      `json:"account_id"`
-	AsOfDate  pgtype.Date `json:"as_of_date"`
+	AccountID string `json:"account_id"`
+	AsOfDate  string `json:"as_of_date"`
 }
 
 type ListPositionsByAccountAndDateRow struct {
-	ID                string             `json:"id"`
-	AccountID         string             `json:"account_id"`
-	SecurityID        string             `json:"security_id"`
-	QuantityMicros    int64              `json:"quantity_micros"`
-	CostBasisMicros   pgtype.Int8        `json:"cost_basis_micros"`
-	MarketValueMicros pgtype.Int8        `json:"market_value_micros"`
-	AsOfDate          pgtype.Date        `json:"as_of_date"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
-	Symbol            string             `json:"symbol"`
-	SecurityName      pgtype.Text        `json:"security_name"`
+	ID                string         `json:"id"`
+	AccountID         string         `json:"account_id"`
+	SecurityID        string         `json:"security_id"`
+	QuantityMicros    int64          `json:"quantity_micros"`
+	CostBasisMicros   sql.NullInt64  `json:"cost_basis_micros"`
+	MarketValueMicros sql.NullInt64  `json:"market_value_micros"`
+	AsOfDate          string         `json:"as_of_date"`
+	CreatedAt         string         `json:"created_at"`
+	UpdatedAt         string         `json:"updated_at"`
+	Symbol            string         `json:"symbol"`
+	SecurityName      sql.NullString `json:"security_name"`
 }
 
 func (q *Queries) ListPositionsByAccountAndDate(ctx context.Context, arg ListPositionsByAccountAndDateParams) ([]ListPositionsByAccountAndDateRow, error) {
-	rows, err := q.db.Query(ctx, listPositionsByAccountAndDate, arg.AccountID, arg.AsOfDate)
+	rows, err := q.db.QueryContext(ctx, listPositionsByAccountAndDate, arg.AccountID, arg.AsOfDate)
 	if err != nil {
 		return nil, err
 	}
@@ -157,6 +222,9 @@ func (q *Queries) ListPositionsByAccountAndDate(ctx context.Context, arg ListPos
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -164,7 +232,7 @@ func (q *Queries) ListPositionsByAccountAndDate(ctx context.Context, arg ListPos
 }
 
 const upsertPosition = `-- name: UpsertPosition :one
-insert into monay.positions (
+insert into positions (
     id,
     account_id,
     security_id,
@@ -173,34 +241,34 @@ insert into monay.positions (
     market_value_micros,
     as_of_date
 ) values (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6,
-    $7
+    ?1,
+    ?2,
+    ?3,
+    ?4,
+    ?5,
+    ?6,
+    ?7
 )
 on conflict (account_id, security_id, as_of_date) do update set
     quantity_micros = excluded.quantity_micros,
     cost_basis_micros = excluded.cost_basis_micros,
     market_value_micros = excluded.market_value_micros,
-    updated_at = now()
+    updated_at = datetime('now')
 returning id, account_id, security_id, quantity_micros, cost_basis_micros, market_value_micros, as_of_date, created_at, updated_at
 `
 
 type UpsertPositionParams struct {
-	ID                string      `json:"id"`
-	AccountID         string      `json:"account_id"`
-	SecurityID        string      `json:"security_id"`
-	QuantityMicros    int64       `json:"quantity_micros"`
-	CostBasisMicros   pgtype.Int8 `json:"cost_basis_micros"`
-	MarketValueMicros pgtype.Int8 `json:"market_value_micros"`
-	AsOfDate          pgtype.Date `json:"as_of_date"`
+	ID                string        `json:"id"`
+	AccountID         string        `json:"account_id"`
+	SecurityID        string        `json:"security_id"`
+	QuantityMicros    int64         `json:"quantity_micros"`
+	CostBasisMicros   sql.NullInt64 `json:"cost_basis_micros"`
+	MarketValueMicros sql.NullInt64 `json:"market_value_micros"`
+	AsOfDate          string        `json:"as_of_date"`
 }
 
-func (q *Queries) UpsertPosition(ctx context.Context, arg UpsertPositionParams) (MonayPosition, error) {
-	row := q.db.QueryRow(ctx, upsertPosition,
+func (q *Queries) UpsertPosition(ctx context.Context, arg UpsertPositionParams) (Position, error) {
+	row := q.db.QueryRowContext(ctx, upsertPosition,
 		arg.ID,
 		arg.AccountID,
 		arg.SecurityID,
@@ -209,7 +277,7 @@ func (q *Queries) UpsertPosition(ctx context.Context, arg UpsertPositionParams) 
 		arg.MarketValueMicros,
 		arg.AsOfDate,
 	)
-	var i MonayPosition
+	var i Position
 	err := row.Scan(
 		&i.ID,
 		&i.AccountID,

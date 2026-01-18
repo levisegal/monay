@@ -7,12 +7,11 @@ package db
 
 import (
 	"context"
-
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
 const createAccount = `-- name: CreateAccount :one
-insert into monay.accounts (
+insert into accounts (
     id,
     user_id,
     name,
@@ -20,27 +19,27 @@ insert into monay.accounts (
     external_account_number,
     account_type
 ) values (
-    $1,
-    $2,
-    $3,
-    $4,
-    $5,
-    $6
+    ?1,
+    ?2,
+    ?3,
+    ?4,
+    ?5,
+    ?6
 )
 returning id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
 `
 
 type CreateAccountParams struct {
-	ID                    string      `json:"id"`
-	UserID                pgtype.Text `json:"user_id"`
-	Name                  string      `json:"name"`
-	InstitutionName       string      `json:"institution_name"`
-	ExternalAccountNumber pgtype.Text `json:"external_account_number"`
-	AccountType           string      `json:"account_type"`
+	ID                    string         `json:"id"`
+	UserID                sql.NullString `json:"user_id"`
+	Name                  string         `json:"name"`
+	InstitutionName       string         `json:"institution_name"`
+	ExternalAccountNumber sql.NullString `json:"external_account_number"`
+	AccountType           string         `json:"account_type"`
 }
 
-func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (MonayAccount, error) {
-	row := q.db.QueryRow(ctx, createAccount,
+func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, createAccount,
 		arg.ID,
 		arg.UserID,
 		arg.Name,
@@ -48,7 +47,7 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (M
 		arg.ExternalAccountNumber,
 		arg.AccountType,
 	)
-	var i MonayAccount
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -63,24 +62,24 @@ func (q *Queries) CreateAccount(ctx context.Context, arg CreateAccountParams) (M
 }
 
 const deleteAccount = `-- name: DeleteAccount :exec
-delete from monay.accounts
-where id = $1
+delete from accounts
+where id = ?1
 `
 
 func (q *Queries) DeleteAccount(ctx context.Context, id string) error {
-	_, err := q.db.Exec(ctx, deleteAccount, id)
+	_, err := q.db.ExecContext(ctx, deleteAccount, id)
 	return err
 }
 
 const getAccount = `-- name: GetAccount :one
 select id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
-from monay.accounts
-where id = $1
+from accounts
+where id = ?1
 `
 
-func (q *Queries) GetAccount(ctx context.Context, id string) (MonayAccount, error) {
-	row := q.db.QueryRow(ctx, getAccount, id)
-	var i MonayAccount
+func (q *Queries) GetAccount(ctx context.Context, id string) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getAccount, id)
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -96,20 +95,20 @@ func (q *Queries) GetAccount(ctx context.Context, id string) (MonayAccount, erro
 
 const getAccountByExternalNumber = `-- name: GetAccountByExternalNumber :one
 select id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
-from monay.accounts
+from accounts
 where
-    institution_name = $1
-    and external_account_number = $2
+    institution_name = ?1
+    and external_account_number = ?2
 `
 
 type GetAccountByExternalNumberParams struct {
-	InstitutionName       string      `json:"institution_name"`
-	ExternalAccountNumber pgtype.Text `json:"external_account_number"`
+	InstitutionName       string         `json:"institution_name"`
+	ExternalAccountNumber sql.NullString `json:"external_account_number"`
 }
 
-func (q *Queries) GetAccountByExternalNumber(ctx context.Context, arg GetAccountByExternalNumberParams) (MonayAccount, error) {
-	row := q.db.QueryRow(ctx, getAccountByExternalNumber, arg.InstitutionName, arg.ExternalAccountNumber)
-	var i MonayAccount
+func (q *Queries) GetAccountByExternalNumber(ctx context.Context, arg GetAccountByExternalNumberParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getAccountByExternalNumber, arg.InstitutionName, arg.ExternalAccountNumber)
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -125,13 +124,13 @@ func (q *Queries) GetAccountByExternalNumber(ctx context.Context, arg GetAccount
 
 const getAccountByName = `-- name: GetAccountByName :one
 select id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
-from monay.accounts
-where name = $1
+from accounts
+where name = ?1
 `
 
-func (q *Queries) GetAccountByName(ctx context.Context, name string) (MonayAccount, error) {
-	row := q.db.QueryRow(ctx, getAccountByName, name)
-	var i MonayAccount
+func (q *Queries) GetAccountByName(ctx context.Context, name string) (Account, error) {
+	row := q.db.QueryRowContext(ctx, getAccountByName, name)
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,
@@ -147,19 +146,19 @@ func (q *Queries) GetAccountByName(ctx context.Context, name string) (MonayAccou
 
 const listAccounts = `-- name: ListAccounts :many
 select id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
-from monay.accounts
+from accounts
 order by name
 `
 
-func (q *Queries) ListAccounts(ctx context.Context) ([]MonayAccount, error) {
-	rows, err := q.db.Query(ctx, listAccounts)
+func (q *Queries) ListAccounts(ctx context.Context) ([]Account, error) {
+	rows, err := q.db.QueryContext(ctx, listAccounts)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	items := []MonayAccount{}
+	items := []Account{}
 	for rows.Next() {
-		var i MonayAccount
+		var i Account
 		if err := rows.Scan(
 			&i.ID,
 			&i.UserID,
@@ -174,6 +173,9 @@ func (q *Queries) ListAccounts(ctx context.Context) ([]MonayAccount, error) {
 		}
 		items = append(items, i)
 	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}
@@ -181,34 +183,34 @@ func (q *Queries) ListAccounts(ctx context.Context) ([]MonayAccount, error) {
 }
 
 const updateAccount = `-- name: UpdateAccount :one
-update monay.accounts
+update accounts
 set
-    name = coalesce(nullif($1, ''), name),
-    institution_name = coalesce(nullif($2, ''), institution_name),
-    external_account_number = coalesce($3, external_account_number),
-    account_type = coalesce(nullif($4, ''), account_type),
-    updated_at = now()
-where id = $5
+    name = coalesce(nullif(?1, ''), name),
+    institution_name = coalesce(nullif(?2, ''), institution_name),
+    external_account_number = coalesce(?3, external_account_number),
+    account_type = coalesce(nullif(?4, ''), account_type),
+    updated_at = datetime('now')
+where id = ?5
 returning id, user_id, name, institution_name, external_account_number, account_type, created_at, updated_at
 `
 
 type UpdateAccountParams struct {
-	Name                  interface{} `json:"name"`
-	InstitutionName       interface{} `json:"institution_name"`
-	ExternalAccountNumber pgtype.Text `json:"external_account_number"`
-	AccountType           interface{} `json:"account_type"`
-	ID                    string      `json:"id"`
+	Name                  interface{}    `json:"name"`
+	InstitutionName       interface{}    `json:"institution_name"`
+	ExternalAccountNumber sql.NullString `json:"external_account_number"`
+	AccountType           interface{}    `json:"account_type"`
+	ID                    string         `json:"id"`
 }
 
-func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (MonayAccount, error) {
-	row := q.db.QueryRow(ctx, updateAccount,
+func (q *Queries) UpdateAccount(ctx context.Context, arg UpdateAccountParams) (Account, error) {
+	row := q.db.QueryRowContext(ctx, updateAccount,
 		arg.Name,
 		arg.InstitutionName,
 		arg.ExternalAccountNumber,
 		arg.AccountType,
 		arg.ID,
 	)
-	var i MonayAccount
+	var i Account
 	err := row.Scan(
 		&i.ID,
 		&i.UserID,

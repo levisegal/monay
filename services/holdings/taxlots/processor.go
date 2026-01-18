@@ -98,7 +98,7 @@ func (p *Processor) processSell(ctx context.Context, txn db.ListTransactionsByAc
 
 	remainingToSell := txn.QuantityMicros.Int64
 	proceeds := txn.AmountMicros
-	sellDate := txn.TransactionDate.Time
+	sellDate := parseDate(txn.TransactionDate)
 
 	for _, lot := range lots {
 		if remainingToSell <= 0 {
@@ -120,7 +120,7 @@ func (p *Processor) processSell(ctx context.Context, txn db.ListTransactionsByAc
 		gain := lotProceeds - costBasis
 
 		holdingPeriod := "short_term"
-		acquiredDate := lot.AcquiredDate.Time
+		acquiredDate := parseDate(lot.AcquiredDate)
 		if sellDate.Sub(acquiredDate) > 365*24*time.Hour {
 			holdingPeriod = "long_term"
 		}
@@ -178,7 +178,7 @@ func sortByDateAsc(txns []db.ListTransactionsByAccountRow) []db.ListTransactions
 
 	for i := 0; i < len(sorted)-1; i++ {
 		for j := i + 1; j < len(sorted); j++ {
-			if sorted[j].TransactionDate.Time.Before(sorted[i].TransactionDate.Time) {
+			if sorted[j].TransactionDate < sorted[i].TransactionDate {
 				sorted[i], sorted[j] = sorted[j], sorted[i]
 			}
 		}

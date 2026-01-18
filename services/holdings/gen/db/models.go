@@ -5,89 +5,89 @@
 package db
 
 import (
-	"github.com/jackc/pgx/v5/pgtype"
+	"database/sql"
 )
 
-type MonayAccount struct {
-	ID                    string             `json:"id"`
-	UserID                pgtype.Text        `json:"user_id"`
-	Name                  string             `json:"name"`
-	InstitutionName       string             `json:"institution_name"`
-	ExternalAccountNumber pgtype.Text        `json:"external_account_number"`
-	AccountType           string             `json:"account_type"`
-	CreatedAt             pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt             pgtype.Timestamptz `json:"updated_at"`
+type Account struct {
+	ID                    string         `json:"id"`
+	UserID                sql.NullString `json:"user_id"`
+	Name                  string         `json:"name"`
+	InstitutionName       string         `json:"institution_name"`
+	ExternalAccountNumber sql.NullString `json:"external_account_number"`
+	AccountType           string         `json:"account_type"`
+	CreatedAt             string         `json:"created_at"`
+	UpdatedAt             string         `json:"updated_at"`
 }
 
-type MonayCashTransaction struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	TransactionID   pgtype.Text        `json:"transaction_id"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	CashType        string             `json:"cash_type"`
-	AmountMicros    int64              `json:"amount_micros"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+type CashTransaction struct {
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	TransactionID   sql.NullString `json:"transaction_id"`
+	TransactionDate string         `json:"transaction_date"`
+	CashType        string         `json:"cash_type"`
+	AmountMicros    int64          `json:"amount_micros"`
+	SecurityID      sql.NullString `json:"security_id"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
 }
 
-type MonayLot struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	SecurityID      string             `json:"security_id"`
-	TransactionID   string             `json:"transaction_id"`
-	AcquiredDate    pgtype.Date        `json:"acquired_date"`
-	QuantityMicros  int64              `json:"quantity_micros"`
-	RemainingMicros int64              `json:"remaining_micros"`
-	CostBasisMicros int64              `json:"cost_basis_micros"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+type Lot struct {
+	ID              string `json:"id"`
+	AccountID       string `json:"account_id"`
+	SecurityID      string `json:"security_id"`
+	TransactionID   string `json:"transaction_id"`
+	AcquiredDate    string `json:"acquired_date"`
+	QuantityMicros  int64  `json:"quantity_micros"`
+	RemainingMicros int64  `json:"remaining_micros"`
+	CostBasisMicros int64  `json:"cost_basis_micros"`
+	CreatedAt       string `json:"created_at"`
 }
 
-type MonayLotDisposition struct {
-	ID                 string             `json:"id"`
-	LotID              string             `json:"lot_id"`
-	SellTransactionID  string             `json:"sell_transaction_id"`
-	DisposedDate       pgtype.Date        `json:"disposed_date"`
-	QuantityMicros     int64              `json:"quantity_micros"`
-	CostBasisMicros    int64              `json:"cost_basis_micros"`
-	ProceedsMicros     int64              `json:"proceeds_micros"`
-	RealizedGainMicros int64              `json:"realized_gain_micros"`
-	HoldingPeriod      string             `json:"holding_period"`
-	CreatedAt          pgtype.Timestamptz `json:"created_at"`
+type LotDisposition struct {
+	ID                 string `json:"id"`
+	LotID              string `json:"lot_id"`
+	SellTransactionID  string `json:"sell_transaction_id"`
+	DisposedDate       string `json:"disposed_date"`
+	QuantityMicros     int64  `json:"quantity_micros"`
+	CostBasisMicros    int64  `json:"cost_basis_micros"`
+	ProceedsMicros     int64  `json:"proceeds_micros"`
+	RealizedGainMicros int64  `json:"realized_gain_micros"`
+	HoldingPeriod      string `json:"holding_period"`
+	CreatedAt          string `json:"created_at"`
 }
 
-type MonayPosition struct {
-	ID                string             `json:"id"`
-	AccountID         string             `json:"account_id"`
-	SecurityID        string             `json:"security_id"`
-	QuantityMicros    int64              `json:"quantity_micros"`
-	CostBasisMicros   pgtype.Int8        `json:"cost_basis_micros"`
-	MarketValueMicros pgtype.Int8        `json:"market_value_micros"`
-	AsOfDate          pgtype.Date        `json:"as_of_date"`
-	CreatedAt         pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt         pgtype.Timestamptz `json:"updated_at"`
+type Position struct {
+	ID                string        `json:"id"`
+	AccountID         string        `json:"account_id"`
+	SecurityID        string        `json:"security_id"`
+	QuantityMicros    int64         `json:"quantity_micros"`
+	CostBasisMicros   sql.NullInt64 `json:"cost_basis_micros"`
+	MarketValueMicros sql.NullInt64 `json:"market_value_micros"`
+	AsOfDate          string        `json:"as_of_date"`
+	CreatedAt         string        `json:"created_at"`
+	UpdatedAt         string        `json:"updated_at"`
 }
 
-type MonaySecurity struct {
-	ID           string             `json:"id"`
-	Symbol       string             `json:"symbol"`
-	Name         pgtype.Text        `json:"name"`
-	SecurityType pgtype.Text        `json:"security_type"`
-	Cusip        pgtype.Text        `json:"cusip"`
-	CreatedAt    pgtype.Timestamptz `json:"created_at"`
-	UpdatedAt    pgtype.Timestamptz `json:"updated_at"`
+type Security struct {
+	ID           string         `json:"id"`
+	Symbol       string         `json:"symbol"`
+	Name         sql.NullString `json:"name"`
+	SecurityType sql.NullString `json:"security_type"`
+	Cusip        sql.NullString `json:"cusip"`
+	CreatedAt    string         `json:"created_at"`
+	UpdatedAt    string         `json:"updated_at"`
 }
 
-type MonayTransaction struct {
-	ID              string             `json:"id"`
-	AccountID       string             `json:"account_id"`
-	SecurityID      pgtype.Text        `json:"security_id"`
-	TransactionType string             `json:"transaction_type"`
-	TransactionDate pgtype.Date        `json:"transaction_date"`
-	QuantityMicros  pgtype.Int8        `json:"quantity_micros"`
-	PriceMicros     pgtype.Int8        `json:"price_micros"`
-	AmountMicros    int64              `json:"amount_micros"`
-	FeesMicros      pgtype.Int8        `json:"fees_micros"`
-	Description     pgtype.Text        `json:"description"`
-	CreatedAt       pgtype.Timestamptz `json:"created_at"`
+type Transaction struct {
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      sql.NullString `json:"security_id"`
+	TransactionType string         `json:"transaction_type"`
+	TransactionDate string         `json:"transaction_date"`
+	QuantityMicros  sql.NullInt64  `json:"quantity_micros"`
+	PriceMicros     sql.NullInt64  `json:"price_micros"`
+	AmountMicros    int64          `json:"amount_micros"`
+	FeesMicros      sql.NullInt64  `json:"fees_micros"`
+	Description     sql.NullString `json:"description"`
+	CreatedAt       string         `json:"created_at"`
 }

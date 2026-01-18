@@ -1,13 +1,12 @@
 version: "2"
 sql:
-  - engine: "postgresql"
+  - engine: "sqlite"
     queries: "queries"
-    schema: "migrations"
+    schema: "schema.sql"
     gen:
       go:
         package: "db"
         out: "../../gen/db"
-        sql_package: "pgx/v5"
         emit_json_tags: true
         emit_empty_slices: true
 

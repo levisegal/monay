@@ -2,11 +2,11 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"log/slog"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/shopspring/decimal"
 	"github.com/spf13/cobra"
 	"golang.org/x/text/language"
@@ -152,7 +152,7 @@ func cashGenerateCommand() *cobra.Command {
 }
 
 func setCashOpening(ctx context.Context, cfg *config.Config, accountName string, date time.Time, balanceMicros int64) error {
-	conn, err := database.Open(ctx, cfg.Database.ConnString())
+	conn, err := database.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
@@ -168,7 +168,7 @@ func setCashOpening(ctx context.Context, cfg *config.Config, accountName string,
 	existing, err := queries.GetOpeningCashBalance(ctx, account.ID)
 	if err == nil {
 		slog.Info("replacing existing opening balance",
-			"old_date", existing.TransactionDate.Time.Format("2006-01-02"),
+			"old_date", existing.TransactionDate,
 			"old_balance", formatMicros(existing.AmountMicros),
 		)
 		if err := queries.DeleteCashTransactionsByAccount(ctx, account.ID); err != nil {
@@ -179,10 +179,10 @@ func setCashOpening(ctx context.Context, cfg *config.Config, accountName string,
 	err = queries.CreateCashTransaction(ctx, db.CreateCashTransactionParams{
 		ID:              database.NewID(database.PrefixCashTxn),
 		AccountID:       account.ID,
-		TransactionDate: pgtype.Date{Time: date, Valid: true},
+		TransactionDate: date.Format("2006-01-02"),
 		CashType:        "opening",
 		AmountMicros:    balanceMicros,
-		Description:     pgtype.Text{String: "Opening cash balance", Valid: true},
+		Description:     sql.NullString{String: "Opening cash balance", Valid: true},
 	})
 	if err != nil {
 		return fmt.Errorf("failed to create opening balance: %w", err)
@@ -198,7 +198,7 @@ func setCashOpening(ctx context.Context, cfg *config.Config, accountName string,
 }
 
 func showCashBalance(ctx context.Context, cfg *config.Config, accountName string) error {
-	conn, err := database.Open(ctx, cfg.Database.ConnString())
+	conn, err := database.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
@@ -211,11 +211,12 @@ func showCashBalance(ctx context.Context, cfg *config.Config, accountName string
 		return fmt.Errorf("account not found: %s", accountName)
 	}
 
-	balanceMicros, err := queries.GetCashBalance(ctx, account.ID)
+	balanceVal, err := queries.GetCashBalance(ctx, account.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get cash balance: %w", err)
 	}
 
+	balanceMicros := toInt64(balanceVal)
 	fmt.Printf("Account: %s\n", accountName)
 	fmt.Printf("Cash Balance: %s\n", formatMicros(balanceMicros))
 
@@ -223,7 +224,7 @@ func showCashBalance(ctx context.Context, cfg *config.Config, accountName string
 }
 
 func showCashLedger(ctx context.Context, cfg *config.Config, accountName string, year int) error {
-	conn, err := database.Open(ctx, cfg.Database.ConnString())
+	conn, err := database.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
@@ -239,13 +240,13 @@ func showCashLedger(ctx context.Context, cfg *config.Config, accountName string,
 	var rows []db.ListCashTransactionsRow
 
 	if year > 0 {
-		startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
-		endDate := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
+		startDate := fmt.Sprintf("%d-01-01", year)
+		endDate := fmt.Sprintf("%d-12-31", year)
 
 		rangeRows, err := queries.ListCashTransactionsByDateRange(ctx, db.ListCashTransactionsByDateRangeParams{
 			AccountID: account.ID,
-			StartDate: pgtype.Date{Time: startDate, Valid: true},
-			EndDate:   pgtype.Date{Time: endDate, Valid: true},
+			StartDate: startDate,
+			EndDate:   endDate,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to list cash transactions: %w", err)
@@ -286,7 +287,7 @@ func showCashLedger(ctx context.Context, cfg *config.Config, accountName string,
 		}
 
 		fmt.Printf("%-12s %-15s %15s  %s\n",
-			row.TransactionDate.Time.Format("2006-01-02"),
+			row.TransactionDate,
 			row.CashType,
 			formatMicros(row.AmountMicros),
 			desc,
@@ -303,14 +304,14 @@ func showCashLedger(ctx context.Context, cfg *config.Config, accountName string,
 	fmt.Printf("Total Income:   %s\n", formatMicros(totalIncome))
 	fmt.Printf("Total Expenses: %s\n", formatMicros(totalExpenses))
 
-	balanceMicros, _ := queries.GetCashBalance(ctx, account.ID)
-	fmt.Printf("Current Balance: %s\n", formatMicros(balanceMicros))
+	balanceVal, _ := queries.GetCashBalance(ctx, account.ID)
+	fmt.Printf("Current Balance: %s\n", formatMicros(toInt64(balanceVal)))
 
 	return nil
 }
 
 func generateCashTransactions(ctx context.Context, cfg *config.Config, accountName string) error {
-	conn, err := database.Open(ctx, cfg.Database.ConnString())
+	conn, err := database.Open(ctx, cfg.DBPath)
 	if err != nil {
 		return err
 	}
@@ -344,7 +345,7 @@ func generateCashTransactions(ctx context.Context, cfg *config.Config, accountNa
 		err := queries.CreateCashTransaction(ctx, db.CreateCashTransactionParams{
 			ID:              database.NewID(database.PrefixCashTxn),
 			AccountID:       account.ID,
-			TransactionID:   pgtype.Text{String: txn.ID, Valid: true},
+			TransactionID:   sql.NullString{String: txn.ID, Valid: true},
 			TransactionDate: txn.TransactionDate,
 			CashType:        cashType,
 			AmountMicros:    amountMicros,
@@ -426,3 +427,15 @@ func formatMicros(micros int64) string {
 	return p.Sprintf("-$%.2f", -f)
 }
 
+func toInt64(v interface{}) int64 {
+	switch val := v.(type) {
+	case int64:
+		return val
+	case int:
+		return int64(val)
+	case float64:
+		return int64(val)
+	default:
+		return 0
+	}
+}
