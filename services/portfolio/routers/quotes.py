@@ -3,10 +3,10 @@ from fastapi import APIRouter, Query
 from models.quote import Quote, QuotesResponse
 from services.market import MarketService
 
-router = APIRouter()
-
 
 def create_router(market: MarketService) -> APIRouter:
+    router = APIRouter()
+
     @router.get("/quotes", response_model=QuotesResponse)
     async def get_quotes(symbols: str = Query(..., description="Comma-separated symbols")):
         symbol_list = [s.strip().upper() for s in symbols.split(",") if s.strip()]

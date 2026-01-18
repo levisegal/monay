@@ -5,10 +5,10 @@ from fastapi import APIRouter, Query
 from models.chart import ChartPoint, ChartResponse
 from services.market import MarketService
 
-router = APIRouter()
-
 
 def create_router(market: MarketService) -> APIRouter:
+    router = APIRouter()
+
     @router.get("/chart/{symbol}", response_model=ChartResponse)
     async def get_chart(
         symbol: str,

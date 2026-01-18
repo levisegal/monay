@@ -4,10 +4,10 @@ from models.portfolio import EnrichedHolding, EnrichedPortfolio, PortfolioSummar
 from services.holdings_client import HoldingsClient
 from services.market import MarketService
 
-router = APIRouter()
-
 
 def create_router(holdings: HoldingsClient, market: MarketService) -> APIRouter:
+    router = APIRouter()
+
     @router.get("/portfolio/enriched", response_model=EnrichedPortfolio)
     async def get_enriched_portfolio(
         account_id: str | None = Query(None, description="Filter by account ID"),
