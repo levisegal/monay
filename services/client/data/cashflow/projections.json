@@ -1,0 +1,323 @@
+{
+  "timeHorizon": "12-month-forward",
+  "referenceDate": "2026-01-13",
+  "annualProjection": {
+    "year": 2026,
+    "totalProjected": 9847.50,
+    "byType": {
+      "dividend": 4125.00,
+      "interest": 5122.50,
+      "mmf": 600.00
+    }
+  },
+  "payments": [
+    {
+      "id": "mmf-jan",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-01-31",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "int-nyc-feb",
+      "symbol": "NYC-GO-2035",
+      "name": "New York City GO 4.0% 2035",
+      "incomeType": "interest",
+      "paymentDate": "2026-02-01",
+      "amount": 500.00,
+      "totalAmount": 500.00,
+      "shares": 25,
+      "frequency": "semi-annual",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "int-fnma-feb",
+      "symbol": "FNMA-MBS",
+      "name": "Fannie Mae 3.5% MBS",
+      "incomeType": "interest",
+      "paymentDate": "2026-02-01",
+      "amount": 350.00,
+      "totalAmount": 350.00,
+      "shares": 20,
+      "frequency": "monthly",
+      "accountId": "fidelity-1"
+    },
+    {
+      "id": "div-aapl-feb",
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "incomeType": "dividend",
+      "paymentDate": "2026-02-15",
+      "exDate": "2026-02-10",
+      "amount": 0.25,
+      "totalAmount": 60.00,
+      "shares": 240,
+      "frequency": "quarterly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "mmf-feb",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-02-28",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "div-msft-mar",
+      "symbol": "MSFT",
+      "name": "Microsoft Corp.",
+      "incomeType": "dividend",
+      "paymentDate": "2026-03-14",
+      "exDate": "2026-02-20",
+      "amount": 0.75,
+      "totalAmount": 112.50,
+      "shares": 150,
+      "frequency": "quarterly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "div-vti-mar",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "incomeType": "dividend",
+      "paymentDate": "2026-03-28",
+      "exDate": "2026-03-23",
+      "amount": 0.82,
+      "totalAmount": 164.00,
+      "shares": 200,
+      "frequency": "quarterly",
+      "accountId": "vanguard-1"
+    },
+    {
+      "id": "mmf-mar",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-03-31",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "int-agg-apr",
+      "symbol": "AGG",
+      "name": "iShares Core U.S. Aggregate Bond ETF",
+      "incomeType": "interest",
+      "paymentDate": "2026-04-07",
+      "amount": 0.28,
+      "totalAmount": 117.60,
+      "shares": 420,
+      "frequency": "monthly",
+      "accountId": "vanguard-1"
+    },
+    {
+      "id": "mmf-apr",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-04-30",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "int-aapl-bond-may",
+      "symbol": "AAPL-2030",
+      "name": "Apple Inc. 2.65% 2030",
+      "incomeType": "interest",
+      "paymentDate": "2026-05-11",
+      "amount": 132.50,
+      "totalAmount": 132.50,
+      "shares": 10,
+      "frequency": "semi-annual",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "div-aapl-may",
+      "symbol": "AAPL",
+      "name": "Apple Inc.",
+      "incomeType": "dividend",
+      "paymentDate": "2026-05-15",
+      "exDate": "2026-05-10",
+      "amount": 0.25,
+      "totalAmount": 60.00,
+      "shares": 240,
+      "frequency": "quarterly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "mmf-may",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-05-31",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "div-msft-jun",
+      "symbol": "MSFT",
+      "name": "Microsoft Corp.",
+      "incomeType": "dividend",
+      "paymentDate": "2026-06-11",
+      "exDate": "2026-05-21",
+      "amount": 0.75,
+      "totalAmount": 112.50,
+      "shares": 150,
+      "frequency": "quarterly",
+      "accountId": "schwab-1"
+    },
+    {
+      "id": "div-vti-jun",
+      "symbol": "VTI",
+      "name": "Vanguard Total Stock Market ETF",
+      "incomeType": "dividend",
+      "paymentDate": "2026-06-26",
+      "exDate": "2026-06-22",
+      "amount": 0.82,
+      "totalAmount": 164.00,
+      "shares": 200,
+      "frequency": "quarterly",
+      "accountId": "vanguard-1"
+    },
+    {
+      "id": "mmf-jun",
+      "symbol": "SWVXX",
+      "name": "Schwab Value Advantage MMF",
+      "incomeType": "mmf-distribution",
+      "paymentDate": "2026-06-30",
+      "amount": 0.004,
+      "totalAmount": 50.00,
+      "shares": 12500,
+      "frequency": "monthly",
+      "accountId": "schwab-1"
+    }
+  ],
+  "monthlyBreakdown": [
+    {
+      "periodLabel": "Jan 2026",
+      "startDate": "2026-01-01",
+      "endDate": "2026-01-31",
+      "dividendIncome": 0,
+      "interestIncome": 0,
+      "mmfIncome": 50.00,
+      "totalIncome": 50.00
+    },
+    {
+      "periodLabel": "Feb 2026",
+      "startDate": "2026-02-01",
+      "endDate": "2026-02-28",
+      "dividendIncome": 60.00,
+      "interestIncome": 850.00,
+      "mmfIncome": 50.00,
+      "totalIncome": 960.00
+    },
+    {
+      "periodLabel": "Mar 2026",
+      "startDate": "2026-03-01",
+      "endDate": "2026-03-31",
+      "dividendIncome": 276.50,
+      "interestIncome": 0,
+      "mmfIncome": 50.00,
+      "totalIncome": 326.50
+    },
+    {
+      "periodLabel": "Apr 2026",
+      "startDate": "2026-04-01",
+      "endDate": "2026-04-30",
+      "dividendIncome": 0,
+      "interestIncome": 117.60,
+      "mmfIncome": 50.00,
+      "totalIncome": 167.60
+    },
+    {
+      "periodLabel": "May 2026",
+      "startDate": "2026-05-01",
+      "endDate": "2026-05-31",
+      "dividendIncome": 60.00,
+      "interestIncome": 132.50,
+      "mmfIncome": 50.00,
+      "totalIncome": 242.50
+    },
+    {
+      "periodLabel": "Jun 2026",
+      "startDate": "2026-06-01",
+      "endDate": "2026-06-30",
+      "dividendIncome": 276.50,
+      "interestIncome": 0,
+      "mmfIncome": 50.00,
+      "totalIncome": 326.50
+    },
+    {
+      "periodLabel": "Jul 2026",
+      "startDate": "2026-07-01",
+      "endDate": "2026-07-31",
+      "dividendIncome": 0,
+      "interestIncome": 467.60,
+      "mmfIncome": 50.00,
+      "totalIncome": 517.60
+    },
+    {
+      "periodLabel": "Aug 2026",
+      "startDate": "2026-08-01",
+      "endDate": "2026-08-31",
+      "dividendIncome": 60.00,
+      "interestIncome": 500.00,
+      "mmfIncome": 50.00,
+      "totalIncome": 610.00
+    },
+    {
+      "periodLabel": "Sep 2026",
+      "startDate": "2026-09-01",
+      "endDate": "2026-09-30",
+      "dividendIncome": 276.50,
+      "interestIncome": 0,
+      "mmfIncome": 50.00,
+      "totalIncome": 326.50
+    },
+    {
+      "periodLabel": "Oct 2026",
+      "startDate": "2026-10-01",
+      "endDate": "2026-10-31",
+      "dividendIncome": 0,
+      "interestIncome": 117.60,
+      "mmfIncome": 50.00,
+      "totalIncome": 167.60
+    },
+    {
+      "periodLabel": "Nov 2026",
+      "startDate": "2026-11-01",
+      "endDate": "2026-11-30",
+      "dividendIncome": 60.00,
+      "interestIncome": 132.50,
+      "mmfIncome": 50.00,
+      "totalIncome": 242.50
+    },
+    {
+      "periodLabel": "Dec 2026",
+      "startDate": "2026-12-01",
+      "endDate": "2026-12-31",
+      "dividendIncome": 276.50,
+      "interestIncome": 0,
+      "mmfIncome": 50.00,
+      "totalIncome": 326.50
+    }
+  ]
+}
