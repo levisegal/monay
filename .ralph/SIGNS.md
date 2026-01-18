@@ -11,9 +11,9 @@ When Ralph makes mistakes, add guidance here to prevent recurrence.
 - Use existing component patterns from `components/ui/`
 - Check TypeScript types before committing
 - Use TanStack Query for server state
+- Reference PAPER_PORTFOLIO_DESIGN.md for design system
 
 ## Database Patterns
-- Use named parameters (@param) in SQL, not positional ($1, $2)
 - Run `make db.generate` after changing queries
 
 ## Proto Patterns

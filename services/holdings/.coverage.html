@@ -1,0 +1,4000 @@
+
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+		<title>cmd: Go Coverage Report</title>
+		<style>
+			body {
+				background: black;
+				color: rgb(80, 80, 80);
+			}
+			body, pre, #legend span {
+				font-family: Menlo, monospace;
+				font-weight: bold;
+			}
+			#topbar {
+				background: black;
+				position: fixed;
+				top: 0; left: 0; right: 0;
+				height: 42px;
+				border-bottom: 1px solid rgb(80, 80, 80);
+			}
+			#content {
+				margin-top: 50px;
+			}
+			#nav, #legend {
+				float: left;
+				margin-left: 10px;
+			}
+			#legend {
+				margin-top: 12px;
+			}
+			#nav {
+				margin-top: 10px;
+			}
+			#legend span {
+				margin: 0 5px;
+			}
+			.cov0 { color: rgb(192, 0, 0) }
+.cov1 { color: rgb(128, 128, 128) }
+.cov2 { color: rgb(116, 140, 131) }
+.cov3 { color: rgb(104, 152, 134) }
+.cov4 { color: rgb(92, 164, 137) }
+.cov5 { color: rgb(80, 176, 140) }
+.cov6 { color: rgb(68, 188, 143) }
+.cov7 { color: rgb(56, 200, 146) }
+.cov8 { color: rgb(44, 212, 149) }
+.cov9 { color: rgb(32, 224, 152) }
+.cov10 { color: rgb(20, 236, 155) }
+
+		</style>
+	</head>
+	<body>
+		<div id="topbar">
+			<div id="nav">
+				<select id="files">
+				
+				<option value="file0">github.com/levisegal/monay/services/holdings/cmd/cmd/accounts.go (0.0%)</option>
+				
+				<option value="file1">github.com/levisegal/monay/services/holdings/cmd/cmd/cash.go (0.0%)</option>
+				
+				<option value="file2">github.com/levisegal/monay/services/holdings/cmd/cmd/holdings.go (0.0%)</option>
+				
+				<option value="file3">github.com/levisegal/monay/services/holdings/cmd/cmd/import.go (0.0%)</option>
+				
+				<option value="file4">github.com/levisegal/monay/services/holdings/cmd/cmd/lots.go (0.0%)</option>
+				
+				<option value="file5">github.com/levisegal/monay/services/holdings/cmd/cmd/plaid.go (0.0%)</option>
+				
+				<option value="file6">github.com/levisegal/monay/services/holdings/cmd/cmd/root.go (0.0%)</option>
+				
+				<option value="file7">github.com/levisegal/monay/services/holdings/cmd/cmd/server.go (0.0%)</option>
+				
+				<option value="file8">github.com/levisegal/monay/services/holdings/cmd/main.go (0.0%)</option>
+				
+				<option value="file9">github.com/levisegal/monay/services/holdings/config/config.go (0.0%)</option>
+				
+				<option value="file10">github.com/levisegal/monay/services/holdings/database/database.go (0.0%)</option>
+				
+				<option value="file11">github.com/levisegal/monay/services/holdings/database/id.go (0.0%)</option>
+				
+				<option value="file12">github.com/levisegal/monay/services/holdings/database/migration.go (0.0%)</option>
+				
+				<option value="file13">github.com/levisegal/monay/services/holdings/importer/etrade.go (0.0%)</option>
+				
+				<option value="file14">github.com/levisegal/monay/services/holdings/importer/fidelity.go (0.0%)</option>
+				
+				<option value="file15">github.com/levisegal/monay/services/holdings/importer/importer.go (0.0%)</option>
+				
+				<option value="file16">github.com/levisegal/monay/services/holdings/importer/lpl.go (0.0%)</option>
+				
+				<option value="file17">github.com/levisegal/monay/services/holdings/importer/merrill.go (0.0%)</option>
+				
+				<option value="file18">github.com/levisegal/monay/services/holdings/importer/schwab.go (0.0%)</option>
+				
+				<option value="file19">github.com/levisegal/monay/services/holdings/importer/vanguard.go (0.0%)</option>
+				
+				<option value="file20">github.com/levisegal/monay/services/holdings/plaid/client.go (0.0%)</option>
+				
+				<option value="file21">github.com/levisegal/monay/services/holdings/plaid/link.go (0.0%)</option>
+				
+				<option value="file22">github.com/levisegal/monay/services/holdings/server/interceptors.go (0.0%)</option>
+				
+				<option value="file23">github.com/levisegal/monay/services/holdings/server/server.go (0.0%)</option>
+				
+				<option value="file24">github.com/levisegal/monay/services/holdings/service/plaid.go (0.0%)</option>
+				
+				<option value="file25">github.com/levisegal/monay/services/holdings/service/service.go (0.0%)</option>
+				
+				<option value="file26">github.com/levisegal/monay/services/holdings/taxlots/analyzer.go (0.0%)</option>
+				
+				<option value="file27">github.com/levisegal/monay/services/holdings/taxlots/processor.go (0.0%)</option>
+				
+				<option value="file28">github.com/levisegal/monay/services/holdings/version/version.go (0.0%)</option>
+				
+				</select>
+			</div>
+			<div id="legend">
+				<span>not tracked</span>
+			
+				<span class="cov0">not covered</span>
+				<span class="cov8">covered</span>
+			
+			</div>
+		</div>
+		<div id="content">
+		
+		<pre class="file" id="file0" style="display: none">package cmd
+
+import (
+        "fmt"
+
+        "github.com/spf13/cobra"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+)
+
+func accountsCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "accounts",
+                Short: "Manage accounts",
+        }
+
+        cmd.AddCommand(accountsListCommand())
+        cmd.AddCommand(accountsRenameCommand())
+        cmd.AddCommand(accountsDeleteCommand())
+
+        return cmd
+}</span>
+
+func accountsDeleteCommand() *cobra.Command <span class="cov0" title="0">{
+        var name string
+
+        cmd := &amp;cobra.Command{
+                Use:   "delete",
+                Short: "Delete an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, name)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account %q not found: %w", name, err)
+                        }</span>
+
+                        <span class="cov0" title="0">if err := queries.DeleteAccount(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to delete account: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("Deleted account %q\n", name)
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;name, "name", "", "Account name to delete")
+        cmd.MarkFlagRequired("name")
+
+        return cmd</span>
+}
+
+func accountsListCommand() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "list",
+                Short: "List all accounts",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+                        accounts, err := queries.ListAccounts(ctx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("\n%-40s %-20s %-15s %s\n", "ID", "Name", "Institution", "External #")
+                        fmt.Printf("%-40s %-20s %-15s %s\n", "----", "----", "-----------", "----------")
+                        for _, a := range accounts </span><span class="cov0" title="0">{
+                                fmt.Printf("%-40s %-20s %-15s %s\n",
+                                        a.ID,
+                                        a.Name,
+                                        a.InstitutionName,
+                                        a.ExternalAccountNumber.String,
+                                )
+                        }</span>
+                        <span class="cov0" title="0">return nil</span>
+                },
+        }
+}
+
+func accountsRenameCommand() *cobra.Command <span class="cov0" title="0">{
+        var oldName, newName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "rename",
+                Short: "Rename an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, oldName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account %q not found: %w", oldName, err)
+                        }</span>
+
+                        <span class="cov0" title="0">updated, err := queries.UpdateAccount(ctx, db.UpdateAccountParams{
+                                ID:   account.ID,
+                                Name: newName,
+                        })
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to rename account: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("Renamed %q -&gt; %q\n", oldName, updated.Name)
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;oldName, "old", "", "Current account name")
+        cmd.Flags().StringVar(&amp;newName, "new", "", "New account name")
+        cmd.MarkFlagRequired("old")
+        cmd.MarkFlagRequired("new")
+
+        return cmd</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file1" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "log/slog"
+        "time"
+
+        "github.com/jackc/pgx/v5/pgtype"
+        "github.com/shopspring/decimal"
+        "github.com/spf13/cobra"
+        "golang.org/x/text/language"
+        "golang.org/x/text/message"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+)
+
+func cashCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "cash",
+                Short: "Cash balance tracking commands",
+        }
+
+        cmd.AddCommand(cashSetCommand())
+        cmd.AddCommand(cashBalanceCommand())
+        cmd.AddCommand(cashLedgerCommand())
+        cmd.AddCommand(cashGenerateCommand())
+
+        return cmd
+}</span>
+
+func cashSetCommand() *cobra.Command <span class="cov0" title="0">{
+        var (
+                accountName string
+                dateStr     string
+                balance     string
+        )
+
+        cmd := &amp;cobra.Command{
+                Use:   "set",
+                Short: "Set opening cash balance for an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">date, err := time.Parse("2006-01-02", dateStr)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("invalid date format, use YYYY-MM-DD: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">balanceDec, err := decimal.NewFromString(balance)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("invalid balance: %w", err)
+                        }</span>
+                        <span class="cov0" title="0">balanceMicros := balanceDec.Mul(decimal.NewFromInt(1_000_000)).IntPart()
+
+                        return setCashOpening(ctx, cfg, accountName, date, balanceMicros)</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.Flags().StringVar(&amp;dateStr, "date", "", "Opening balance date (YYYY-MM-DD)")
+        cmd.Flags().StringVar(&amp;balance, "balance", "", "Opening cash balance (e.g., 5000.00)")
+
+        cmd.MarkFlagRequired("account-name")
+        cmd.MarkFlagRequired("date")
+        cmd.MarkFlagRequired("balance")
+
+        return cmd</span>
+}
+
+func cashBalanceCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "balance",
+                Short: "Show current cash balance for an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">return showCashBalance(ctx, cfg, accountName)</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func cashLedgerCommand() *cobra.Command <span class="cov0" title="0">{
+        var (
+                accountName string
+                year        int
+        )
+
+        cmd := &amp;cobra.Command{
+                Use:   "ledger",
+                Short: "Show cash ledger for an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">return showCashLedger(ctx, cfg, accountName, year)</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.Flags().IntVar(&amp;year, "year", 0, "Filter by year (optional)")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func cashGenerateCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "generate",
+                Short: "Generate cash transactions from existing transactions",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">return generateCashTransactions(ctx, cfg, accountName)</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func setCashOpening(ctx context.Context, cfg *config.Config, accountName string, date time.Time, balanceMicros int64) error <span class="cov0" title="0">{
+        conn, err := database.Open(ctx, cfg.Database.ConnString())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer conn.Close()
+
+        queries := db.New(conn)
+
+        account, err := queries.GetAccountByName(ctx, accountName)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("account not found: %s", accountName)
+        }</span>
+
+        <span class="cov0" title="0">existing, err := queries.GetOpeningCashBalance(ctx, account.ID)
+        if err == nil </span><span class="cov0" title="0">{
+                slog.Info("replacing existing opening balance",
+                        "old_date", existing.TransactionDate.Time.Format("2006-01-02"),
+                        "old_balance", formatMicros(existing.AmountMicros),
+                )
+                if err := queries.DeleteCashTransactionsByAccount(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to delete existing cash transactions: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">err = queries.CreateCashTransaction(ctx, db.CreateCashTransactionParams{
+                ID:              database.NewID(database.PrefixCashTxn),
+                AccountID:       account.ID,
+                TransactionDate: pgtype.Date{Time: date, Valid: true},
+                CashType:        "opening",
+                AmountMicros:    balanceMicros,
+                Description:     pgtype.Text{String: "Opening cash balance", Valid: true},
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create opening balance: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">slog.Info("set opening cash balance",
+                "account", accountName,
+                "date", date.Format("2006-01-02"),
+                "balance", formatMicros(balanceMicros),
+        )
+
+        return nil</span>
+}
+
+func showCashBalance(ctx context.Context, cfg *config.Config, accountName string) error <span class="cov0" title="0">{
+        conn, err := database.Open(ctx, cfg.Database.ConnString())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer conn.Close()
+
+        queries := db.New(conn)
+
+        account, err := queries.GetAccountByName(ctx, accountName)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("account not found: %s", accountName)
+        }</span>
+
+        <span class="cov0" title="0">balanceMicros, err := queries.GetCashBalance(ctx, account.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to get cash balance: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("Account: %s\n", accountName)
+        fmt.Printf("Cash Balance: %s\n", formatMicros(balanceMicros))
+
+        return nil</span>
+}
+
+func showCashLedger(ctx context.Context, cfg *config.Config, accountName string, year int) error <span class="cov0" title="0">{
+        conn, err := database.Open(ctx, cfg.Database.ConnString())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer conn.Close()
+
+        queries := db.New(conn)
+
+        account, err := queries.GetAccountByName(ctx, accountName)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("account not found: %s", accountName)
+        }</span>
+
+        <span class="cov0" title="0">var rows []db.ListCashTransactionsRow
+
+        if year &gt; 0 </span><span class="cov0" title="0">{
+                startDate := time.Date(year, 1, 1, 0, 0, 0, 0, time.UTC)
+                endDate := time.Date(year, 12, 31, 0, 0, 0, 0, time.UTC)
+
+                rangeRows, err := queries.ListCashTransactionsByDateRange(ctx, db.ListCashTransactionsByDateRangeParams{
+                        AccountID: account.ID,
+                        StartDate: pgtype.Date{Time: startDate, Valid: true},
+                        EndDate:   pgtype.Date{Time: endDate, Valid: true},
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to list cash transactions: %w", err)
+                }</span>
+                <span class="cov0" title="0">for _, r := range rangeRows </span><span class="cov0" title="0">{
+                        rows = append(rows, db.ListCashTransactionsRow(r))
+                }</span>
+        } else<span class="cov0" title="0"> {
+                rows, err = queries.ListCashTransactions(ctx, account.ID)
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to list cash transactions: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">if len(rows) == 0 </span><span class="cov0" title="0">{
+                fmt.Printf("No cash transactions found for %s\n", accountName)
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">fmt.Printf("=== %s: Cash Ledger ===\n\n", accountName)
+        fmt.Printf("%-12s %-15s %15s  %s\n", "Date", "Type", "Amount", "Description")
+        fmt.Println("─────────────────────────────────────────────────────────────────────────")
+
+        var totalIncome, totalExpenses int64
+        for _, row := range rows </span><span class="cov0" title="0">{
+                symbol := ""
+                if row.Symbol.Valid </span><span class="cov0" title="0">{
+                        symbol = row.Symbol.String
+                }</span>
+                <span class="cov0" title="0">desc := row.Description.String
+                if symbol != "" &amp;&amp; desc == "" </span><span class="cov0" title="0">{
+                        desc = symbol
+                }</span> else<span class="cov0" title="0"> if symbol != "" </span><span class="cov0" title="0">{
+                        desc = symbol + ": " + desc
+                }</span>
+                <span class="cov0" title="0">if len(desc) &gt; 40 </span><span class="cov0" title="0">{
+                        desc = desc[:37] + "..."
+                }</span>
+
+                <span class="cov0" title="0">fmt.Printf("%-12s %-15s %15s  %s\n",
+                        row.TransactionDate.Time.Format("2006-01-02"),
+                        row.CashType,
+                        formatMicros(row.AmountMicros),
+                        desc,
+                )
+
+                if row.AmountMicros &gt; 0 &amp;&amp; row.CashType != "opening" </span><span class="cov0" title="0">{
+                        totalIncome += row.AmountMicros
+                }</span> else<span class="cov0" title="0"> if row.AmountMicros &lt; 0 </span><span class="cov0" title="0">{
+                        totalExpenses += row.AmountMicros
+                }</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("─────────────────────────────────────────────────────────────────────────")
+        fmt.Printf("Total Income:   %s\n", formatMicros(totalIncome))
+        fmt.Printf("Total Expenses: %s\n", formatMicros(totalExpenses))
+
+        balanceMicros, _ := queries.GetCashBalance(ctx, account.ID)
+        fmt.Printf("Current Balance: %s\n", formatMicros(balanceMicros))
+
+        return nil</span>
+}
+
+func generateCashTransactions(ctx context.Context, cfg *config.Config, accountName string) error <span class="cov0" title="0">{
+        conn, err := database.Open(ctx, cfg.Database.ConnString())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer conn.Close()
+
+        queries := db.New(conn)
+
+        account, err := queries.GetAccountByName(ctx, accountName)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("account not found: %s", accountName)
+        }</span>
+
+        <span class="cov0" title="0">if err := queries.DeleteNonOpeningCashTransactionsByAccount(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clear existing cash transactions: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">transactions, err := queries.ListTransactionsByAccount(ctx, account.ID)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list transactions: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var created int
+        for _, txn := range transactions </span><span class="cov0" title="0">{
+                cashType, hasCashImpact := mapTransactionTypeToCashType(txn.TransactionType)
+                if !hasCashImpact </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">amountMicros := normalizeCashAmount(cashType, txn.AmountMicros)
+
+                err := queries.CreateCashTransaction(ctx, db.CreateCashTransactionParams{
+                        ID:              database.NewID(database.PrefixCashTxn),
+                        AccountID:       account.ID,
+                        TransactionID:   pgtype.Text{String: txn.ID, Valid: true},
+                        TransactionDate: txn.TransactionDate,
+                        CashType:        cashType,
+                        AmountMicros:    amountMicros,
+                        SecurityID:      txn.SecurityID,
+                        Description:     txn.Description,
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to create cash transaction: %w", err)
+                }</span>
+                <span class="cov0" title="0">created++</span>
+        }
+
+        <span class="cov0" title="0">slog.Info("generated cash transactions",
+                "account", accountName,
+                "transactions", len(transactions),
+                "cash_records", created,
+        )
+
+        return nil</span>
+}
+
+func mapTransactionTypeToCashType(txnType string) (cashType string, hasCashImpact bool) <span class="cov0" title="0">{
+        switch txnType </span>{
+        case "buy":<span class="cov0" title="0">
+                return "purchase", true</span>
+        case "sell":<span class="cov0" title="0">
+                return "proceeds", true</span>
+        case "dividend":<span class="cov0" title="0">
+                return "dividend", true</span>
+        case "interest":<span class="cov0" title="0">
+                return "interest", true</span>
+        case "cap_gain":<span class="cov0" title="0">
+                return "cap_gain", true</span>
+        case "fee":<span class="cov0" title="0">
+                return "fee", true</span>
+        case "transfer_in":<span class="cov0" title="0">
+                return "transfer_in", true</span>
+        case "transfer_out":<span class="cov0" title="0">
+                return "transfer_out", true</span>
+        default:<span class="cov0" title="0">
+                return "", false</span>
+        }
+}
+
+func normalizeCashAmount(cashType string, amountMicros int64) int64 <span class="cov0" title="0">{
+        switch cashType </span>{
+        case "purchase":<span class="cov0" title="0">
+                if amountMicros &gt; 0 </span><span class="cov0" title="0">{
+                        return -amountMicros
+                }</span>
+                <span class="cov0" title="0">return amountMicros</span>
+        case "fee":<span class="cov0" title="0">
+                if amountMicros &gt; 0 </span><span class="cov0" title="0">{
+                        return -amountMicros
+                }</span>
+                <span class="cov0" title="0">return amountMicros</span>
+        case "transfer_out":<span class="cov0" title="0">
+                if amountMicros &gt; 0 </span><span class="cov0" title="0">{
+                        return -amountMicros
+                }</span>
+                <span class="cov0" title="0">return amountMicros</span>
+        case "proceeds", "dividend", "interest", "cap_gain", "transfer_in":<span class="cov0" title="0">
+                if amountMicros &lt; 0 </span><span class="cov0" title="0">{
+                        return -amountMicros
+                }</span>
+                <span class="cov0" title="0">return amountMicros</span>
+        default:<span class="cov0" title="0">
+                return amountMicros</span>
+        }
+}
+
+func formatMicros(micros int64) string <span class="cov0" title="0">{
+        d := decimal.NewFromInt(micros).Div(decimal.NewFromInt(1_000_000))
+        f, _ := d.Float64()
+        p := message.NewPrinter(language.English)
+        if micros &gt;= 0 </span><span class="cov0" title="0">{
+                return p.Sprintf("$%.2f", f)
+        }</span>
+        <span class="cov0" title="0">return p.Sprintf("-$%.2f", -f)</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file2" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "os"
+        "sort"
+        "time"
+
+        "github.com/rodaine/table"
+        "github.com/spf13/cobra"
+        "golang.org/x/text/language"
+        "golang.org/x/text/message"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+)
+
+func holdingsCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "holdings",
+                Short: "View current holdings",
+        }
+
+        cmd.AddCommand(listHoldingsCommand())
+        cmd.AddCommand(positionsCommand())
+
+        return cmd
+}</span>
+
+func listHoldingsCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+        var all bool
+        var sortBy string
+
+        cmd := &amp;cobra.Command{
+                Use:   "list",
+                Short: "List current holdings with cost basis",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        if all </span><span class="cov0" title="0">{
+                                return listAllHoldings(queries, ctx, sortBy)
+                        }</span>
+
+                        <span class="cov0" title="0">if accountName == "" </span><span class="cov0" title="0">{
+                                return fmt.Errorf("--account-name required (or use --all)")
+                        }</span>
+
+                        <span class="cov0" title="0">account, err := queries.GetAccountByName(ctx, accountName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account not found: %s", accountName)
+                        }</span>
+
+                        <span class="cov0" title="0">holdings, err := queries.ListHoldingsByAccount(ctx, account.ID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to list holdings: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">cashBalance, _ := queries.GetCashBalance(ctx, account.ID)
+
+                        fmt.Printf("\n=== %s: Current Holdings ===\n\n", account.Name)
+
+                        tbl := table.New("Symbol", "Quantity", "Cost Basis", "Acquired")
+                        tbl.WithWriter(os.Stdout)
+
+                        var totalCostBasis int64
+                        for _, h := range holdings </span><span class="cov0" title="0">{
+                                qty := float64(h.QuantityMicros) / 1_000_000
+                                cost := float64(h.CostBasisMicros) / 1_000_000
+                                totalCostBasis += h.CostBasisMicros
+
+                                acquired := ""
+                                if t, ok := h.EarliestAcquired.(time.Time); ok </span><span class="cov0" title="0">{
+                                        acquired = t.Format("2006-01-02")
+                                }</span>
+
+                                <span class="cov0" title="0">tbl.AddRow(h.Symbol, formatQty(qty), formatCurrency(cost), acquired)</span>
+                        }
+
+                        <span class="cov0" title="0">tbl.Print()
+
+                        fmt.Printf("\nPositions (cost basis): %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+                        fmt.Printf("Cash:                   %s\n", formatCurrency(float64(cashBalance)/1_000_000))
+                        fmt.Printf("TOTAL (cost + cash):    %s\n", formatCurrency(float64(totalCostBasis+cashBalance)/1_000_000))
+
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.Flags().BoolVar(&amp;all, "all", false, "Show holdings across all accounts")
+        cmd.Flags().StringVar(&amp;sortBy, "sort", "cost", "Sort by: cost, symbol, account")
+
+        return cmd</span>
+}
+
+func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) error <span class="cov0" title="0">{
+        holdings, err := queries.ListAllHoldings(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list holdings: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">accounts, err := queries.ListAccounts(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list accounts: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">var totalCash int64
+        cashByAccount := make(map[string]int64)
+        for _, a := range accounts </span><span class="cov0" title="0">{
+                cash, _ := queries.GetCashBalance(ctx, a.ID)
+                cashByAccount[a.ID] = cash
+                totalCash += cash
+        }</span>
+
+        <span class="cov0" title="0">switch sortBy </span>{
+        case "symbol":<span class="cov0" title="0">
+                sort.Slice(holdings, func(i, j int) bool </span><span class="cov0" title="0">{
+                        return holdings[i].Symbol &lt; holdings[j].Symbol
+                }</span>)
+        case "account":<span class="cov0" title="0">
+                sort.Slice(holdings, func(i, j int) bool </span><span class="cov0" title="0">{
+                        return holdings[i].AccountName &lt; holdings[j].AccountName
+                }</span>)
+        default:<span class="cov0" title="0">
+                sort.Slice(holdings, func(i, j int) bool </span><span class="cov0" title="0">{
+                        return holdings[i].CostBasisMicros &gt; holdings[j].CostBasisMicros
+                }</span>)
+        }
+
+        <span class="cov0" title="0">fmt.Printf("\n=== All Holdings ===\n\n")
+
+        tbl := table.New("Broker", "Account", "Symbol", "Quantity", "Cost Basis", "Acquired")
+        tbl.WithWriter(os.Stdout)
+
+        var totalCostBasis int64
+        for _, h := range holdings </span><span class="cov0" title="0">{
+                qty := float64(h.QuantityMicros) / 1_000_000
+                cost := float64(h.CostBasisMicros) / 1_000_000
+                totalCostBasis += h.CostBasisMicros
+
+                acquired := ""
+                if t, ok := h.EarliestAcquired.(time.Time); ok </span><span class="cov0" title="0">{
+                        acquired = t.Format("2006-01-02")
+                }</span>
+
+                <span class="cov0" title="0">broker := h.Broker
+                if broker == "" </span><span class="cov0" title="0">{
+                        broker = "-"
+                }</span>
+
+                <span class="cov0" title="0">tbl.AddRow(broker, h.AccountName, h.Symbol, formatQty(qty), formatCurrency(cost), acquired)</span>
+        }
+
+        <span class="cov0" title="0">tbl.Print()
+
+        fmt.Printf("\nPositions (cost basis): %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+        fmt.Printf("Cash:                   %s\n", formatCurrency(float64(totalCash)/1_000_000))
+        fmt.Printf("TOTAL (cost + cash):    %s\n", formatCurrency(float64(totalCostBasis+totalCash)/1_000_000))
+
+        return nil</span>
+}
+
+func positionsCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "positions",
+                Short: "List positions aggregated by symbol",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        positions, err := queries.ListPositions(ctx)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to list positions: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Printf("\n=== Positions (by Symbol) ===\n\n")
+
+                        tbl := table.New("Symbol", "Quantity", "Cost Basis", "Accounts", "Acquired")
+                        tbl.WithWriter(os.Stdout)
+
+                        var totalCostBasis int64
+                        for _, p := range positions </span><span class="cov0" title="0">{
+                                qty := float64(p.QuantityMicros) / 1_000_000
+                                cost := float64(p.CostBasisMicros) / 1_000_000
+                                totalCostBasis += p.CostBasisMicros
+
+                                acquired := ""
+                                if t, ok := p.EarliestAcquired.(time.Time); ok </span><span class="cov0" title="0">{
+                                        acquired = t.Format("2006-01-02")
+                                }</span>
+
+                                <span class="cov0" title="0">tbl.AddRow(p.Symbol, formatQty(qty), formatCurrency(cost), p.AccountCount, acquired)</span>
+                        }
+
+                        <span class="cov0" title="0">tbl.Print()
+
+                        fmt.Printf("\nTOTAL: %s\n", formatCurrency(float64(totalCostBasis)/1_000_000))
+
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">return cmd</span>
+}
+
+func formatCurrency(amount float64) string <span class="cov0" title="0">{
+        p := message.NewPrinter(language.English)
+        return p.Sprintf("$%.2f", amount)
+}</span>
+
+func formatQty(qty float64) string <span class="cov0" title="0">{
+        p := message.NewPrinter(language.English)
+        return p.Sprintf("%.2f", qty)
+}</span>
+</pre>
+		
+		<pre class="file" id="file3" style="display: none">package cmd
+
+import (
+        "context"
+        "fmt"
+        "log/slog"
+        "os"
+
+        "github.com/jackc/pgx/v5/pgtype"
+        "github.com/spf13/cobra"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+        "github.com/levisegal/monay/services/holdings/importer"
+)
+
+func importCommand() *cobra.Command <span class="cov0" title="0">{
+        var (
+                broker      string
+                files       []string
+                accountName string
+        )
+
+        cmd := &amp;cobra.Command{
+                Use:   "import",
+                Short: "Import transactions from CSV files",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">for _, file := range files </span><span class="cov0" title="0">{
+                                if err := runImport(ctx, cfg, broker, file, accountName); err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                        }
+                        <span class="cov0" title="0">return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;broker, "broker", "", "Broker name (etrade, schwab, fidelity, vanguard, lpl)")
+        cmd.Flags().StringArrayVar(&amp;files, "file", nil, "Path to CSV file(s) - can be repeated")
+        cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name for imported data")
+
+        cmd.MarkFlagRequired("broker")
+        cmd.MarkFlagRequired("file")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, accountName string) error <span class="cov0" title="0">{
+        parser, err := importer.GetParser(importer.Broker(brokerName))
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">f, err := os.Open(filePath)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to open file: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer f.Close()
+
+        result, err := parser.Parse(ctx, f)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to parse CSV: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">slog.Info("parsed CSV",
+                "transactions", len(result.Transactions),
+                "positions", len(result.Positions),
+        )
+
+        conn, err := database.Open(ctx, cfg.Database.ConnString())
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">defer conn.Close()
+
+        queries := db.New(conn)
+
+        account, err := queries.GetAccountByName(ctx, accountName)
+        if err != nil </span><span class="cov0" title="0">{
+                account, err = queries.CreateAccount(ctx, db.CreateAccountParams{
+                        ID:              database.NewID(database.PrefixAccount),
+                        Name:            accountName,
+                        InstitutionName: brokerName,
+                        AccountType:     "brokerage",
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to create account: %w", err)
+                }</span>
+                <span class="cov0" title="0">slog.Info("created account", "id", account.ID, "name", account.Name)</span>
+        }
+
+        <span class="cov0" title="0">for _, txn := range result.Transactions </span><span class="cov0" title="0">{
+                var securityID pgtype.Text
+
+                if txn.Symbol != "" </span><span class="cov0" title="0">{
+                        sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+                                ID:     database.NewID(database.PrefixSecurity),
+                                Symbol: txn.Symbol,
+                                Name:   pgtype.Text{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+                        })
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to upsert security %s: %w", txn.Symbol, err)
+                        }</span>
+                        <span class="cov0" title="0">securityID = pgtype.Text{String: sec.ID, Valid: true}</span>
+                }
+
+                <span class="cov0" title="0">err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+                        ID:              database.NewID(database.PrefixTransaction),
+                        AccountID:       account.ID,
+                        SecurityID:      securityID,
+                        TransactionType: string(txn.TransactionType),
+                        TransactionDate: pgtype.Date{Time: txn.TransactionDate, Valid: true},
+                        QuantityMicros:  int8FromMicros(txn.QuantityMicros),
+                        PriceMicros:     int8FromMicros(txn.PriceMicros),
+                        AmountMicros:    txn.AmountMicros,
+                        FeesMicros:      int8FromMicros(txn.FeesMicros),
+                        Description:     pgtype.Text{String: txn.Description, Valid: txn.Description != ""},
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to create transaction: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">for _, pos := range result.Positions </span><span class="cov0" title="0">{
+                sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+                        ID:     database.NewID(database.PrefixSecurity),
+                        Symbol: pos.Symbol,
+                        Name:   pgtype.Text{String: pos.SecurityName, Valid: pos.SecurityName != ""},
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to upsert security %s: %w", pos.Symbol, err)
+                }</span>
+
+                <span class="cov0" title="0">_, err = queries.UpsertPosition(ctx, db.UpsertPositionParams{
+                        ID:                database.NewID(database.PrefixPosition),
+                        AccountID:         account.ID,
+                        SecurityID:        sec.ID,
+                        QuantityMicros:    pos.QuantityMicros,
+                        CostBasisMicros:   int8FromMicros(pos.CostBasisMicros),
+                        MarketValueMicros: int8FromMicros(pos.MarketValueMicros),
+                        AsOfDate:          pgtype.Date{Time: pos.AsOfDate, Valid: true},
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to upsert position: %w", err)
+                }</span>
+        }
+
+        <span class="cov0" title="0">slog.Info("import complete",
+                "account", accountName,
+                "transactions", len(result.Transactions),
+                "positions", len(result.Positions),
+        )
+
+        return nil</span>
+}
+
+func int8FromMicros(v int64) pgtype.Int8 <span class="cov0" title="0">{
+        return pgtype.Int8{Int64: v, Valid: true}
+}</span>
+</pre>
+		
+		<pre class="file" id="file4" style="display: none">package cmd
+
+import (
+        "bufio"
+        "fmt"
+        "log/slog"
+        "os"
+        "strings"
+        "time"
+
+        "github.com/jackc/pgx/v5/pgtype"
+        "github.com/shopspring/decimal"
+        "github.com/spf13/cobra"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+        "github.com/levisegal/monay/services/holdings/importer"
+        "github.com/levisegal/monay/services/holdings/taxlots"
+)
+
+func lotsCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "lots",
+                Short: "Tax lot management commands",
+        }
+
+        cmd.AddCommand(processLotsCommand())
+        cmd.AddCommand(createLotsCommand())
+        cmd.AddCommand(checkLotsCommand())
+        cmd.AddCommand(clearLotsCommand())
+
+        return cmd
+}</span>
+
+func clearLotsCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "clear",
+                Short: "Clear all transactions and lots for an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, accountName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account not found: %s", accountName)
+                        }</span>
+
+                        <span class="cov0" title="0">if err := queries.DeleteLotsByAccount(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to delete lots: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">if err := queries.DeleteTransactionsByAccount(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to delete transactions: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">slog.Info("cleared account data", "account", account.Name)
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name to clear")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func processLotsCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "process",
+                Short: "Process tax lots from transactions (FIFO matching)",
+                Long: `Process transactions to create tax lots and match sells to buys using FIFO.
+                
+This should be run after importing all transaction history for an account.
+It will clear existing lots and recompute from scratch.`,
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, accountName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account not found: %s", accountName)
+                        }</span>
+
+                        <span class="cov0" title="0">slog.Info("processing lots", "account", account.Name, "account_id", account.ID)
+
+                        processor := taxlots.NewProcessor(queries)
+                        if err := processor.ProcessTransactions(ctx, account.ID); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to process tax lots: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">slog.Info("lot processing complete", "account", account.Name)
+
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name to process")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func createLotsCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+
+        cmd := &amp;cobra.Command{
+                Use:   "create",
+                Short: "Interactively create opening balance lots",
+                Long: `Create opening balance transactions for positions acquired before your transaction history.
+                
+This will prompt you for symbol, quantity, cost basis, and acquisition date for each lot.`,
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, accountName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account not found: %s", accountName)
+                        }</span>
+
+                        <span class="cov0" title="0">scanner := bufio.NewScanner(os.Stdin)
+
+                        for </span><span class="cov0" title="0">{
+                                lot, err := promptForLot(scanner)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov0" title="0">if lot == nil </span><span class="cov0" title="0">{
+                                        break</span>
+                                }
+
+                                <span class="cov0" title="0">sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+                                        ID:     database.NewID(database.PrefixSecurity),
+                                        Symbol: lot.symbol,
+                                        Name:   pgtype.Text{},
+                                })
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("failed to upsert security: %w", err)
+                                }</span>
+
+                                <span class="cov0" title="0">txnID := database.NewID(database.PrefixTransaction)
+                                err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+                                        ID:              txnID,
+                                        AccountID:       account.ID,
+                                        SecurityID:      pgtype.Text{String: sec.ID, Valid: true},
+                                        TransactionType: string(importer.TransactionTypeOpeningBalance),
+                                        TransactionDate: pgtype.Date{Time: lot.acquiredDate, Valid: true},
+                                        QuantityMicros:  pgtype.Int8{Int64: lot.quantityMicros, Valid: true},
+                                        PriceMicros:     pgtype.Int8{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
+                                        AmountMicros:    lot.costBasisMicros,
+                                        FeesMicros:      pgtype.Int8{Int64: 0, Valid: true},
+                                        Description:     pgtype.Text{String: "Opening balance - manual entry", Valid: true},
+                                })
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("failed to create transaction: %w", err)
+                                }</span>
+
+                                <span class="cov0" title="0">slog.Info("created opening balance",
+                                        "symbol", lot.symbol,
+                                        "quantity", float64(lot.quantityMicros)/1_000_000,
+                                        "cost_basis", float64(lot.costBasisMicros)/1_000_000,
+                                        "acquired", lot.acquiredDate.Format("2006-01-02"),
+                                )
+
+                                fmt.Print("\nAdd another lot? (y/n): ")
+                                if !scanner.Scan() </span><span class="cov0" title="0">{
+                                        fmt.Println("\nCancelled.")
+                                        break</span>
+                                }
+                                <span class="cov0" title="0">if strings.ToLower(strings.TrimSpace(scanner.Text())) != "y" </span><span class="cov0" title="0">{
+                                        break</span>
+                                }
+                                <span class="cov0" title="0">fmt.Println()</span>
+                        }
+
+                        <span class="cov0" title="0">fmt.Println("\nDone. Run 'lots process' to rebuild tax lots.")
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+type lotInput struct {
+        symbol          string
+        quantityMicros  int64
+        costBasisMicros int64
+        acquiredDate    time.Time
+}
+
+func checkLotsCommand() *cobra.Command <span class="cov0" title="0">{
+        var accountName string
+        var fix bool
+
+        cmd := &amp;cobra.Command{
+                Use:   "check",
+                Short: "Analyze lot gaps and identify positions needing attention",
+                Long: `Analyze transactions to find sells without matching buys.
+
+Categorizes gaps as:
+- SAFE TO IGNORE: fully sold positions, no current holdings affected
+- NEEDS REVIEW: still held positions with missing cost basis
+
+Use --fix to interactively add opening balances for positions needing review.`,
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">conn, err := database.Open(ctx, cfg.Database.ConnString())
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+                        <span class="cov0" title="0">defer conn.Close()
+
+                        queries := db.New(conn)
+
+                        account, err := queries.GetAccountByName(ctx, accountName)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("account not found: %s", accountName)
+                        }</span>
+
+                        <span class="cov0" title="0">analyzer := taxlots.NewAnalyzer(queries)
+                        result, err := analyzer.Analyze(ctx, account.ID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("analysis failed: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">var safeToIgnore, needsReview []taxlots.SymbolGap
+                        for _, gap := range result.Gaps </span><span class="cov0" title="0">{
+                                if gap.NeedsOpeningBalance </span><span class="cov0" title="0">{
+                                        needsReview = append(needsReview, gap)
+                                }</span> else<span class="cov0" title="0"> {
+                                        safeToIgnore = append(safeToIgnore, gap)
+                                }</span>
+                        }
+
+                        <span class="cov0" title="0">fmt.Printf("\n=== %s: Lot Analysis ===\n", account.Name)
+
+                        if len(safeToIgnore) &gt; 0 </span><span class="cov0" title="0">{
+                                fmt.Println("\nSAFE TO IGNORE (old positions fully closed, or new buys after old sells):")
+                                fmt.Printf("  %-10s %15s %15s\n", "Symbol", "Unmatched Qty", "Current Qty")
+                                for _, gap := range safeToIgnore </span><span class="cov0" title="0">{
+                                        fmt.Printf("  %-10s %15.2f %15.2f\n", gap.Symbol,
+                                                float64(gap.UnmatchedMicros)/1_000_000,
+                                                float64(gap.RemainingMicros)/1_000_000)
+                                }</span>
+                        }
+
+                        <span class="cov0" title="0">if len(needsReview) &gt; 0 </span><span class="cov0" title="0">{
+                                fmt.Println("\nNEEDS OPENING BALANCE (current holdings affected by missing buys):")
+                                fmt.Printf("  %-10s %15s %15s\n", "Symbol", "Unmatched Qty", "Current Qty")
+                                for _, gap := range needsReview </span><span class="cov0" title="0">{
+                                        fmt.Printf("  %-10s %15.2f %15.2f\n", gap.Symbol,
+                                                float64(gap.UnmatchedMicros)/1_000_000,
+                                                float64(gap.RemainingMicros)/1_000_000)
+                                }</span>
+                        }
+
+                        <span class="cov0" title="0">fmt.Printf("\nSummary: %d historical gaps (ignorable), %d need opening balances\n",
+                                len(safeToIgnore), len(needsReview))
+
+                        if len(needsReview) == 0 </span><span class="cov0" title="0">{
+                                fmt.Println("No action needed.")
+                                return nil
+                        }</span>
+
+                        <span class="cov0" title="0">if !fix </span><span class="cov0" title="0">{
+                                fmt.Println("Run with --fix to add opening balances interactively.")
+                                return nil
+                        }</span>
+
+                        <span class="cov0" title="0">scanner := bufio.NewScanner(os.Stdin)
+                        fmt.Print("\nFix these now? (y/n): ")
+                        if !scanner.Scan() </span><span class="cov0" title="0">{
+                                fmt.Println("\nCancelled.")
+                                return nil
+                        }</span>
+                        <span class="cov0" title="0">if strings.ToLower(strings.TrimSpace(scanner.Text())) != "y" </span><span class="cov0" title="0">{
+                                return nil
+                        }</span>
+
+                        <span class="cov0" title="0">for _, gap := range needsReview </span><span class="cov0" title="0">{
+                                fmt.Printf("\n--- %s (%.2f shares missing) ---\n", gap.Symbol, float64(gap.UnmatchedMicros)/1_000_000)
+                                fmt.Println("Look up in E*Trade: Portfolios &gt; Positions &gt; " + gap.Symbol + " &gt; Date Acquired, Total Cost")
+
+                                lot, err := promptForLotWithSymbol(scanner, gap.Symbol, gap.UnmatchedMicros)
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return err
+                                }</span>
+                                <span class="cov0" title="0">if lot == nil </span><span class="cov0" title="0">{
+                                        fmt.Println("Skipped.")
+                                        continue</span>
+                                }
+
+                                <span class="cov0" title="0">sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+                                        ID:     database.NewID(database.PrefixSecurity),
+                                        Symbol: lot.symbol,
+                                        Name:   pgtype.Text{},
+                                })
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("failed to upsert security: %w", err)
+                                }</span>
+
+                                <span class="cov0" title="0">err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+                                        ID:              database.NewID(database.PrefixTransaction),
+                                        AccountID:       account.ID,
+                                        SecurityID:      pgtype.Text{String: sec.ID, Valid: true},
+                                        TransactionType: string(importer.TransactionTypeOpeningBalance),
+                                        TransactionDate: pgtype.Date{Time: lot.acquiredDate, Valid: true},
+                                        QuantityMicros:  pgtype.Int8{Int64: lot.quantityMicros, Valid: true},
+                                        PriceMicros:     pgtype.Int8{Int64: lot.costBasisMicros / lot.quantityMicros, Valid: true},
+                                        AmountMicros:    lot.costBasisMicros,
+                                        FeesMicros:      pgtype.Int8{Int64: 0, Valid: true},
+                                        Description:     pgtype.Text{String: "Opening balance - manual entry", Valid: true},
+                                })
+                                if err != nil </span><span class="cov0" title="0">{
+                                        return fmt.Errorf("failed to create transaction: %w", err)
+                                }</span>
+
+                                <span class="cov0" title="0">fmt.Printf("Created opening balance for %s.\n", lot.symbol)</span>
+                        }
+
+                        <span class="cov0" title="0">fmt.Printf("\nDone. Run 'lots process --account-name %s' to rebuild lots.\n", account.Name)
+                        return nil</span>
+                },
+        }
+
+        <span class="cov0" title="0">cmd.Flags().StringVar(&amp;accountName, "account-name", "", "Account name to check")
+        cmd.Flags().BoolVar(&amp;fix, "fix", false, "Interactively add opening balances for positions needing review")
+        cmd.MarkFlagRequired("account-name")
+
+        return cmd</span>
+}
+
+func promptForLotWithSymbol(scanner *bufio.Scanner, symbol string, suggestedQtyMicros int64) (*lotInput, error) <span class="cov0" title="0">{
+        fmt.Printf("Quantity (shares) [%.2f]: ", float64(suggestedQtyMicros)/1_000_000)
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">qtyStr := strings.TrimSpace(scanner.Text())
+        var quantityMicros int64
+        if qtyStr == "" </span><span class="cov0" title="0">{
+                quantityMicros = suggestedQtyMicros
+        }</span> else<span class="cov0" title="0"> {
+                qtyDec, err := decimal.NewFromString(qtyStr)
+                if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("invalid quantity: %w", err)
+                }</span>
+                <span class="cov0" title="0">quantityMicros = qtyDec.Mul(decimal.NewFromInt(1_000_000)).IntPart()</span>
+        }
+
+        <span class="cov0" title="0">fmt.Print("Total cost basis ($): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">costStr := strings.TrimSpace(scanner.Text())
+        if costStr == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+        <span class="cov0" title="0">costDec, err := decimal.NewFromString(costStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid cost basis: %w", err)
+        }</span>
+        <span class="cov0" title="0">costBasisMicros := costDec.Mul(decimal.NewFromInt(1_000_000)).IntPart()
+
+        fmt.Print("Acquisition date (YYYY-MM-DD): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">dateStr := strings.TrimSpace(scanner.Text())
+        if dateStr == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+        <span class="cov0" title="0">acquiredDate, err := time.Parse("2006-01-02", dateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid date (use YYYY-MM-DD): %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;lotInput{
+                symbol:          symbol,
+                quantityMicros:  quantityMicros,
+                costBasisMicros: costBasisMicros,
+                acquiredDate:    acquiredDate,
+        }, nil</span>
+}
+
+func promptForLot(scanner *bufio.Scanner) (*lotInput, error) <span class="cov0" title="0">{
+        fmt.Print("Symbol (or 'done' to finish): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">symbol := strings.ToUpper(strings.TrimSpace(scanner.Text()))
+        if symbol == "" || symbol == "DONE" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov0" title="0">fmt.Print("Quantity (shares): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">qtyDec, err := decimal.NewFromString(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid quantity: %w", err)
+        }</span>
+        <span class="cov0" title="0">quantityMicros := qtyDec.Mul(decimal.NewFromInt(1_000_000)).IntPart()
+
+        fmt.Print("Total cost basis ($): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">costDec, err := decimal.NewFromString(strings.TrimSpace(scanner.Text()))
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid cost basis: %w", err)
+        }</span>
+        <span class="cov0" title="0">costBasisMicros := costDec.Mul(decimal.NewFromInt(1_000_000)).IntPart()
+
+        fmt.Print("Acquisition date (YYYY-MM-DD): ")
+        if !scanner.Scan() </span><span class="cov0" title="0">{
+                return nil, scanner.Err()
+        }</span>
+        <span class="cov0" title="0">dateStr := strings.TrimSpace(scanner.Text())
+        acquiredDate, err := time.Parse("2006-01-02", dateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("invalid date (use YYYY-MM-DD): %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return &amp;lotInput{
+                symbol:          symbol,
+                quantityMicros:  quantityMicros,
+                costBasisMicros: costBasisMicros,
+                acquiredDate:    acquiredDate,
+        }, nil</span>
+}
+</pre>
+		
+		<pre class="file" id="file5" style="display: none">package cmd
+
+import (
+        "encoding/json"
+        "fmt"
+        "os"
+        "time"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/plaid"
+        plaidgo "github.com/plaid/plaid-go/v29/plaid"
+        "github.com/spf13/cobra"
+)
+
+func plaidCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "plaid",
+                Short: "Plaid integration commands",
+        }
+
+        cmd.AddCommand(plaidLinkCommand())
+        cmd.AddCommand(plaidHoldingsCommand())
+
+        return cmd
+}</span>
+
+func plaidLinkCommand() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "link",
+                Short: "Run Plaid Link flow to connect an account",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">client := plaid.NewClient(cfg.Plaid)
+
+                        fmt.Println("[1] Creating link token...")
+                        userID := fmt.Sprintf("user-%d", time.Now().Unix())
+                        linkToken, err := client.CreateLinkToken(ctx, userID)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("create link token: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Println("[2] Open http://localhost:8080 in your browser")
+                        fmt.Println("    For sandbox, use test credentials: user_good / pass_good")
+                        fmt.Println()
+                        fmt.Println("    Waiting for connection...")
+
+                        publicToken, err := plaid.ServeLinkAndWait(linkToken, 5*time.Minute)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("link flow: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Println("[3] Exchanging public token for access token...")
+                        accessToken, err := client.ExchangePublicToken(ctx, publicToken)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("exchange token: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">if err := saveAccessToken(accessToken); err != nil </span><span class="cov0" title="0">{
+                                fmt.Printf("Warning: could not save access token: %v\n", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Println("[4] Success! Access token saved to .access_token")
+                        return nil</span>
+                },
+        }
+}
+
+func plaidHoldingsCommand() *cobra.Command <span class="cov0" title="0">{
+        return &amp;cobra.Command{
+                Use:   "holdings",
+                Short: "Fetch investment holdings from Plaid",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">client := plaid.NewClient(cfg.Plaid)
+
+                        accessToken, err := loadAccessToken()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("no access token found, run 'holdings plaid link' first: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">fmt.Println("Fetching investment holdings...")
+                        resp, err := client.GetHoldings(ctx, accessToken)
+                        if err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("get holdings: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">printHoldings(resp)
+                        return nil</span>
+                },
+        }
+}
+
+func printHoldings(resp *plaidgo.InvestmentsHoldingsGetResponse) <span class="cov0" title="0">{
+        fmt.Printf("\nAccounts (%d):\n", len(resp.Accounts))
+        for _, acct := range resp.Accounts </span><span class="cov0" title="0">{
+                balance := 0.0
+                if b := acct.GetBalances().Current.Get(); b != nil </span><span class="cov0" title="0">{
+                        balance = *b
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("  - %s (%s): $%.2f\n", acct.GetName(), acct.GetType(), balance)</span>
+        }
+
+        <span class="cov0" title="0">fmt.Printf("\nHoldings (%d):\n", len(resp.Holdings))
+
+        securities := make(map[string]plaidgo.Security)
+        for _, sec := range resp.Securities </span><span class="cov0" title="0">{
+                securities[sec.GetSecurityId()] = sec
+        }</span>
+
+        <span class="cov0" title="0">for _, h := range resp.Holdings </span><span class="cov0" title="0">{
+                sec := securities[h.GetSecurityId()]
+                symbol := sec.GetTickerSymbol()
+                if symbol == "" </span><span class="cov0" title="0">{
+                        symbol = sec.GetName()
+                }</span>
+                <span class="cov0" title="0">fmt.Printf("  %s: %.4f units @ $%.2f = $%.2f\n",
+                        symbol,
+                        h.GetQuantity(),
+                        h.GetInstitutionPrice(),
+                        h.GetInstitutionValue(),
+                )</span>
+        }
+
+        <span class="cov0" title="0">fmt.Println("\n--- Raw JSON ---")
+        data, _ := json.MarshalIndent(resp, "", "  ")
+        fmt.Println(string(data))</span>
+}
+
+func loadAccessToken() (string, error) <span class="cov0" title="0">{
+        data, err := os.ReadFile(".access_token")
+        if err != nil </span><span class="cov0" title="0">{
+                return "", err
+        }</span>
+        <span class="cov0" title="0">return string(data), nil</span>
+}
+
+func saveAccessToken(token string) error <span class="cov0" title="0">{
+        return os.WriteFile(".access_token", []byte(token), 0600)
+}</span>
+</pre>
+		
+		<pre class="file" id="file6" style="display: none">package cmd
+
+import (
+        "context"
+
+        "github.com/spf13/cobra"
+)
+
+func Execute(ctx context.Context) error <span class="cov0" title="0">{
+        cmd := Command()
+        cmd.SetContext(ctx)
+        return cmd.Execute()
+}</span>
+
+func Command() *cobra.Command <span class="cov0" title="0">{
+        command := &amp;cobra.Command{
+                Use:   "holdings",
+                Short: "Monay holdings service",
+        }
+
+        command.AddCommand(serverCommand())
+        command.AddCommand(plaidCommand())
+        command.AddCommand(importCommand())
+        command.AddCommand(lotsCommand())
+        command.AddCommand(holdingsCommand())
+        command.AddCommand(accountsCommand())
+        command.AddCommand(cashCommand())
+
+        return command
+}</span>
+
+</pre>
+		
+		<pre class="file" id="file7" style="display: none">package cmd
+
+import (
+        "fmt"
+        "log/slog"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/server"
+        "github.com/spf13/cobra"
+)
+
+func serverCommand() *cobra.Command <span class="cov0" title="0">{
+        cmd := &amp;cobra.Command{
+                Use:   "server",
+                Short: "Start the holdings API server",
+                RunE: func(cmd *cobra.Command, args []string) error </span><span class="cov0" title="0">{
+                        ctx := cmd.Context()
+
+                        cfg, err := config.Load()
+                        if err != nil </span><span class="cov0" title="0">{
+                                return err
+                        }</span>
+
+                        <span class="cov0" title="0">slog.Info("database config",
+                                "host", cfg.Database.Host,
+                                "port", cfg.Database.Port,
+                                "database", cfg.Database.Name,
+                                "user", cfg.Database.User,
+                        )
+
+                        if err := database.MigrateUp(ctx, cfg.Database.ConnString()); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("database migrations failed: %w", err)
+                        }</span>
+
+                        <span class="cov0" title="0">return server.Start(ctx, cfg)</span>
+                },
+        }
+
+        <span class="cov0" title="0">return cmd</span>
+}
+</pre>
+		
+		<pre class="file" id="file8" style="display: none">package main
+
+import (
+        "context"
+        "log/slog"
+        "os"
+        "os/signal"
+        "syscall"
+
+        "github.com/levisegal/monay/services/holdings/cmd/cmd"
+)
+
+func main() <span class="cov0" title="0">{
+        ctx, cancel := context.WithCancel(context.Background())
+        defer cancel()
+
+        sigChan := make(chan os.Signal, 1)
+        signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+        defer func() </span><span class="cov0" title="0">{
+                signal.Stop(sigChan)
+                close(sigChan)
+        }</span>()
+
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                sig := &lt;-sigChan
+                slog.InfoContext(ctx, "Received signal, initiating shutdown", "signal", sig.String())
+                cancel()
+        }</span>()
+
+        <span class="cov0" title="0">if err := cmd.Execute(ctx); err != nil </span><span class="cov0" title="0">{
+                os.Exit(1)
+        }</span>
+}
+
+
+
+</pre>
+		
+		<pre class="file" id="file9" style="display: none">package config
+
+import (
+        "fmt"
+        "sync"
+
+        "dario.cat/mergo"
+        "github.com/caarlos0/env/v11"
+)
+
+var (
+        once   sync.Once
+        config *Config
+)
+
+func Load() (*Config, error) <span class="cov0" title="0">{
+        var err error
+        once.Do(func() </span><span class="cov0" title="0">{
+                config, err = NewConfig()
+        }</span>)
+        <span class="cov0" title="0">return config, err</span>
+}
+
+func NewConfig() (*Config, error) <span class="cov0" title="0">{
+        conf := defaultConfig()
+        envConfig := &amp;Config{}
+
+        err := env.ParseWithOptions(envConfig, env.Options{Prefix: "MONAY_HOLDINGS_"})
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">err = mergo.Merge(conf, envConfig, mergo.WithOverride)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">return conf, nil</span>
+}
+
+func defaultConfig() *Config <span class="cov0" title="0">{
+        return &amp;Config{
+                ListenAddr:   ":8888",
+                LoggingLevel: "info",
+                Database: Database{
+                        Host: "postgres.monay.local",
+                        Port: "5432",
+                        Name: "monay",
+                        User: "monay_admin",
+                },
+                Plaid: Plaid{
+                        Env: "sandbox",
+                },
+        }
+}</span>
+
+type Config struct {
+        ListenAddr   string   `env:"LISTEN_ADDR"`
+        LoggingLevel string   `env:"LOGGING_LEVEL"`
+        Database     Database `envPrefix:"POSTGRES_"`
+        Plaid        Plaid    `envPrefix:"PLAID_"`
+}
+
+type Database struct {
+        Host   string `env:"HOST"`
+        Port   string `env:"PORT"`
+        Name   string `env:"DATABASE"`
+        User   string `env:"USER"`
+        Region string `env:"REGION"`
+        // If set, the password to use to connect to the database.
+        // If nil, will use RDS IAM authentication in production.
+        Password *string `env:"PASSWORD"`
+}
+
+func (d Database) ConnStringWithoutPassword() string <span class="cov0" title="0">{
+        return fmt.Sprintf("host=%s port=%s user=%s dbname=%s sslmode=disable",
+                d.Host, d.Port, d.User, d.Name,
+        )
+}</span>
+
+func (d Database) ConnString() string <span class="cov0" title="0">{
+        connString := d.ConnStringWithoutPassword()
+        if d.Password != nil </span><span class="cov0" title="0">{
+                connString = fmt.Sprintf("%s password=%s", connString, *d.Password)
+        }</span>
+        <span class="cov0" title="0">return connString</span>
+}
+
+type Plaid struct {
+        ClientID    string `env:"CLIENT_ID"`
+        Secret      string `env:"SECRET"`
+        Env         string `env:"ENV"`
+        RedirectURI string `env:"REDIRECT_URI"` // Required for OAuth institutions in production (must be HTTPS)
+}
+</pre>
+		
+		<pre class="file" id="file10" style="display: none">package database
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/jackc/pgx/v5/pgxpool"
+)
+
+func Open(ctx context.Context, connString string) (*pgxpool.Pool, error) <span class="cov0" title="0">{
+        pool, err := pgxpool.New(ctx, connString)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to create connection pool: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if err := pool.Ping(ctx); err != nil </span><span class="cov0" title="0">{
+                pool.Close()
+                return nil, fmt.Errorf("failed to ping database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">return pool, nil</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file11" style="display: none">package database
+
+import "github.com/segmentio/ksuid"
+
+type IDPrefix string
+
+const (
+        PrefixAccount        IDPrefix = "acct"
+        PrefixSecurity       IDPrefix = "sec"
+        PrefixPosition       IDPrefix = "pos"
+        PrefixTransaction    IDPrefix = "txn"
+        PrefixLot            IDPrefix = "lot"
+        PrefixLotDisposition IDPrefix = "disp"
+        PrefixCashTxn        IDPrefix = "cash"
+)
+
+func NewID(prefix IDPrefix) string <span class="cov0" title="0">{
+        return string(prefix) + "_" + ksuid.New().String()
+}</span>
+</pre>
+		
+		<pre class="file" id="file12" style="display: none">package database
+
+import (
+        "context"
+        "database/sql"
+        "fmt"
+        "log/slog"
+
+        _ "github.com/jackc/pgx/v5/stdlib"
+        "github.com/pressly/goose/v3"
+
+        "github.com/levisegal/monay/services/holdings/database/sql/migrations"
+)
+
+func MigrateUp(ctx context.Context, connString string) error <span class="cov0" title="0">{
+        db, err := sql.Open("pgx", connString)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to open database for migrations: %w", err)
+        }</span>
+        <span class="cov0" title="0">defer db.Close()
+
+        if err := db.PingContext(ctx); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to ping database: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">goose.SetLogger(goose.NopLogger())
+
+        provider, err := goose.NewProvider(goose.DialectPostgres, db, migrations.Embed)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to create migration provider: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">results, err := provider.Up(ctx)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to apply database migrations: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">if len(results) == 0 </span><span class="cov0" title="0">{
+                slog.Info("database migrations up-to-date")
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">for _, r := range results </span><span class="cov0" title="0">{
+                slog.Info("applied migration", "version", r.Source.Version, "name", r.Source.Path)
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file13" style="display: none">package importer
+
+import (
+        "context"
+        "encoding/csv"
+        "fmt"
+        "io"
+        "strings"
+        "time"
+
+        "github.com/shopspring/decimal"
+)
+
+const microsMultiplier = 1_000_000
+
+type ETradeParser struct{}
+
+func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        reader := csv.NewReader(r)
+        reader.FieldsPerRecord = -1
+
+        var transactions []Transaction
+        var externalAccountNumber string
+        headerFound := false
+
+        for </span><span class="cov0" title="0">{
+                record, err := reader.Read()
+                if err == io.EOF </span><span class="cov0" title="0">{
+                        break</span>
+                }
+                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to read CSV: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">if len(record) == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if len(record) &gt;= 2 &amp;&amp; record[0] == "For Account:" </span><span class="cov0" title="0">{
+                        externalAccountNumber = strings.TrimSpace(record[1])
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if record[0] == "TransactionDate" </span><span class="cov0" title="0">{
+                        headerFound = true
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if !headerFound </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if len(record) &lt; 9 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">txn, err := parseETradeRow(record)
+                if err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if txn != nil </span><span class="cov0" title="0">{
+                        transactions = append(transactions, *txn)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;ImportResult{
+                ExternalAccountNumber: externalAccountNumber,
+                Transactions:          transactions,
+                Positions:             nil,
+        }, nil</span>
+}
+
+func parseETradeRow(record []string) (*Transaction, error) <span class="cov0" title="0">{
+        dateStr := strings.TrimSpace(record[0])
+        txnType := strings.TrimSpace(record[1])
+        symbol := normalizeSymbol(strings.TrimSpace(record[3]))
+        quantityStr := strings.TrimSpace(record[4])
+        amountStr := strings.TrimSpace(record[5])
+        priceStr := strings.TrimSpace(record[6])
+        commissionStr := strings.TrimSpace(record[7])
+        description := strings.TrimSpace(record[8])
+
+        if dateStr == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov0" title="0">date, err := time.Parse("01/02/06", dateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse date %s: %w", dateStr, err)
+        }</span>
+
+        <span class="cov0" title="0">quantity, _ := decimal.NewFromString(quantityStr)
+        amount, _ := decimal.NewFromString(amountStr)
+        price, _ := decimal.NewFromString(priceStr)
+        commission, _ := decimal.NewFromString(commissionStr)
+
+        transactionType := mapETradeTransactionType(txnType, quantity, amount)
+        if transactionType == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        <span class="cov0" title="0">return &amp;Transaction{
+                Symbol:          symbol,
+                SecurityName:    extractSecurityName(description),
+                TransactionType: transactionType,
+                TransactionDate: date,
+                QuantityMicros:  toMicros(quantity.Abs()),
+                PriceMicros:     toMicros(price),
+                AmountMicros:    toMicros(amount.Abs()),
+                FeesMicros:      toMicros(commission),
+                Description:     description,
+        }, nil</span>
+}
+
+func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) TransactionType <span class="cov0" title="0">{
+        switch txnType </span>{
+        case "Bought":<span class="cov0" title="0">
+                return TransactionTypeBuy</span>
+        case "Opening Balance":<span class="cov0" title="0">
+                return TransactionTypeOpeningBalance</span>
+        case "Sold":<span class="cov0" title="0">
+                return TransactionTypeSell</span>
+        case "Dividend":<span class="cov0" title="0">
+                // DRIP: quantity &gt; 0 means reinvesting dividend into shares (buy)
+                if quantity.IsPositive() </span><span class="cov0" title="0">{
+                        return TransactionTypeBuy
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeDividend</span>
+        case "Qualified Dividend":<span class="cov0" title="0">
+                return TransactionTypeDividend</span>
+        case "Interest Income", "Interest":<span class="cov0" title="0">
+                return TransactionTypeInterest</span>
+        case "Online Transfer":<span class="cov0" title="0">
+                if amount.IsPositive() </span><span class="cov0" title="0">{
+                        return TransactionTypeTransferIn
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeTransferOut</span>
+        case "Transfer":<span class="cov0" title="0">
+                // Security transfer - shares coming in from another account
+                // Treat as a buy for lot purposes (creates a cost basis lot)
+                if quantity.IsPositive() || amount.IsPositive() </span><span class="cov0" title="0">{
+                        return TransactionTypeSecurityTransfer
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeTransferOut</span>
+        case "Reorganization":<span class="cov0" title="0">
+                if quantity.IsPositive() </span><span class="cov0" title="0">{
+                        return TransactionTypeReorgIn
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeReorgOut</span>
+        case "LT Cap Gain Distribution", "ST Cap Gain Distribution":<span class="cov0" title="0">
+                return TransactionTypeCapGain</span>
+        case "Misc Trade", "Adjustment":<span class="cov0" title="0">
+                return TransactionTypeOther</span>
+        default:<span class="cov0" title="0">
+                return ""</span>
+        }
+}
+
+func extractSecurityName(description string) string <span class="cov0" title="0">{
+        parts := strings.SplitN(description, " ", 4)
+        if len(parts) &gt;= 3 </span><span class="cov0" title="0">{
+                return strings.Join(parts[:3], " ")
+        }</span>
+        <span class="cov0" title="0">return description</span>
+}
+
+func toMicros(d decimal.Decimal) int64 <span class="cov0" title="0">{
+        return d.Mul(decimal.NewFromInt(microsMultiplier)).IntPart()
+}</span>
+
+// normalizeSymbol handles CUSIP-to-ticker mapping and cleanup
+func normalizeSymbol(symbol string) string <span class="cov0" title="0">{
+        // Skip empty or whitespace-only
+        if strings.TrimSpace(symbol) == "" </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+
+        // Known CUSIP mappings (E*TRADE sometimes uses CUSIPs for reorgs)
+        <span class="cov0" title="0">cusipMap := map[string]string{
+                "74374N102": "PRVB", // Provention Bio
+        }
+        if ticker, ok := cusipMap[symbol]; ok </span><span class="cov0" title="0">{
+                return ticker
+        }</span>
+
+        // Skip internal account references like #2145605
+        <span class="cov0" title="0">if strings.HasPrefix(symbol, "#") </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+
+        <span class="cov0" title="0">return symbol</span>
+}
+</pre>
+		
+		<pre class="file" id="file14" style="display: none">package importer
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+type FidelityParser struct{}
+
+func (p *FidelityParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        return nil, fmt.Errorf("fidelity parser not implemented: need sample CSV to build parser")
+}</span>
+
+
+
+</pre>
+		
+		<pre class="file" id="file15" style="display: none">package importer
+
+import (
+        "context"
+        "fmt"
+        "io"
+        "time"
+)
+
+type TransactionType string
+
+const (
+        TransactionTypeBuy              TransactionType = "buy"
+        TransactionTypeSell             TransactionType = "sell"
+        TransactionTypeDividend         TransactionType = "dividend"
+        TransactionTypeInterest         TransactionType = "interest"
+        TransactionTypeSplit            TransactionType = "split"
+        TransactionTypeTransferIn       TransactionType = "transfer_in"
+        TransactionTypeTransferOut      TransactionType = "transfer_out"
+        TransactionTypeSecurityTransfer TransactionType = "security_transfer" // shares transferred in
+        TransactionTypeReorgIn          TransactionType = "reorg_in"          // shares received from reorg
+        TransactionTypeReorgOut         TransactionType = "reorg_out"         // shares removed from reorg (cash merger, etc)
+        TransactionTypeCapGain          TransactionType = "cap_gain"          // capital gain distributions
+        TransactionTypeOpeningBalance   TransactionType = "opening_balance"   // manual opening lot
+        TransactionTypeFee              TransactionType = "fee"               // advisory fees, etc
+        TransactionTypeOther            TransactionType = "other"
+)
+
+type Transaction struct {
+        Symbol          string
+        SecurityName    string
+        TransactionType TransactionType
+        TransactionDate time.Time
+        QuantityMicros  int64 // quantity * 1,000,000
+        PriceMicros     int64 // price * 1,000,000
+        AmountMicros    int64 // amount * 1,000,000
+        FeesMicros      int64 // fees * 1,000,000
+        Description     string
+}
+
+type Position struct {
+        Symbol            string
+        SecurityName      string
+        QuantityMicros    int64 // quantity * 1,000,000
+        CostBasisMicros   int64 // cost basis * 1,000,000
+        MarketValueMicros int64 // market value * 1,000,000
+        AsOfDate          time.Time
+}
+
+type ImportResult struct {
+        ExternalAccountNumber string
+        Transactions          []Transaction
+        Positions             []Position
+}
+
+type Broker string
+
+const (
+        BrokerETrade   Broker = "etrade"
+        BrokerSchwab   Broker = "schwab"
+        BrokerFidelity Broker = "fidelity"
+        BrokerVanguard Broker = "vanguard"
+        BrokerLPL      Broker = "lpl"
+        BrokerMerrill  Broker = "merrill"
+)
+
+type Parser interface {
+        Parse(ctx context.Context, r io.Reader) (*ImportResult, error)
+}
+
+func GetParser(broker Broker) (Parser, error) <span class="cov0" title="0">{
+        switch broker </span>{
+        case BrokerETrade:<span class="cov0" title="0">
+                return &amp;ETradeParser{}, nil</span>
+        case BrokerSchwab:<span class="cov0" title="0">
+                return &amp;SchwabParser{}, nil</span>
+        case BrokerFidelity:<span class="cov0" title="0">
+                return &amp;FidelityParser{}, nil</span>
+        case BrokerVanguard:<span class="cov0" title="0">
+                return &amp;VanguardParser{}, nil</span>
+        case BrokerLPL:<span class="cov0" title="0">
+                return &amp;LPLParser{}, nil</span>
+        case BrokerMerrill:<span class="cov0" title="0">
+                return &amp;MerrillParser{}, nil</span>
+        default:<span class="cov0" title="0">
+                return nil, fmt.Errorf("unsupported broker: %s", broker)</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file16" style="display: none">package importer
+
+import (
+        "context"
+        "encoding/csv"
+        "fmt"
+        "io"
+        "strings"
+        "time"
+
+        "github.com/shopspring/decimal"
+)
+
+type LPLParser struct{}
+
+func (p *LPLParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        reader := csv.NewReader(r)
+        reader.FieldsPerRecord = -1
+        reader.LazyQuotes = true
+
+        var transactions []Transaction
+        var externalAccountNumber string
+        headerFound := false
+
+        for </span><span class="cov0" title="0">{
+                record, err := reader.Read()
+                if err == io.EOF </span><span class="cov0" title="0">{
+                        break</span>
+                }
+                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to read CSV: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">if len(record) == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Header: Date,Activity,Symbol,Description,Quantity,Unit Price,Value,Held In,Account Nickname,Account Number
+                <span class="cov0" title="0">if record[0] == "Date" </span><span class="cov0" title="0">{
+                        headerFound = true
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if !headerFound </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if len(record) &lt; 10 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Extract account number from last column
+                <span class="cov0" title="0">if externalAccountNumber == "" </span><span class="cov0" title="0">{
+                        externalAccountNumber = strings.TrimSpace(record[9])
+                }</span>
+
+                <span class="cov0" title="0">txn, err := parseLPLRow(record)
+                if err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if txn != nil </span><span class="cov0" title="0">{
+                        transactions = append(transactions, *txn)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;ImportResult{
+                ExternalAccountNumber: externalAccountNumber,
+                Transactions:          transactions,
+                Positions:             nil,
+        }, nil</span>
+}
+
+func parseLPLRow(record []string) (*Transaction, error) <span class="cov0" title="0">{
+        dateStr := strings.TrimSpace(record[0])
+        activity := strings.ToLower(strings.TrimSpace(record[1]))
+        symbol := strings.TrimSpace(record[2])
+        description := strings.TrimSpace(record[3])
+        quantityStr := strings.TrimSpace(record[4])
+        priceStr := cleanLPLAmount(record[5])
+        valueStr := cleanLPLAmount(record[6])
+
+        if dateStr == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Parse date MM/DD/YYYY
+        <span class="cov0" title="0">date, err := time.Parse("1/2/2006", dateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse date %s: %w", dateStr, err)
+        }</span>
+
+        // Clean quantity
+        <span class="cov0" title="0">if quantityStr == "-" </span><span class="cov0" title="0">{
+                quantityStr = "0"
+        }</span>
+        <span class="cov0" title="0">quantity, _ := decimal.NewFromString(quantityStr)
+        price, _ := decimal.NewFromString(priceStr)
+        value, _ := decimal.NewFromString(valueStr)
+
+        transactionType := mapLPLTransactionType(activity, value)
+        if transactionType == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Skip internal cash account transactions for buy/sell
+        <span class="cov0" title="0">if (transactionType == TransactionTypeBuy || transactionType == TransactionTypeSell) &amp;&amp; symbol == "9999227" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Clean up symbol
+        <span class="cov0" title="0">symbol = normalizeLPLSymbol(symbol)
+
+        return &amp;Transaction{
+                Symbol:          symbol,
+                SecurityName:    extractLPLSecurityName(description),
+                TransactionType: transactionType,
+                TransactionDate: date,
+                QuantityMicros:  toMicros(quantity.Abs()),
+                PriceMicros:     toMicros(price),
+                AmountMicros:    toMicros(value.Abs()),
+                FeesMicros:      0,
+                Description:     description,
+        }, nil</span>
+}
+
+func mapLPLTransactionType(activity string, value decimal.Decimal) TransactionType <span class="cov0" title="0">{
+        switch activity </span>{
+        case "buy":<span class="cov0" title="0">
+                return TransactionTypeBuy</span>
+        case "sell":<span class="cov0" title="0">
+                return TransactionTypeSell</span>
+        case "dividend reinvest":<span class="cov0" title="0">
+                // DRIP - dividend used to buy more shares
+                return TransactionTypeBuy</span>
+        case "stock dividend/split":<span class="cov0" title="0">
+                // Shares received from split - treat as buy with $0 cost
+                return TransactionTypeBuy</span>
+        case "cash dividend":<span class="cov0" title="0">
+                return TransactionTypeDividend</span>
+        case "interest":<span class="cov0" title="0">
+                return TransactionTypeInterest</span>
+        case "reinvest interest":<span class="cov0" title="0">
+                // Interest reinvested into cash account - treat as interest
+                return TransactionTypeInterest</span>
+        case "ica transfer":<span class="cov0" title="0">
+                if value.IsPositive() </span><span class="cov0" title="0">{
+                        return TransactionTypeTransferIn
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeTransferOut</span>
+        case "journal":<span class="cov0" title="0">
+                // Distribution to linked account
+                return TransactionTypeTransferOut</span>
+        case "fee":<span class="cov0" title="0">
+                return TransactionTypeFee</span>
+        default:<span class="cov0" title="0">
+                return ""</span>
+        }
+}
+
+func cleanLPLAmount(s string) string <span class="cov0" title="0">{
+        s = strings.TrimSpace(s)
+        s = strings.ReplaceAll(s, "$", "")
+        s = strings.ReplaceAll(s, "\t", "")
+        s = strings.ReplaceAll(s, ",", "")
+        if s == "-" </span><span class="cov0" title="0">{
+                return "0"
+        }</span>
+        <span class="cov0" title="0">return s</span>
+}
+
+func normalizeLPLSymbol(symbol string) string <span class="cov0" title="0">{
+        // Skip internal cash account
+        if symbol == "9999227" || symbol == "CASH" </span><span class="cov0" title="0">{
+                return ""
+        }</span>
+        <span class="cov0" title="0">return symbol</span>
+}
+
+func extractLPLSecurityName(description string) string <span class="cov0" title="0">{
+        // Bond descriptions are very long, extract the issuer name
+        // e.g. "LOS ANGELES CA UNI SCH DIST RFDG SER A B/E CPN  5.000% DUE..."
+        parts := strings.Split(description, " CPN ")
+        if len(parts) &gt; 0 </span><span class="cov0" title="0">{
+                return strings.TrimSpace(parts[0])
+        }</span>
+        <span class="cov0" title="0">return description</span>
+}
+
+</pre>
+		
+		<pre class="file" id="file17" style="display: none">package importer
+
+import (
+        "bufio"
+        "context"
+        "encoding/csv"
+        "fmt"
+        "io"
+        "strings"
+        "time"
+
+        "github.com/shopspring/decimal"
+)
+
+type MerrillParser struct{}
+
+func (p *MerrillParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        // Merrill CSVs have weird formatting: `"value" ,"value"` (space before comma)
+        // Preprocess to normalize: `"value","value"`
+        normalized := normalizeMerrillCSV(r)
+
+        reader := csv.NewReader(normalized)
+        reader.FieldsPerRecord = -1
+        reader.LazyQuotes = true
+        reader.TrimLeadingSpace = true
+
+        var transactions []Transaction
+        var externalAccountNumber string
+        headerFound := false
+
+        for </span><span class="cov0" title="0">{
+                record, err := reader.Read()
+                if err == io.EOF </span><span class="cov0" title="0">{
+                        break</span>
+                }
+                <span class="cov0" title="0">if err != nil </span><span class="cov0" title="0">{
+                        return nil, fmt.Errorf("failed to read CSV: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">if len(record) == 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Look for header row
+                <span class="cov0" title="0">firstCol := strings.TrimSpace(record[0])
+                if strings.Contains(strings.ToLower(firstCol), "trade date") </span><span class="cov0" title="0">{
+                        headerFound = true
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">if !headerFound </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Skip empty rows or separator rows
+                <span class="cov0" title="0">if len(record) &lt; 9 || firstCol == "" || firstCol == "," </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                // Extract account number from Account column (index 2)
+                <span class="cov0" title="0">if externalAccountNumber == "" &amp;&amp; len(record) &gt; 2 </span><span class="cov0" title="0">{
+                        acct := strings.TrimSpace(record[2])
+                        if acct != "" </span><span class="cov0" title="0">{
+                                externalAccountNumber = acct
+                        }</span>
+                }
+
+                <span class="cov0" title="0">txn, err := parseMerrillRow(record)
+                if err != nil </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+                <span class="cov0" title="0">if txn != nil </span><span class="cov0" title="0">{
+                        transactions = append(transactions, *txn)
+                }</span>
+        }
+
+        <span class="cov0" title="0">return &amp;ImportResult{
+                ExternalAccountNumber: externalAccountNumber,
+                Transactions:          transactions,
+                Positions:             nil,
+        }, nil</span>
+}
+
+// normalizeMerrillCSV fixes Merrill's weird CSV formatting where there's a space
+// before commas: `"value" ,"value"` → `"value","value"`
+func normalizeMerrillCSV(r io.Reader) io.Reader <span class="cov0" title="0">{
+        var result strings.Builder
+        scanner := bufio.NewScanner(r)
+        // Increase buffer for long lines (Merrill descriptions can be very long)
+        buf := make([]byte, 0, 64*1024)
+        scanner.Buffer(buf, 1024*1024)
+
+        for scanner.Scan() </span><span class="cov0" title="0">{
+                line := scanner.Text()
+                // Replace `" ,"` with `","`
+                normalized := strings.ReplaceAll(line, "\" ,\"", "\",\"")
+                // Remove trailing space after last quote (Merrill quirk)
+                normalized = strings.TrimRight(normalized, " ")
+                result.WriteString(normalized)
+                result.WriteByte('\n')
+        }</span>
+
+        <span class="cov0" title="0">return strings.NewReader(result.String())</span>
+}
+
+func parseMerrillRow(record []string) (*Transaction, error) <span class="cov0" title="0">{
+        // Columns: Trade Date, Settlement Date, Account, Description, Type, Symbol/CUSIP, Quantity, Price, Amount
+        dateStr := strings.TrimSpace(record[0])
+        description := strings.TrimSpace(record[3])
+        symbol := strings.TrimSpace(record[5])
+        quantityStr := cleanMerrillAmount(record[6])
+        priceStr := cleanMerrillAmount(record[7])
+        amountStr := cleanMerrillAmount(record[8])
+
+        if dateStr == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Parse date MM/DD/YYYY
+        <span class="cov0" title="0">date, err := time.Parse("01/02/2006", dateStr)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, fmt.Errorf("failed to parse date %s: %w", dateStr, err)
+        }</span>
+
+        // Parse amounts first (needed for transaction type detection)
+        <span class="cov0" title="0">quantity, _ := decimal.NewFromString(quantityStr)
+        price, _ := decimal.NewFromString(priceStr)
+        amount, _ := decimal.NewFromString(amountStr)
+
+        // Determine transaction type from description (and qty/amount for stock splits)
+        transactionType := mapMerrillTransactionType(description, quantity, amount)
+        if transactionType == "" </span><span class="cov0" title="0">{
+                return nil, nil
+        }</span>
+
+        // Normalize CUSIP to symbol for known securities
+        <span class="cov0" title="0">symbol = normalizeMerrillSymbol(symbol)
+
+        // Skip internal cash account transactions
+        if symbol == "990286916" || strings.Contains(symbol, "TMCXX") </span><span class="cov0" title="0">{
+                if transactionType != TransactionTypeInterest </span><span class="cov0" title="0">{
+                        return nil, nil
+                }</span>
+        }
+
+        // For sells, quantity is negative in CSV - we want absolute value
+        // For buys/opening balance, use the quantity as-is (positive)
+        <span class="cov0" title="0">absQuantity := quantity.Abs()
+
+        // For amount, take absolute value
+        absAmount := amount.Abs()
+
+        return &amp;Transaction{
+                Symbol:          symbol,
+                SecurityName:    extractMerrillSecurityName(description),
+                TransactionType: transactionType,
+                TransactionDate: date,
+                QuantityMicros:  toMicros(absQuantity),
+                PriceMicros:     toMicros(price),
+                AmountMicros:    toMicros(absAmount),
+                FeesMicros:      0,
+                Description:     description,
+        }, nil</span>
+}
+
+func mapMerrillTransactionType(description string, quantity, amount decimal.Decimal) TransactionType <span class="cov0" title="0">{
+        desc := strings.ToLower(description)
+
+        switch </span>{
+        case strings.HasPrefix(desc, "sale "):<span class="cov0" title="0">
+                return TransactionTypeSell</span>
+        case strings.HasPrefix(desc, "purchase "):<span class="cov0" title="0">
+                return TransactionTypeBuy</span>
+        case strings.HasPrefix(desc, "opening balance"):<span class="cov0" title="0">
+                return TransactionTypeOpeningBalance</span>
+
+        // Stock split handling: "Dividend X HOLDING Y PAY DATE" with qty &gt; 0 and amount = 0
+        case strings.HasPrefix(desc, "dividend ") &amp;&amp; !quantity.IsZero() &amp;&amp; amount.IsZero():<span class="cov0" title="0">
+                // Stock split shares - treat as buy with $0 cost
+                return TransactionTypeBuy</span>
+
+        case strings.HasPrefix(desc, "dividend "), strings.HasPrefix(desc, "foreign dividend "):<span class="cov0" title="0">
+                return TransactionTypeDividend</span>
+
+        case strings.HasPrefix(desc, "interest "):<span class="cov0" title="0">
+                return TransactionTypeInterest</span>
+        case strings.HasPrefix(desc, "bank interest "):<span class="cov0" title="0">
+                return TransactionTypeInterest</span>
+
+        case strings.HasPrefix(desc, "short term capital gain"):<span class="cov0" title="0">
+                return TransactionTypeCapGain</span>
+        case strings.HasPrefix(desc, "long term capital gain"):<span class="cov0" title="0">
+                return TransactionTypeCapGain</span>
+
+        case strings.HasPrefix(desc, "advisory program fee"):<span class="cov0" title="0">
+                return TransactionTypeFee</span>
+
+        case strings.HasPrefix(desc, "reinvestment share"):<span class="cov0" title="0">
+                // DRIP shares - treat as buy with $0 cost
+                return TransactionTypeBuy</span>
+
+        // Bond redemption at maturity
+        case strings.HasPrefix(desc, "redemption "):<span class="cov0" title="0">
+                return TransactionTypeSell</span>
+
+        // Exchange transactions (muni bond exchanges) - buy or sell based on qty sign
+        case strings.HasPrefix(desc, "exchange "):<span class="cov0" title="0">
+                if quantity.IsNegative() </span><span class="cov0" title="0">{
+                        return TransactionTypeSell
+                }</span>
+                <span class="cov0" title="0">return TransactionTypeBuy</span>
+
+        // Skip these:
+        case strings.HasPrefix(desc, "stock dividend due bill"):<span class="cov0" title="0">
+                // Temporary placeholder entries that cancel out - skip
+                return ""</span>
+        case strings.HasPrefix(desc, "reinvestment program"):<span class="cov0" title="0">
+                // Cash side of DRIP - skip (the "Reinvestment Share(s)" has the actual shares)
+                return ""</span>
+        case strings.HasPrefix(desc, "deposit ml bank"), strings.HasPrefix(desc, "withdrawal ml"):<span class="cov0" title="0">
+                // Internal cash sweep - skip
+                return ""</span>
+        case strings.HasPrefix(desc, "check accumulation"):<span class="cov0" title="0">
+                // Cash sweep accumulation - skip
+                return ""</span>
+        case strings.HasPrefix(desc, "foreign tax"):<span class="cov0" title="0">
+                // Foreign withholding tax - skip for now
+                return ""</span>
+
+        default:<span class="cov0" title="0">
+                return ""</span>
+        }
+}
+
+// normalizeMerrillSymbol maps CUSIPs to symbols for securities that Merrill
+// reports inconsistently (e.g., using CUSIP at maturity but symbol elsewhere)
+func normalizeMerrillSymbol(symbol string) string <span class="cov0" title="0">{
+        cusipToSymbol := map[string]string{
+                "46435U432": "IBMN", // iShares iBonds Dec 2025 Term Muni
+        }
+        if mapped, ok := cusipToSymbol[symbol]; ok </span><span class="cov0" title="0">{
+                return mapped
+        }</span>
+        <span class="cov0" title="0">return symbol</span>
+}
+
+func cleanMerrillAmount(s string) string <span class="cov0" title="0">{
+        s = strings.TrimSpace(s)
+        s = strings.ReplaceAll(s, "$", "")
+        s = strings.ReplaceAll(s, ",", "")
+        s = strings.ReplaceAll(s, "\"", "")
+        if s == "" || s == "-" </span><span class="cov0" title="0">{
+                return "0"
+        }</span>
+        <span class="cov0" title="0">return s</span>
+}
+
+func extractMerrillSecurityName(description string) string <span class="cov0" title="0">{
+        desc := strings.TrimSpace(description)
+
+        // Remove common prefixes
+        prefixes := []string{
+                "Sale  ", "Sale ", "Purchase  ", "Purchase ",
+                "Opening Balance - ",
+                "Dividend ", "Foreign Dividend ", "Bank Interest ", "Interest ",
+                "Short Term Capital Gain ", "Long Term Capital Gain ",
+                "Advisory Program Fee ",
+                "Reinvestment Share(s) ", "Reinvestment Program ",
+                "Redemption ", "Exchange ",
+        }
+
+        for _, prefix := range prefixes </span><span class="cov0" title="0">{
+                if strings.HasPrefix(desc, prefix) </span><span class="cov0" title="0">{
+                        desc = strings.TrimPrefix(desc, prefix)
+                        break</span>
+                }
+        }
+
+        // Cut at common noise phrases
+        <span class="cov0" title="0">cutoffs := []string{
+                " VSP ", " EXECUTED ", " PER ADVISORY", " THIS SALE",
+                " HOLDING ", " PAY DATE", " AGENT REINV",
+                " PROSPECTUS", " PRODUCT DESCRIPTION",
+        }
+
+        for _, cutoff := range cutoffs </span><span class="cov0" title="0">{
+                if idx := strings.Index(desc, cutoff); idx &gt; 0 </span><span class="cov0" title="0">{
+                        desc = desc[:idx]
+                        break</span>
+                }
+        }
+
+        <span class="cov0" title="0">return strings.TrimSpace(desc)</span>
+}
+</pre>
+		
+		<pre class="file" id="file18" style="display: none">package importer
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+type SchwabParser struct{}
+
+func (p *SchwabParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        return nil, fmt.Errorf("schwab parser not implemented: need sample CSV to build parser")
+}</span>
+
+
+
+</pre>
+		
+		<pre class="file" id="file19" style="display: none">package importer
+
+import (
+        "context"
+        "fmt"
+        "io"
+)
+
+type VanguardParser struct{}
+
+func (p *VanguardParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) <span class="cov0" title="0">{
+        return nil, fmt.Errorf("vanguard parser not implemented: need sample CSV to build parser")
+}</span>
+
+
+
+</pre>
+		
+		<pre class="file" id="file20" style="display: none">package plaid
+
+import (
+        "context"
+        "fmt"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/plaid/plaid-go/v29/plaid"
+)
+
+type Client struct {
+        api         *plaid.APIClient
+        redirectURI string
+}
+
+func NewClient(cfg config.Plaid) *Client <span class="cov0" title="0">{
+        plaidCfg := plaid.NewConfiguration()
+        plaidCfg.AddDefaultHeader("PLAID-CLIENT-ID", cfg.ClientID)
+        plaidCfg.AddDefaultHeader("PLAID-SECRET", cfg.Secret)
+
+        switch cfg.Env </span>{
+        case "production":<span class="cov0" title="0">
+                plaidCfg.UseEnvironment(plaid.Production)</span>
+        default:<span class="cov0" title="0">
+                plaidCfg.UseEnvironment(plaid.Sandbox)</span>
+        }
+
+        <span class="cov0" title="0">return &amp;Client{
+                api:         plaid.NewAPIClient(plaidCfg),
+                redirectURI: cfg.RedirectURI,
+        }</span>
+}
+
+func (c *Client) GetHoldings(ctx context.Context, accessToken string) (*plaid.InvestmentsHoldingsGetResponse, error) <span class="cov0" title="0">{
+        req := plaid.NewInvestmentsHoldingsGetRequest(accessToken)
+        resp, _, err := c.api.PlaidApi.InvestmentsHoldingsGet(ctx).InvestmentsHoldingsGetRequest(*req).Execute()
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, plaidError(err)
+        }</span>
+        <span class="cov0" title="0">return &amp;resp, nil</span>
+}
+
+func (c *Client) ExchangePublicToken(ctx context.Context, publicToken string) (string, error) <span class="cov0" title="0">{
+        req := plaid.NewItemPublicTokenExchangeRequest(publicToken)
+        resp, _, err := c.api.PlaidApi.ItemPublicTokenExchange(ctx).ItemPublicTokenExchangeRequest(*req).Execute()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", plaidError(err)
+        }</span>
+        <span class="cov0" title="0">return resp.GetAccessToken(), nil</span>
+}
+
+func (c *Client) API() *plaid.APIClient <span class="cov0" title="0">{
+        return c.api
+}</span>
+
+func plaidError(err error) error <span class="cov0" title="0">{
+        if plaidErr, ok := err.(plaid.GenericOpenAPIError); ok </span><span class="cov0" title="0">{
+                return fmt.Errorf("%s: %s", plaidErr.Error(), string(plaidErr.Body()))
+        }</span>
+        <span class="cov0" title="0">return err</span>
+}
+</pre>
+		
+		<pre class="file" id="file21" style="display: none">package plaid
+
+import (
+        "context"
+        "fmt"
+        "net/http"
+        "time"
+
+        "github.com/plaid/plaid-go/v29/plaid"
+)
+
+func (c *Client) CreateLinkToken(ctx context.Context, userID string) (string, error) <span class="cov0" title="0">{
+        user := plaid.LinkTokenCreateRequestUser{
+                ClientUserId: userID,
+        }
+
+        req := plaid.NewLinkTokenCreateRequest(
+                "Monay",
+                "en",
+                []plaid.CountryCode{plaid.COUNTRYCODE_US},
+                user,
+        )
+        req.SetProducts([]plaid.Products{plaid.PRODUCTS_INVESTMENTS})
+        // OAuth institutions (Schwab, etc.) require redirect URI in production
+        if c.redirectURI != "" </span><span class="cov0" title="0">{
+                req.SetRedirectUri(c.redirectURI)
+        }</span>
+
+        <span class="cov0" title="0">resp, _, err := c.api.PlaidApi.LinkTokenCreate(ctx).LinkTokenCreateRequest(*req).Execute()
+        if err != nil </span><span class="cov0" title="0">{
+                return "", plaidError(err)
+        }</span>
+
+        <span class="cov0" title="0">return resp.GetLinkToken(), nil</span>
+}
+
+func ServeLinkAndWait(linkToken string, timeout time.Duration) (string, error) <span class="cov0" title="0">{
+        publicTokenCh := make(chan string, 1)
+        errCh := make(chan error, 1)
+
+        mux := http.NewServeMux()
+        server := &amp;http.Server{Addr: ":8080", Handler: mux}
+
+        mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                w.Header().Set("Content-Type", "text/html")
+                fmt.Fprintf(w, linkHTML, linkToken)
+        }</span>)
+
+        <span class="cov0" title="0">mux.HandleFunc("/callback", func(w http.ResponseWriter, r *http.Request) </span><span class="cov0" title="0">{
+                publicToken := r.URL.Query().Get("public_token")
+                if publicToken == "" </span><span class="cov0" title="0">{
+                        http.Error(w, "missing public_token", http.StatusBadRequest)
+                        return
+                }</span>
+                <span class="cov0" title="0">w.Header().Set("Content-Type", "text/html")
+                fmt.Fprint(w, "&lt;html&gt;&lt;body&gt;&lt;h2&gt;Success! You can close this window.&lt;/h2&gt;&lt;/body&gt;&lt;/html&gt;")
+                publicTokenCh &lt;- publicToken</span>
+        })
+
+        <span class="cov0" title="0">go func() </span><span class="cov0" title="0">{
+                if err := server.ListenAndServe(); err != http.ErrServerClosed </span><span class="cov0" title="0">{
+                        errCh &lt;- err
+                }</span>
+        }()
+
+        <span class="cov0" title="0">select </span>{
+        case token := &lt;-publicTokenCh:<span class="cov0" title="0">
+                server.Shutdown(context.Background())
+                return token, nil</span>
+        case err := &lt;-errCh:<span class="cov0" title="0">
+                return "", err</span>
+        case &lt;-time.After(timeout):<span class="cov0" title="0">
+                server.Shutdown(context.Background())
+                return "", fmt.Errorf("timeout waiting for callback")</span>
+        }
+}
+
+const linkHTML = `&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Connect Account - Monay&lt;/title&gt;
+  &lt;script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"&gt;&lt;/script&gt;
+  &lt;style&gt;
+    body { font-family: system-ui; max-width: 600px; margin: 100px auto; text-align: center; }
+    button { padding: 16px 32px; font-size: 18px; cursor: pointer; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Connect Your Account&lt;/h1&gt;
+  &lt;p&gt;Click below to securely connect your brokerage account via Plaid.&lt;/p&gt;
+  &lt;button id="link-btn"&gt;Connect Account&lt;/button&gt;
+  &lt;p id="status"&gt;&lt;/p&gt;
+  &lt;script&gt;
+    const handler = Plaid.create({
+      token: '%s',
+      onSuccess: (public_token, metadata) =&gt; {
+        document.getElementById('status').innerText = 'Connected! Redirecting...';
+        window.location.href = '/callback?public_token=' + encodeURIComponent(public_token);
+      },
+      onExit: (err, metadata) =&gt; {
+        if (err) {
+          document.getElementById('status').innerText = 'Error: ' + err.display_message;
+        }
+      },
+    });
+    document.getElementById('link-btn').addEventListener('click', () =&gt; handler.open());
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;`
+</pre>
+		
+		<pre class="file" id="file22" style="display: none">package server
+
+import (
+        "context"
+        "log/slog"
+        "time"
+
+        "connectrpc.com/connect"
+)
+
+type loggingInterceptor struct{}
+
+func NewLoggingInterceptor() connect.UnaryInterceptorFunc <span class="cov0" title="0">{
+        interceptor := &amp;loggingInterceptor{}
+        return interceptor.WrapUnary
+}</span>
+
+func (i *loggingInterceptor) WrapUnary(next connect.UnaryFunc) connect.UnaryFunc <span class="cov0" title="0">{
+        return func(ctx context.Context, req connect.AnyRequest) (connect.AnyResponse, error) </span><span class="cov0" title="0">{
+                start := time.Now()
+
+                resp, err := next(ctx, req)
+
+                duration := time.Since(start)
+
+                if err != nil </span><span class="cov0" title="0">{
+                        slog.Error("RPC failed",
+                                "procedure", req.Spec().Procedure,
+                                "duration", duration,
+                                "error", err,
+                        )
+                }</span> else<span class="cov0" title="0"> {
+                        slog.Info("RPC completed",
+                                "procedure", req.Spec().Procedure,
+                                "duration", duration,
+                        )
+                }</span>
+
+                <span class="cov0" title="0">return resp, err</span>
+        }
+}
+</pre>
+		
+		<pre class="file" id="file23" style="display: none">package server
+
+import (
+        "context"
+        "errors"
+        "log"
+        "log/slog"
+        "net"
+        "net/http"
+        "strings"
+        "time"
+
+        "connectrpc.com/connect"
+        "connectrpc.com/grpchealth"
+        "connectrpc.com/grpcreflect"
+        "golang.org/x/net/http2"
+        "golang.org/x/net/http2/h2c"
+        "golang.org/x/sync/errgroup"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1/monayv1beta1connect"
+        "github.com/levisegal/monay/services/holdings/plaid"
+        "github.com/levisegal/monay/services/holdings/service"
+        "github.com/levisegal/monay/services/holdings/version"
+)
+
+func Start(ctx context.Context, cfg *config.Config) error <span class="cov0" title="0">{
+        slog.Info("Starting Monay Holdings API server...")
+        ver, rev := version.GetReleaseInfo()
+        slog.Info("  Version", "version", ver)
+        slog.Info("  Revision", "revision", rev)
+
+        slog.Info("Plaid config",
+                "client_id_set", cfg.Plaid.ClientID != "",
+                "secret_set", cfg.Plaid.Secret != "",
+                "env", cfg.Plaid.Env,
+        )
+        plaidClient := plaid.NewClient(cfg.Plaid)
+        svc := service.New(cfg, plaidClient)
+
+        interceptors := connect.WithInterceptors(
+                NewLoggingInterceptor(),
+        )
+
+        apiMux := http.NewServeMux()
+
+        apiMux.Handle(monayv1beta1connect.NewPlaidServiceHandler(svc, interceptors))
+
+        // Health check
+        checker := grpchealth.NewStaticChecker(
+                monayv1beta1connect.PlaidServiceName,
+        )
+        apiMux.Handle(grpchealth.NewHandler(checker))
+
+        // Reflection
+        reflector := grpcreflect.NewStaticReflector(
+                monayv1beta1connect.PlaidServiceName,
+        )
+        apiMux.Handle(grpcreflect.NewHandlerV1(reflector))
+        apiMux.Handle(grpcreflect.NewHandlerV1Alpha(reflector))
+
+        // Serve test page at root - temporary dev UI, will be replaced by Next.js frontend
+        apiMux.HandleFunc("/", serveTestPage)
+
+        webListener, err := net.Listen("tcp", cfg.ListenAddr)
+        slog.Info("Plaid environment", "env", cfg.Plaid.Env)
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">webServer := &amp;http.Server{
+                Handler: h2c.NewHandler(apiMux, &amp;http2.Server{}),
+                ErrorLog: log.New(
+                        slogErrorWriter{logger: slog.With(slog.String("component", "http"))},
+                        "",
+                        0,
+                ),
+        }
+
+        g, gctx := errgroup.WithContext(ctx)
+        go func() </span><span class="cov0" title="0">{
+                &lt;-gctx.Done()
+                slog.Info("Shutting down the server...")
+                shutdownHttpServer(webServer)
+        }</span>()
+
+        <span class="cov0" title="0">g.Go(func() error </span><span class="cov0" title="0">{
+                slog.Info("API server is running", "listen_addr", cfg.ListenAddr)
+                return serveHttp(webServer, webListener)
+        }</span>)
+
+        <span class="cov0" title="0">return g.Wait()</span>
+}
+
+func serveHttp(s *http.Server, l net.Listener) error <span class="cov0" title="0">{
+        if l == nil || s == nil </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+        <span class="cov0" title="0">if err := s.Serve(l); err != nil &amp;&amp; !errors.Is(err, http.ErrServerClosed) </span><span class="cov0" title="0">{
+                return err
+        }</span>
+        <span class="cov0" title="0">return nil</span>
+}
+
+func shutdownHttpServer(s *http.Server) <span class="cov0" title="0">{
+        ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+        defer cancel()
+        _ = s.Shutdown(ctx)
+}</span>
+
+type slogErrorWriter struct {
+        logger *slog.Logger
+}
+
+func (w slogErrorWriter) Write(p []byte) (int, error) <span class="cov0" title="0">{
+        msg := strings.TrimRight(string(p), "\n")
+        w.logger.Error(msg)
+        return len(p), nil
+}</span>
+
+func serveTestPage(w http.ResponseWriter, r *http.Request) <span class="cov0" title="0">{
+        if r.URL.Path != "/" </span><span class="cov0" title="0">{
+                http.NotFound(w, r)
+                return
+        }</span>
+        <span class="cov0" title="0">w.Header().Set("Content-Type", "text/html")
+        w.Write([]byte(testPageHTML))</span>
+}
+
+// TODO: Delete this HTML and serveTestPage when Next.js frontend is ready.
+// This is a temporary dev-only UI for testing the Plaid integration.
+const testPageHTML = `&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Monay - Plaid Test&lt;/title&gt;
+  &lt;script src="https://cdn.plaid.com/link/v2/stable/link-initialize.js"&gt;&lt;/script&gt;
+  &lt;style&gt;
+    * { box-sizing: border-box; }
+    body {
+      font-family: system-ui, -apple-system, sans-serif;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px 20px;
+      background: #0a0a0a;
+      color: #e5e5e5;
+    }
+    h1 { color: #fff; margin-bottom: 8px; }
+    .subtitle { color: #888; margin-bottom: 32px; }
+    button {
+      background: #2563eb;
+      color: white;
+      border: none;
+      padding: 12px 24px;
+      font-size: 16px;
+      border-radius: 8px;
+      cursor: pointer;
+      margin-right: 12px;
+      margin-bottom: 12px;
+    }
+    button:hover { background: #1d4ed8; }
+    button:disabled { background: #374151; cursor: not-allowed; }
+    #status {
+      margin-top: 24px;
+      padding: 16px;
+      background: #1a1a1a;
+      border-radius: 8px;
+      white-space: pre-wrap;
+      font-family: monospace;
+      font-size: 14px;
+    }
+    .success { color: #22c55e; }
+    .error { color: #ef4444; }
+  &lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+  &lt;h1&gt;Monay&lt;/h1&gt;
+  &lt;p class="subtitle"&gt;Plaid Integration Test&lt;/p&gt;
+  
+  &lt;button id="connect-btn"&gt;Connect Account&lt;/button&gt;
+  &lt;button id="holdings-btn" disabled&gt;Fetch Holdings&lt;/button&gt;
+  
+  &lt;div id="status"&gt;Ready. Click "Connect Account" to start.&lt;/div&gt;
+
+  &lt;script&gt;
+    const statusEl = document.getElementById('status');
+    const connectBtn = document.getElementById('connect-btn');
+    const holdingsBtn = document.getElementById('holdings-btn');
+    
+    function log(msg, type) {
+      const line = document.createElement('div');
+      line.textContent = msg;
+      if (type) line.className = type;
+      statusEl.appendChild(line);
+      statusEl.scrollTop = statusEl.scrollHeight;
+    }
+    
+    async function connectAccount() {
+      statusEl.innerHTML = '';
+      log('Creating link token...');
+      
+      try {
+        const resp = await fetch('/monay.v1beta1.PlaidService/CreateLinkToken', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ userId: 'test-user-' + Date.now() })
+        });
+        
+        if (!resp.ok) throw new Error(await resp.text());
+        const data = await resp.json();
+        log('Got link token: ' + data.linkToken.substring(0, 30) + '...');
+        
+        const handler = Plaid.create({
+          token: data.linkToken,
+          onSuccess: async (publicToken, metadata) =&gt; {
+            log('Connected! Institution: ' + metadata.institution.name, 'success');
+            log('Exchanging public token...');
+            
+            const exchangeResp = await fetch('/monay.v1beta1.PlaidService/ExchangePublicToken', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ publicToken: publicToken })
+            });
+            
+            if (!exchangeResp.ok) throw new Error(await exchangeResp.text());
+            log('Access token stored!', 'success');
+            holdingsBtn.disabled = false;
+          },
+          onExit: (err, metadata) =&gt; {
+            if (err) log('Link error: ' + err.display_message, 'error');
+          },
+        });
+        
+        handler.open();
+      } catch (err) {
+        log('Error: ' + err.message, 'error');
+      }
+    }
+    
+    async function fetchHoldings() {
+      log('Fetching holdings...');
+      
+      try {
+        const resp = await fetch('/monay.v1beta1.PlaidService/GetHoldings', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({})
+        });
+        
+        if (!resp.ok) throw new Error(await resp.text());
+        const data = await resp.json();
+        
+        log('\nAccounts:', 'success');
+        for (const acct of data.accounts || []) {
+          log('  ' + acct.name + ' (' + acct.type + '): $' + acct.balance.toFixed(2));
+        }
+        
+        log('\nHoldings:', 'success');
+        for (const h of data.holdings || []) {
+          const qty = (h.quantity || 0).toFixed(4);
+          const price = (h.price || 0).toFixed(2);
+          const value = (h.value || 0).toFixed(2);
+          log('  ' + (h.symbol || h.name || 'Unknown') + ': ' + qty + ' @ $' + price + ' = $' + value);
+        }
+      } catch (err) {
+        log('Error: ' + err.message, 'error');
+      }
+    }
+    
+    connectBtn.addEventListener('click', connectAccount);
+    holdingsBtn.addEventListener('click', fetchHoldings);
+  &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;`
+</pre>
+		
+		<pre class="file" id="file24" style="display: none">package service
+
+import (
+        "context"
+        "fmt"
+
+        "connectrpc.com/connect"
+        "github.com/plaid/plaid-go/v29/plaid"
+
+        monayv1beta1 "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1"
+)
+
+func (s *HoldingsService) CreateLinkToken(
+        ctx context.Context,
+        req *connect.Request[monayv1beta1.CreateLinkTokenRequest],
+) (*connect.Response[monayv1beta1.CreateLinkTokenResponse], error) <span class="cov0" title="0">{
+        userID := req.Msg.UserId
+        if userID == "" </span><span class="cov0" title="0">{
+                userID = "default-user"
+        }</span>
+
+        <span class="cov0" title="0">token, err := s.plaidClient.CreateLinkToken(ctx, userID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, connect.NewError(connect.CodeInternal, err)
+        }</span>
+
+        <span class="cov0" title="0">return connect.NewResponse(&amp;monayv1beta1.CreateLinkTokenResponse{
+                LinkToken: token,
+        }), nil</span>
+}
+
+func (s *HoldingsService) ExchangePublicToken(
+        ctx context.Context,
+        req *connect.Request[monayv1beta1.ExchangePublicTokenRequest],
+) (*connect.Response[monayv1beta1.ExchangePublicTokenResponse], error) <span class="cov0" title="0">{
+        accessToken, err := s.plaidClient.ExchangePublicToken(ctx, req.Msg.PublicToken)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, connect.NewError(connect.CodeInternal, err)
+        }</span>
+
+        <span class="cov0" title="0">s.mu.Lock()
+        s.accessToken = accessToken
+        s.mu.Unlock()
+
+        s.saveAccessToken(accessToken)
+
+        return connect.NewResponse(&amp;monayv1beta1.ExchangePublicTokenResponse{}), nil</span>
+}
+
+func (s *HoldingsService) GetHoldings(
+        ctx context.Context,
+        req *connect.Request[monayv1beta1.GetHoldingsRequest],
+) (*connect.Response[monayv1beta1.GetHoldingsResponse], error) <span class="cov0" title="0">{
+        s.mu.RLock()
+        token := s.accessToken
+        s.mu.RUnlock()
+
+        if token == "" </span><span class="cov0" title="0">{
+                return nil, connect.NewError(connect.CodeFailedPrecondition, fmt.Errorf("no access token, connect an account first"))
+        }</span>
+
+        <span class="cov0" title="0">resp, err := s.plaidClient.GetHoldings(ctx, token)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, connect.NewError(connect.CodeInternal, err)
+        }</span>
+
+        <span class="cov0" title="0">securities := buildSecurityMaps(resp.Securities)
+
+        return connect.NewResponse(&amp;monayv1beta1.GetHoldingsResponse{
+                Accounts: buildAccounts(resp.Accounts),
+                Holdings: buildHoldings(resp.Holdings, securities),
+        }), nil</span>
+}
+
+type securityMaps struct {
+        symbols map[string]string
+        names   map[string]string
+}
+
+func buildSecurityMaps(securities []plaid.Security) securityMaps <span class="cov0" title="0">{
+        m := securityMaps{
+                symbols: make(map[string]string),
+                names:   make(map[string]string),
+        }
+        for _, sec := range securities </span><span class="cov0" title="0">{
+                m.symbols[sec.GetSecurityId()] = sec.GetTickerSymbol()
+                m.names[sec.GetSecurityId()] = sec.GetName()
+        }</span>
+        <span class="cov0" title="0">return m</span>
+}
+
+func buildAccounts(accounts []plaid.AccountBase) []*monayv1beta1.Account <span class="cov0" title="0">{
+        result := make([]*monayv1beta1.Account, 0, len(accounts))
+        for _, acct := range accounts </span><span class="cov0" title="0">{
+                balance := 0.0
+                if b := acct.GetBalances().Current.Get(); b != nil </span><span class="cov0" title="0">{
+                        balance = *b
+                }</span>
+                <span class="cov0" title="0">result = append(result, &amp;monayv1beta1.Account{
+                        AccountId: acct.GetAccountId(),
+                        Name:      acct.GetName(),
+                        Type:      string(acct.GetType()),
+                        Subtype:   string(acct.GetSubtype()),
+                        Balance:   balance,
+                })</span>
+        }
+        <span class="cov0" title="0">return result</span>
+}
+
+func buildHoldings(holdings []plaid.Holding, sec securityMaps) []*monayv1beta1.Holding <span class="cov0" title="0">{
+        result := make([]*monayv1beta1.Holding, 0, len(holdings))
+        for _, h := range holdings </span><span class="cov0" title="0">{
+                symbol := sec.symbols[h.GetSecurityId()]
+                name := sec.names[h.GetSecurityId()]
+                if symbol == "" </span><span class="cov0" title="0">{
+                        symbol = name
+                }</span>
+                <span class="cov0" title="0">result = append(result, &amp;monayv1beta1.Holding{
+                        AccountId:  h.GetAccountId(),
+                        SecurityId: h.GetSecurityId(),
+                        Symbol:     symbol,
+                        Name:       name,
+                        Quantity:   h.GetQuantity(),
+                        Price:      h.GetInstitutionPrice(),
+                        Value:      h.GetInstitutionValue(),
+                })</span>
+        }
+        <span class="cov0" title="0">return result</span>
+}
+</pre>
+		
+		<pre class="file" id="file25" style="display: none">package service
+
+import (
+        "context"
+        "os"
+        "sync"
+
+        "connectrpc.com/connect"
+        "google.golang.org/protobuf/types/known/emptypb"
+
+        "github.com/levisegal/monay/services/holdings/config"
+        monayv1beta1 "github.com/levisegal/monay/services/holdings/gen/api/monay/v1beta1"
+        "github.com/levisegal/monay/services/holdings/plaid"
+        "github.com/levisegal/monay/services/holdings/version"
+)
+
+type HoldingsService struct {
+        config      *config.Config
+        plaidClient *plaid.Client
+
+        mu          sync.RWMutex
+        accessToken string
+}
+
+func New(cfg *config.Config, plaidClient *plaid.Client) *HoldingsService <span class="cov0" title="0">{
+        svc := &amp;HoldingsService{
+                config:      cfg,
+                plaidClient: plaidClient,
+        }
+        svc.loadAccessToken()
+        return svc
+}</span>
+
+func (s *HoldingsService) GetVersion(
+        _ context.Context,
+        _ *connect.Request[emptypb.Empty],
+) (*connect.Response[monayv1beta1.GetVersionResponse], error) <span class="cov0" title="0">{
+        v, revision := version.GetReleaseInfo()
+        return connect.NewResponse(&amp;monayv1beta1.GetVersionResponse{
+                Version:  v,
+                Revision: revision,
+        }), nil
+}</span>
+
+// loadAccessToken reads the Plaid access token from disk.
+// The access token is returned by Plaid after a user completes Link and is
+// used to fetch that user's data. In production, store this in the database
+// tied to a user record. File storage is a dev-only workaround.
+func (s *HoldingsService) loadAccessToken() <span class="cov0" title="0">{
+        data, err := os.ReadFile(".access_token")
+        if err == nil </span><span class="cov0" title="0">{
+                s.accessToken = string(data)
+        }</span>
+}
+
+func (s *HoldingsService) saveAccessToken(token string) <span class="cov0" title="0">{
+        os.WriteFile(".access_token", []byte(token), 0600)
+}</span>
+</pre>
+		
+		<pre class="file" id="file26" style="display: none">// Package taxlots provides FIFO lot matching and gap analysis for tax lot tracking.
+//
+// # Era Detection
+//
+// A key concept is "ownership eras" - periods when you held a security separated by
+// complete exits. The analyzer detects when unmatched sells are from a PREVIOUS era
+// vs the CURRENT era to avoid false positives.
+//
+// Example: ZS (Zscaler)
+//
+//        Era 1 (old position):
+//          2015: Bought 1000 shares    &lt;- NOT in transaction history (too old)
+//          2018: Sold 500 shares       &lt;- In history, but no matching buy = UNMATCHED
+//          2019: Sold 500 shares       &lt;- In history, but no matching buy = UNMATCHED
+//          (position fully closed)
+//
+//        Era 2 (new position):
+//          2023-11-13: Bought 300 shares  &lt;- In history, creates lot
+//          (currently held)
+//
+// Without era detection: "ZS has 1000 unmatched sells AND 300 current shares = NEEDS REVIEW"
+// With era detection: "Last unmatched sell (2019) is BEFORE current lot (2023) = SAFE TO IGNORE"
+//
+// The current 300 shares are NOT affected by the old unmatched sells because they're
+// from a completely separate ownership period.
+package taxlots
+
+import (
+        "context"
+        "time"
+
+        "github.com/levisegal/monay/services/holdings/gen/db"
+)
+
+type SymbolGap struct {
+        Symbol                string
+        SecurityID            string
+        UnmatchedMicros       int64
+        RemainingMicros       int64
+        NeedsOpeningBalance   bool
+        LastUnmatchedSellDate time.Time
+        EarliestLotDate       time.Time
+}
+
+type AnalysisResult struct {
+        Gaps []SymbolGap
+}
+
+type Analyzer struct {
+        queries *db.Queries
+}
+
+func NewAnalyzer(queries *db.Queries) *Analyzer <span class="cov0" title="0">{
+        return &amp;Analyzer{queries: queries}
+}</span>
+
+func (a *Analyzer) Analyze(ctx context.Context, accountID string) (*AnalysisResult, error) <span class="cov0" title="0">{
+        txns, err := a.queries.ListTransactionsByAccount(ctx, accountID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">sorted := sortByDateAsc(txns)
+
+        lots := make(map[string][]simulatedLot)
+        unmatched := make(map[string]int64)
+        lastUnmatchedSell := make(map[string]time.Time)
+
+        for _, txn := range sorted </span><span class="cov0" title="0">{
+                if !txn.SecurityID.Valid </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">secID := txn.SecurityID.String
+                txnDate := txn.TransactionDate.Time
+
+                switch txn.TransactionType </span>{
+                case "buy", "security_transfer", "opening_balance":<span class="cov0" title="0">
+                        if txn.QuantityMicros.Valid &amp;&amp; txn.QuantityMicros.Int64 &gt; 0 </span><span class="cov0" title="0">{
+                                lots[secID] = append(lots[secID], simulatedLot{
+                                        quantityMicros:  txn.QuantityMicros.Int64,
+                                        remainingMicros: txn.QuantityMicros.Int64,
+                                        acquiredDate:    txnDate,
+                                })
+                        }</span>
+                case "sell":<span class="cov0" title="0">
+                        if !txn.QuantityMicros.Valid || txn.QuantityMicros.Int64 == 0 </span><span class="cov0" title="0">{
+                                continue</span>
+                        }
+                        <span class="cov0" title="0">remaining := txn.QuantityMicros.Int64
+                        for i := range lots[secID] </span><span class="cov0" title="0">{
+                                if remaining &lt;= 0 </span><span class="cov0" title="0">{
+                                        break</span>
+                                }
+                                <span class="cov0" title="0">if lots[secID][i].remainingMicros &lt;= 0 </span><span class="cov0" title="0">{
+                                        continue</span>
+                                }
+                                <span class="cov0" title="0">take := min(remaining, lots[secID][i].remainingMicros)
+                                lots[secID][i].remainingMicros -= take
+                                remaining -= take</span>
+                        }
+                        <span class="cov0" title="0">if remaining &gt; 0 </span><span class="cov0" title="0">{
+                                unmatched[secID] += remaining
+                                lastUnmatchedSell[secID] = txnDate
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">remainingBySymbol, err := a.queries.SumRemainingBySymbol(ctx, accountID)
+        if err != nil </span><span class="cov0" title="0">{
+                return nil, err
+        }</span>
+
+        <span class="cov0" title="0">symbolMap := make(map[string]db.SumRemainingBySymbolRow)
+        for _, row := range remainingBySymbol </span><span class="cov0" title="0">{
+                symbolMap[row.SecurityID] = row
+        }</span>
+
+        <span class="cov0" title="0">var gaps []SymbolGap
+        for secID, unmatchedQty := range unmatched </span><span class="cov0" title="0">{
+                row, ok := symbolMap[secID]
+                symbol := secID
+                var remainingMicros int64
+                if ok </span><span class="cov0" title="0">{
+                        symbol = row.Symbol
+                        remainingMicros = row.RemainingMicros
+                }</span>
+
+                <span class="cov0" title="0">var earliestLotDate time.Time
+                for _, lot := range lots[secID] </span><span class="cov0" title="0">{
+                        if lot.remainingMicros &gt; 0 </span><span class="cov0" title="0">{
+                                if earliestLotDate.IsZero() || lot.acquiredDate.Before(earliestLotDate) </span><span class="cov0" title="0">{
+                                        earliestLotDate = lot.acquiredDate
+                                }</span>
+                        }
+                }
+
+                <span class="cov0" title="0">lastSellDate := lastUnmatchedSell[secID]
+
+                // Era-aware opening balance detection:
+                //
+                // We only need an opening balance if unmatched sells could affect CURRENT holdings.
+                // This happens when sells occurred DURING the current ownership era (after you
+                // acquired the shares you still hold).
+                //
+                // Example 1: NEEDS opening balance (same era)
+                //   2015: Bought 1000 shares    &lt;- missing from history
+                //   2023: Sold 500 shares       &lt;- unmatched, AFTER earliest lot would be
+                //   Current: 500 shares held    &lt;- these ARE affected by missing 2015 buy
+                //   =&gt; lastSellDate (2023) &gt;= earliestLotDate (would be 2015 if we had it)
+                //   =&gt; NeedsOpeningBalance = true
+                //
+                // Example 2: SAFE to ignore (different eras)
+                //   2015: Bought 1000 shares    &lt;- missing from history (Era 1)
+                //   2019: Sold 1000 shares      &lt;- unmatched sell (Era 1 closed)
+                //   2023: Bought 300 shares     &lt;- in history, new era (Era 2)
+                //   Current: 300 shares held    &lt;- NOT affected by old missing buy
+                //   =&gt; lastSellDate (2019) &lt; earliestLotDate (2023)
+                //   =&gt; NeedsOpeningBalance = false
+                //
+                needsOpeningBalance := remainingMicros &gt; 0 &amp;&amp; !earliestLotDate.IsZero() &amp;&amp;
+                        !lastSellDate.Before(earliestLotDate)
+
+                gaps = append(gaps, SymbolGap{
+                        Symbol:                symbol,
+                        SecurityID:            secID,
+                        UnmatchedMicros:       unmatchedQty,
+                        RemainingMicros:       remainingMicros,
+                        NeedsOpeningBalance:   needsOpeningBalance,
+                        LastUnmatchedSellDate: lastSellDate,
+                        EarliestLotDate:       earliestLotDate,
+                })</span>
+        }
+
+        <span class="cov0" title="0">return &amp;AnalysisResult{Gaps: gaps}, nil</span>
+}
+
+type simulatedLot struct {
+        quantityMicros  int64
+        remainingMicros int64
+        acquiredDate    time.Time
+}
+</pre>
+		
+		<pre class="file" id="file27" style="display: none">package taxlots
+
+import (
+        "context"
+        "fmt"
+        "log/slog"
+        "time"
+
+        "github.com/levisegal/monay/services/holdings/database"
+        "github.com/levisegal/monay/services/holdings/gen/db"
+)
+
+type Processor struct {
+        queries *db.Queries
+}
+
+func NewProcessor(queries *db.Queries) *Processor <span class="cov0" title="0">{
+        return &amp;Processor{queries: queries}
+}</span>
+
+func (p *Processor) ProcessTransactions(ctx context.Context, accountID string) error <span class="cov0" title="0">{
+        if err := p.queries.DeleteLotsByAccount(ctx, accountID); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clear lot dispositions: %w", err)
+        }</span>
+        <span class="cov0" title="0">if err := p.queries.DeleteLotsForAccount(ctx, accountID); err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to clear lots: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">slog.Info("cleared existing lots for account", "account_id", accountID)
+
+        txns, err := p.queries.ListTransactionsByAccount(ctx, accountID)
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list transactions: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">sorted := sortByDateAsc(txns)
+
+        for _, txn := range sorted </span><span class="cov0" title="0">{
+                if !txn.SecurityID.Valid </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">switch txn.TransactionType </span>{
+                case "buy", "security_transfer", "opening_balance", "reorg_in":<span class="cov0" title="0">
+                        if err := p.processBuy(ctx, txn); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to process buy %s: %w", txn.ID, err)
+                        }</span>
+                case "sell", "reorg_out":<span class="cov0" title="0">
+                        if err := p.processSell(ctx, txn); err != nil </span><span class="cov0" title="0">{
+                                return fmt.Errorf("failed to process sell %s: %w", txn.ID, err)
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func (p *Processor) processBuy(ctx context.Context, txn db.ListTransactionsByAccountRow) error <span class="cov0" title="0">{
+        if !txn.QuantityMicros.Valid || txn.QuantityMicros.Int64 == 0 </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">_, err := p.queries.CreateLot(ctx, db.CreateLotParams{
+                ID:              database.NewID(database.PrefixLot),
+                AccountID:       txn.AccountID,
+                SecurityID:      txn.SecurityID.String,
+                TransactionID:   txn.ID,
+                AcquiredDate:    txn.TransactionDate,
+                QuantityMicros:  txn.QuantityMicros.Int64,
+                RemainingMicros: txn.QuantityMicros.Int64,
+                CostBasisMicros: txn.AmountMicros,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return err
+        }</span>
+
+        <span class="cov0" title="0">slog.Debug("created lot",
+                "transaction_id", txn.ID,
+                "symbol", txn.Symbol,
+                "quantity", txn.QuantityMicros.Int64,
+        )
+
+        return nil</span>
+}
+
+func (p *Processor) processSell(ctx context.Context, txn db.ListTransactionsByAccountRow) error <span class="cov0" title="0">{
+        if !txn.QuantityMicros.Valid || txn.QuantityMicros.Int64 == 0 </span><span class="cov0" title="0">{
+                return nil
+        }</span>
+
+        <span class="cov0" title="0">lots, err := p.queries.ListLotsByAccountAndSecurity(ctx, db.ListLotsByAccountAndSecurityParams{
+                AccountID:  txn.AccountID,
+                SecurityID: txn.SecurityID.String,
+        })
+        if err != nil </span><span class="cov0" title="0">{
+                return fmt.Errorf("failed to list lots: %w", err)
+        }</span>
+
+        <span class="cov0" title="0">remainingToSell := txn.QuantityMicros.Int64
+        proceeds := txn.AmountMicros
+        sellDate := txn.TransactionDate.Time
+
+        for _, lot := range lots </span><span class="cov0" title="0">{
+                if remainingToSell &lt;= 0 </span><span class="cov0" title="0">{
+                        break</span>
+                }
+
+                <span class="cov0" title="0">if lot.RemainingMicros &lt;= 0 </span><span class="cov0" title="0">{
+                        continue</span>
+                }
+
+                <span class="cov0" title="0">sellFromLot := min(remainingToSell, lot.RemainingMicros)
+
+                costPerMicro := float64(lot.CostBasisMicros) / float64(lot.QuantityMicros)
+                costBasis := int64(costPerMicro * float64(sellFromLot))
+
+                proceedsPerMicro := float64(proceeds) / float64(txn.QuantityMicros.Int64)
+                lotProceeds := int64(proceedsPerMicro * float64(sellFromLot))
+
+                gain := lotProceeds - costBasis
+
+                holdingPeriod := "short_term"
+                acquiredDate := lot.AcquiredDate.Time
+                if sellDate.Sub(acquiredDate) &gt; 365*24*time.Hour </span><span class="cov0" title="0">{
+                        holdingPeriod = "long_term"
+                }</span>
+
+                <span class="cov0" title="0">_, err := p.queries.CreateLotDisposition(ctx, db.CreateLotDispositionParams{
+                        ID:                 database.NewID(database.PrefixLotDisposition),
+                        LotID:              lot.ID,
+                        SellTransactionID:  txn.ID,
+                        DisposedDate:       txn.TransactionDate,
+                        QuantityMicros:     sellFromLot,
+                        CostBasisMicros:    costBasis,
+                        ProceedsMicros:     lotProceeds,
+                        RealizedGainMicros: gain,
+                        HoldingPeriod:      holdingPeriod,
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to create disposition: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">newRemaining := lot.RemainingMicros - sellFromLot
+                err = p.queries.UpdateLotRemaining(ctx, db.UpdateLotRemainingParams{
+                        ID:              lot.ID,
+                        RemainingMicros: newRemaining,
+                })
+                if err != nil </span><span class="cov0" title="0">{
+                        return fmt.Errorf("failed to update lot remaining: %w", err)
+                }</span>
+
+                <span class="cov0" title="0">slog.Debug("matched sell to lot",
+                        "lot_id", lot.ID,
+                        "quantity", sellFromLot,
+                        "cost_basis", costBasis,
+                        "proceeds", lotProceeds,
+                        "gain", gain,
+                        "holding_period", holdingPeriod,
+                )
+
+                remainingToSell -= sellFromLot</span>
+        }
+
+        <span class="cov0" title="0">if remainingToSell &gt; 0 </span><span class="cov0" title="0">{
+                slog.Warn("sell quantity exceeds available lots",
+                        "transaction_id", txn.ID,
+                        "symbol", txn.Symbol,
+                        "unmatched_quantity", remainingToSell,
+                )
+        }</span>
+
+        <span class="cov0" title="0">return nil</span>
+}
+
+func sortByDateAsc(txns []db.ListTransactionsByAccountRow) []db.ListTransactionsByAccountRow <span class="cov0" title="0">{
+        sorted := make([]db.ListTransactionsByAccountRow, len(txns))
+        copy(sorted, txns)
+
+        for i := 0; i &lt; len(sorted)-1; i++ </span><span class="cov0" title="0">{
+                for j := i + 1; j &lt; len(sorted); j++ </span><span class="cov0" title="0">{
+                        if sorted[j].TransactionDate.Time.Before(sorted[i].TransactionDate.Time) </span><span class="cov0" title="0">{
+                                sorted[i], sorted[j] = sorted[j], sorted[i]
+                        }</span>
+                }
+        }
+
+        <span class="cov0" title="0">return sorted</span>
+}
+</pre>
+		
+		<pre class="file" id="file28" style="display: none">package version
+
+var (
+        Version    string
+        Revision   string
+        DevVersion = "dev"
+)
+
+func BuildVersion() string <span class="cov0" title="0">{
+        if len(Version) == 0 </span><span class="cov0" title="0">{
+                return DevVersion
+        }</span>
+        <span class="cov0" title="0">return Version</span>
+}
+
+func GetReleaseInfo() (string, string) <span class="cov0" title="0">{
+        return BuildVersion(), Revision
+}</span>
+</pre>
+		
+		</div>
+	</body>
+	<script>
+	(function() {
+		var files = document.getElementById('files');
+		var visible;
+		files.addEventListener('change', onChange, false);
+		function select(part) {
+			if (visible)
+				visible.style.display = 'none';
+			visible = document.getElementById(part);
+			if (!visible)
+				return;
+			files.value = part;
+			visible.style.display = 'block';
+			location.hash = part;
+		}
+		function onChange() {
+			select(files.value);
+			window.scrollTo(0, 0);
+		}
+		if (location.hash != "") {
+			select(location.hash.substr(1));
+		}
+		if (!visible) {
+			select("file0");
+		}
+	})();
+	</script>
+</html>

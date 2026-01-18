@@ -105,7 +105,11 @@ func plaidHoldingsCommand() *cobra.Command {
 func printHoldings(resp *plaidgo.InvestmentsHoldingsGetResponse) {
 	fmt.Printf("\nAccounts (%d):\n", len(resp.Accounts))
 	for _, acct := range resp.Accounts {
-		fmt.Printf("  - %s (%s): $%.2f\n", acct.GetName(), acct.GetType(), acct.GetBalances().Current.Get())
+		balance := 0.0
+		if b := acct.GetBalances().Current.Get(); b != nil {
+			balance = *b
+		}
+		fmt.Printf("  - %s (%s): $%.2f\n", acct.GetName(), acct.GetType(), balance)
 	}
 
 	fmt.Printf("\nHoldings (%d):\n", len(resp.Holdings))

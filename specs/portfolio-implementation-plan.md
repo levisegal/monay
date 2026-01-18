@@ -22,11 +22,16 @@ Add real market data to the Monay portfolio dashboard:
 | `/services/holdings/service/holdings.go` | Update: handlers for REST routes |
 | `/services/holdings/plaid/` | Delete: Plaid integration removed |
 | `/services/holdings/service/plaid.go` | Delete: Plaid handlers removed |
+| `/services/holdings/Makefile` | Update: remove proto.generate, update targets |
+| `/services/holdings/build/*.Dockerfile` | Update: remove Postgres/Plaid deps |
+| `/services/holdings/env.example` | Update: SQLite config only |
 | `/services/portfolio/` | New: entire Python/FastAPI service |
 | `/services/portfolio/main.py` | New: FastAPI app entry point |
 | `/services/portfolio/services/market.py` | New: yfinance wrapper with cache |
-| `/services/portfolio/services/cache.py` | New: SQLite chart cache |
+| `/services/portfolio/services/cache.py` | New: SQLite daily price cache |
 | `/services/portfolio/services/holdings_client.py` | New: HTTP client for Holdings |
+| `/services/portfolio/Makefile` | New: dev/run targets |
+| `/services/portfolio/build/dev.Dockerfile` | New: Python/uv container |
 | `/services/client/package.json` | Update: add tanstack-query, orval |
 | `/services/client/orval.config.ts` | New: OpenAPI client generation config |
 | `/services/client/lib/api/` | Generated: typed API client |
@@ -186,6 +191,22 @@ Rewrite `server/server.go`:
 - Delete `/services/holdings/service/plaid.go`
 - Archive `/api/monay/v1beta1/*.proto` files
 
+#### 1.6 Update Build Configs
+
+Update `/services/holdings/Makefile`:
+- Remove `proto.generate` target (no more protobufs)
+- Update `run`/`dev` targets if needed
+
+Update `/services/holdings/build/`:
+- `dev.Dockerfile` - remove Postgres client, Plaid env vars
+- `ci.Dockerfile` - same
+- `.air.toml` - update if paths changed
+
+Update `/services/holdings/env.example`:
+- Remove `MONAY_HOLDINGS_PLAID_*` vars
+- Remove `MONAY_HOLDINGS_POSTGRES_*` vars
+- Add `MONAY_HOLDINGS_DB_PATH=./holdings.db`
+
 ### Phase 2: Portfolio Service (Python/FastAPI)
 
 #### 2.1 Create Directory Structure
@@ -280,6 +301,37 @@ Create `main.py`:
 - Mount routers
 - Add CORS middleware
 - Expose `/openapi.json` (automatic with FastAPI)
+
+#### 2.9 Create Build Configs
+
+Create `/services/portfolio/Makefile`:
+```makefile
+.PHONY: dev run
+
+dev:
+	uv run uvicorn main:app --reload --port 8889
+
+run:
+	uv run uvicorn main:app --port 8889
+```
+
+Create `/services/portfolio/build/dev.Dockerfile`:
+```dockerfile
+FROM python:3.12-slim
+WORKDIR /app
+RUN pip install uv
+COPY pyproject.toml uv.lock ./
+RUN uv sync
+COPY . .
+CMD ["uv", "run", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8889"]
+```
+
+Create `/services/portfolio/.env.example`:
+```
+MONAY_PORTFOLIO_LISTEN_ADDR=:8889
+MONAY_PORTFOLIO_HOLDINGS_URL=http://localhost:8888
+MONAY_PORTFOLIO_CACHE_PATH=./cache.db
+```
 
 ### Phase 3: Frontend Integration
 

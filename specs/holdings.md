@@ -95,11 +95,13 @@ MONAY_HOLDINGS_DB_PATH=./holdings.db
 
 ## Database
 
-PostgreSQL with tables for:
-- Accounts
-- Holdings
-- Tax lots
-- Transactions
-- Cash balances
+SQLite (migration from Postgres planned in [portfolio-implementation-plan.md](./portfolio-implementation-plan.md)).
 
-Migrations in `database/sql/migrations/`.
+Tables:
+- `accounts` - Linked brokerage accounts
+- `holdings` - Current positions
+- `lots` - Tax lots with cost basis
+- `transactions` - Trade history
+- `cash_balances` - Cash tracking
+
+Tables created on startup (no migrations).

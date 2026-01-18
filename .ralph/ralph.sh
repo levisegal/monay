@@ -45,20 +45,14 @@ auto_commit() {
         return 0
     fi
 
-    # Get the last completed task for commit message
-    TASK=$(grep -m1 "^\- \[x\]" "$RALPH_DIR/TASKS.md" | sed 's/- \[x\] //' | head -c 72)
-    if [ -z "$TASK" ]; then
-        TASK="ralph iteration $iteration"
-    fi
-
     git add -A
-    git commit -m "ralph: $TASK" | tee -a "$LOG_FILE"
-    echo "Committed: ralph: $TASK" | tee -a "$LOG_FILE"
+    git commit -m "ralph: iteration $iteration" | tee -a "$LOG_FILE"
+    echo "Committed: ralph: iteration $iteration" | tee -a "$LOG_FILE"
 }
 
 run_claude() {
     cd "$REPO_ROOT"
-    cat "$RALPH_DIR/PROMPT.md" | claude --print 2>&1 | tee -a "$LOG_FILE"
+    cat "$RALPH_DIR/PROMPT.md" | claude --print --dangerously-skip-permissions 2>&1 | tee -a "$LOG_FILE"
 }
 
 iteration=0
@@ -70,12 +64,6 @@ while [ $iteration -lt $max_iterations ]; do
     echo "========================================" | tee -a "$LOG_FILE"
     echo "Iteration $iteration of $max_iterations" | tee -a "$LOG_FILE"
     echo "========================================" | tee -a "$LOG_FILE"
-
-    # Check if tasks remain
-    if ! grep -q "^\- \[ \]" "$RALPH_DIR/TASKS.md" 2>/dev/null; then
-        echo "No pending tasks. Ralph is done!" | tee -a "$LOG_FILE"
-        break
-    fi
 
     # Run Claude
     run_claude
