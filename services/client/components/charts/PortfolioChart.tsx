@@ -42,7 +42,7 @@ export function PortfolioChart({ data }: PortfolioChartProps) {
   const isPositive = change >= 0;
 
   return (
-    <div className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-6">
+    <div data-testid="portfolio-chart" className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
         <div>
           <h2 className="font-serif text-lg font-semibold text-ink mb-1">

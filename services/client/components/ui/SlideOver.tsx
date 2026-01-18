@@ -7,9 +7,10 @@ interface SlideOverProps {
   onClose: () => void;
   title?: string;
   children: React.ReactNode;
+  "data-testid"?: string;
 }
 
-export function SlideOver({ isOpen, onClose, title, children }: SlideOverProps) {
+export function SlideOver({ isOpen, onClose, title, children, "data-testid": testId }: SlideOverProps) {
   // Close on escape key
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
@@ -36,7 +37,7 @@ export function SlideOver({ isOpen, onClose, title, children }: SlideOverProps) 
       />
 
       {/* Panel */}
-      <div className="fixed inset-y-0 right-0 w-full md:w-[576px] bg-white border-l border-paper-gray shadow-paper-lg overflow-y-auto">
+      <div data-testid={testId} className="fixed inset-y-0 right-0 w-full md:w-[576px] bg-white border-l border-paper-gray shadow-paper-lg overflow-y-auto">
         {/* Header */}
         <div className="sticky top-0 bg-white border-b border-paper-gray px-6 py-4 flex items-center justify-between">
           {title && (

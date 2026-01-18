@@ -70,7 +70,7 @@ export function HoldingDetailPanel({
   const dayGainLoss = totalShares * quote.regularMarketChange;
 
   return (
-    <SlideOver isOpen={isOpen} onClose={onClose}>
+    <SlideOver isOpen={isOpen} onClose={onClose} data-testid="holding-detail-panel">
       {/* Header */}
       <div className="mb-6">
         <div className="flex items-start justify-between mb-2">

@@ -228,20 +228,20 @@ export default function DashboardPage() {
         </header>
 
         {isLoading && (
-          <div className="text-center py-8 text-foreground-secondary">
+          <div data-testid="loading-state" className="text-center py-8 text-foreground-secondary">
             Loading portfolio data...
           </div>
         )}
 
         {error && (
-          <div className="text-center py-8 text-red-700">
+          <div data-testid="error-state" className="text-center py-8 text-red-700">
             Failed to load portfolio. Make sure Holdings and Portfolio services are running.
           </div>
         )}
 
         {!isLoading && !error && (
           <>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-section">
+            <div data-testid="stats-cards" className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-section">
               {stats.map((stat) => (
                 <div
                   key={stat.label}
@@ -272,7 +272,7 @@ export default function DashboardPage() {
               <PortfolioChart data={portfolioHistory.data} />
             </div>
 
-            <div className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-statement">
+            <div data-testid="holdings-table" className="bg-white border border-paper-gray rounded-md shadow-paper p-4 sm:p-statement">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="font-serif text-lg font-semibold text-ink">
                   Holdings
@@ -365,6 +365,7 @@ export default function DashboardPage() {
                     {aggregatedHoldings.map((holding) => (
                       <tr
                         key={holding.symbol}
+                        data-testid="holding-row"
                         onClick={() => setSelectedHolding(holding.symbol)}
                         className="border-b border-paper-gray hover:bg-paper-cream/50 transition-all cursor-pointer"
                       >
@@ -409,7 +410,7 @@ export default function DashboardPage() {
               </div>
 
               {aggregatedHoldings.length === 0 && (
-                <div className="text-center py-8 text-foreground-secondary">
+                <div data-testid="empty-holdings" className="text-center py-8 text-foreground-secondary">
                   No holdings found. Import a CSV to get started.
                 </div>
               )}

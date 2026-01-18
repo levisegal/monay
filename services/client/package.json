@@ -8,7 +8,10 @@
     "start": "next start",
     "lint": "next lint",
     "tsc:check": "tsc --noEmit",
-    "api:generate": "orval"
+    "api:generate": "orval",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:update": "playwright test --update-snapshots"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.90.19",
@@ -18,6 +21,7 @@
     "recharts": "^3.6.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.57.0",
     "@types/node": "^22",
     "@types/react": "^19",
     "@types/react-dom": "^19",
