@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { PortfolioChart } from "../components/charts/PortfolioChart";
 import { HoldingDetailPanel } from "../components/holdings/HoldingDetailPanel";
 import { GainsLossSection } from "../components/gains/GainsLossSection";
@@ -57,6 +57,17 @@ export default function DashboardPage() {
   const [selectedHolding, setSelectedHolding] = useState<string | null>(null);
   const [selectedPortfolio, setSelectedPortfolio] = useState("personal");
   const [selectedAccount, setSelectedAccount] = useState<string | null>(null);
+  const [currentDate, setCurrentDate] = useState<string>("");
+
+  useEffect(() => {
+    setCurrentDate(
+      new Date().toLocaleDateString("en-US", {
+        month: "long",
+        day: "numeric",
+        year: "numeric",
+      })
+    );
+  }, []);
 
   const { data: portfolioResponse, isLoading, error } = useGetEnrichedPortfolioApiV1PortfolioEnrichedGet(
     selectedAccount ? { account_id: selectedAccount } : undefined
@@ -214,11 +225,7 @@ export default function DashboardPage() {
             Portfolio Statement
           </h1>
           <p className="text-base text-foreground-secondary mb-4">
-            {new Date().toLocaleDateString("en-US", {
-              month: "long",
-              day: "numeric",
-              year: "numeric",
-            })}
+            {currentDate}
           </p>
           <AccountSelector
             accounts={uniqueAccounts}

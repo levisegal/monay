@@ -124,15 +124,11 @@ func (rt *Router) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 type HoldingResponse struct {
-	ID                string  `json:"id"`
-	AccountID         string  `json:"account_id"`
-	AccountName       string  `json:"account_name"`
-	Symbol            string  `json:"symbol"`
-	SecurityName      *string `json:"security_name,omitempty"`
-	Quantity          float64 `json:"quantity"`
-	CostBasis         *int64  `json:"cost_basis_micros,omitempty"`
-	MarketValue       *int64  `json:"market_value_micros,omitempty"`
-	AsOfDate          string  `json:"as_of_date"`
+	AccountName  string  `json:"account_name"`
+	Symbol       string  `json:"symbol"`
+	SecurityName *string `json:"security_name,omitempty"`
+	Quantity     float64 `json:"quantity"`
+	CostBasis    *int64  `json:"cost_basis_micros,omitempty"`
 }
 
 type HoldingsListResponse struct {
@@ -142,9 +138,11 @@ type HoldingsListResponse struct {
 func (rt *Router) listHoldings(w http.ResponseWriter, r *http.Request) {
 	accountID := r.URL.Query().Get("account_id")
 
+	slog.Info("listHoldings", "account_id", accountID)
+
 	var holdings []HoldingResponse
 	if accountID != "" {
-		positions, err := rt.queries.ListPositionsByAccount(r.Context(), accountID)
+		rows, err := rt.queries.ListHoldingsByAccount(r.Context(), accountID)
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "failed to list holdings")
 			slog.Error("failed to list holdings", "error", err)
@@ -158,21 +156,23 @@ func (rt *Router) listHoldings(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		holdings = make([]HoldingResponse, len(positions))
-		for i, p := range positions {
-			holdings[i] = positionByAccountToResponse(p, account.Name)
+		slog.Info("listHoldingsByAccount", "rows", len(rows))
+		holdings = make([]HoldingResponse, len(rows))
+		for i, h := range rows {
+			holdings[i] = holdingByAccountToResponse(h, account.Name)
 		}
 	} else {
-		positions, err := rt.queries.ListAllPositions(r.Context())
+		rows, err := rt.queries.ListAllHoldings(r.Context())
 		if err != nil {
 			respondError(w, http.StatusInternalServerError, "failed to list holdings")
 			slog.Error("failed to list holdings", "error", err)
 			return
 		}
 
-		holdings = make([]HoldingResponse, len(positions))
-		for i, p := range positions {
-			holdings[i] = positionToResponse(p)
+		slog.Info("listAllHoldings", "rows", len(rows))
+		holdings = make([]HoldingResponse, len(rows))
+		for i, h := range rows {
+			holdings[i] = holdingToResponse(h)
 		}
 	}
 
@@ -193,44 +193,34 @@ func accountToResponse(a db.Account) AccountResponse {
 	return resp
 }
 
-func positionToResponse(p db.ListAllPositionsRow) HoldingResponse {
+func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	resp := HoldingResponse{
-		ID:          p.ID,
-		AccountID:   p.AccountID,
-		AccountName: p.AccountName,
-		Symbol:      p.Symbol,
-		Quantity:    float64(p.QuantityMicros) / 1_000_000,
-		AsOfDate:    p.AsOfDate,
+		AccountName: h.AccountName,
+		Symbol:      h.Symbol,
+		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
 	}
-	if p.SecurityName.Valid {
-		resp.SecurityName = &p.SecurityName.String
+	if h.SecurityName.Valid {
+		resp.SecurityName = &h.SecurityName.String
 	}
-	if p.CostBasisMicros.Valid {
-		resp.CostBasis = &p.CostBasisMicros.Int64
-	}
-	if p.MarketValueMicros.Valid {
-		resp.MarketValue = &p.MarketValueMicros.Int64
+	if h.CostBasisMicros.Valid {
+		costBasis := int64(h.CostBasisMicros.Float64)
+		resp.CostBasis = &costBasis
 	}
 	return resp
 }
 
-func positionByAccountToResponse(p db.ListPositionsByAccountRow, accountName string) HoldingResponse {
+func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string) HoldingResponse {
 	resp := HoldingResponse{
-		ID:          p.ID,
-		AccountID:   p.AccountID,
 		AccountName: accountName,
-		Symbol:      p.Symbol,
-		Quantity:    float64(p.QuantityMicros) / 1_000_000,
-		AsOfDate:    p.AsOfDate,
+		Symbol:      h.Symbol,
+		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
 	}
-	if p.SecurityName.Valid {
-		resp.SecurityName = &p.SecurityName.String
+	if h.SecurityName.Valid {
+		resp.SecurityName = &h.SecurityName.String
 	}
-	if p.CostBasisMicros.Valid {
-		resp.CostBasis = &p.CostBasisMicros.Int64
-	}
-	if p.MarketValueMicros.Valid {
-		resp.MarketValue = &p.MarketValueMicros.Int64
+	if h.CostBasisMicros.Valid {
+		costBasis := int64(h.CostBasisMicros.Float64)
+		resp.CostBasis = &costBasis
 	}
 	return resp
 }
