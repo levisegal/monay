@@ -2,31 +2,14 @@
   "permissions": {
     "allow": [
       "Skill(planning)",
-      "WebFetch(domain:github.com)",
-      "WebFetch(domain:raw.githubusercontent.com)",
-      "WebFetch(domain:steve-yegge.medium.com)",
-      "WebFetch(domain:deepwiki.com)",
-      "Bash(bd --version:*)",
-      "Bash(bd init:*)",
-      "Bash(bd doctor:*)",
-      "Bash(bd create:*)",
-      "Bash(bd sync:*)",
-      "Bash(git add:*)",
-      "Bash(bd list:*)",
-      "Bash(bd ready)",
-      "Bash(bd dep add:*)",
-      "Bash(bd show:*)",
-      "Bash(bd config get:*)",
-      "Bash(bd config list:*)",
-      "Bash(bd update:*)",
-      "mcp__playwright__browser_navigate",
-      "mcp__playwright__browser_click",
-      "mcp__playwright__browser_take_screenshot",
       "Bash(pnpm run tsc:check:*)",
       "Bash(pnpm run lint)",
       "Bash(git commit:*)",
       "Bash(git push)",
-      "mcp__playwright__browser_close"
+      "Bash(sqlite3:*)",
+      "Bash(curl:*)",
+      "Bash(git config:*)",
+      "Bash(git add:*)"
     ]
   }
 }
