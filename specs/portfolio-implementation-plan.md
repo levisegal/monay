@@ -421,3 +421,260 @@ Open http://localhost:7777 and verify:
 - [ ] Day change indicators reflect actual market movement
 - [ ] Clicking a holding opens detail panel with live chart
 - [ ] Portfolio summary reflects aggregated values
+
+### Phase 5: Visual Regression Testing (MCP/Playwright)
+
+#### 5.1 Baseline Screenshots
+
+Before migration, capture baseline screenshots from the postgres-backed version:
+- Store in `services/client/tests/screenshots/baseline/`
+- `dashboard-full.png` - Full dashboard view
+- `holdings-table.png` - Holdings table section
+- `portfolio-chart.png` - Portfolio chart section
+
+#### 5.2 Create Playwright Test Script
+
+Create `services/client/tests/visual-regression.spec.ts`:
+```typescript
+import { test, expect } from '@playwright/test';
+
+test.describe('Visual Regression', () => {
+  test('dashboard matches baseline', async ({ page }) => {
+    await page.goto('http://localhost:7777');
+    await page.waitForSelector('[data-testid="holdings-table"]');
+
+    // Compare full dashboard
+    await expect(page).toHaveScreenshot('dashboard-full.png', {
+      maxDiffPixelRatio: 0.1, // Allow 10% diff for dynamic data
+    });
+  });
+
+  test('holdings table structure matches', async ({ page }) => {
+    await page.goto('http://localhost:7777');
+    await page.waitForSelector('[data-testid="holdings-table"]');
+
+    const table = page.locator('[data-testid="holdings-table"]');
+    await expect(table).toHaveScreenshot('holdings-table.png', {
+      maxDiffPixelRatio: 0.1,
+    });
+  });
+});
+```
+
+#### 5.3 Run Visual Comparison via MCP
+
+Use Playwright MCP to:
+1. Navigate to http://localhost:7777
+2. Wait for data to load
+3. Take screenshot of current state
+4. Compare against baseline in `tests/screenshots/baseline/`
+5. Report differences
+
+```bash
+# Run playwright tests
+cd services/client && pnpm playwright test visual-regression
+
+# Or use MCP directly for ad-hoc comparison
+# browser_navigate -> browser_snapshot -> browser_take_screenshot
+```
+
+#### 5.4 Acceptance Criteria
+
+- [ ] Dashboard layout unchanged (structure, sections)
+- [ ] Holdings table columns match (symbol, shares, price, value, gain/loss)
+- [ ] Portfolio chart renders with data
+- [ ] No missing UI elements from postgres version
+- [ ] Dynamic values (prices, changes) can differ but structure must match
+
+### Phase 6: Data Reimport & Sanity Check
+
+#### 6.1 Locate Original Data Sources
+
+Check for original CSV files from brokerages:
+```bash
+# Common locations
+ls ~/Downloads/*etrade*.csv
+ls ~/Downloads/*fidelity*.csv
+ls ~/Documents/finances/*.csv
+```
+
+Or check if old Postgres is still accessible:
+```bash
+# If postgres container still exists
+docker ps -a | grep postgres
+```
+
+#### 6.2 Reimport Holdings Data
+
+Using the import scripts in `services/holdings/scripts/`:
+
+```bash
+cd services/holdings
+
+# Import E*Trade account
+./scripts/import-account.sh /path/to/etrade-holdings.csv
+
+# Import transactions if available
+./scripts/import-transactions.sh /path/to/etrade-transactions.csv
+```
+
+#### 6.3 Verify Data Loaded
+
+```bash
+# Check accounts
+curl http://localhost:8888/api/v1/accounts
+
+# Check holdings
+curl http://localhost:8888/api/v1/holdings
+
+# Should see accounts and holdings matching the original data
+```
+
+#### 6.4 Screenshot Sanity Check vs E*Trade
+
+Use MCP Playwright to compare dashboard against E*Trade checkpoint:
+
+1. Navigate to dashboard: `http://localhost:7777`
+2. Take screenshot of holdings table
+3. Compare against `etrade-checkpoint.png` in repo root
+
+**Comparison checklist (doesn't need to be 100% match):**
+- [ ] Same accounts appear (Stock Plan, Brokerage, etc.)
+- [ ] Holdings symbols match (AAPL, MSFT, etc.)
+- [ ] Share quantities approximately match
+- [ ] Total values in same ballpark (exact prices will differ due to market)
+- [ ] No missing accounts or holdings
+
+```bash
+# MCP commands for comparison:
+# 1. browser_navigate to http://localhost:7777
+# 2. browser_snapshot to see current state
+# 3. browser_take_screenshot filename=dashboard-current.png
+# 4. Compare dashboard-current.png vs etrade-checkpoint.png
+```
+
+#### 6.5 Acceptance Criteria
+
+- [ ] All accounts from E*Trade checkpoint appear in dashboard
+- [ ] Holdings count matches (same number of positions)
+- [ ] No data loss from migration
+- [ ] Portfolio totals within reasonable range (market fluctuation OK)
+
+## Account Inventory
+
+All accounts that should be loaded and visible in the dashboard:
+
+### E*Trade Accounts (6)
+| Account Name | Type | Transactions | Notes |
+|--------------|------|--------------|-------|
+| Employee Stock Plan RSU | etrade | 1 | RSU grants |
+| Stock Plan ESPP | etrade | 1 | Employee stock purchase |
+| Stock Plan DRIP | etrade | 1 | Dividend reinvestment |
+| E*Trade Joint-2060 | etrade | 223 | Joint brokerage |
+| E*Trade Joint-3652 | etrade | 51 | Joint brokerage |
+| E*Trade Maya-3758 | etrade | 147 | Individual brokerage |
+
+### LPL Accounts (2)
+| Account Name | Type | Transactions | Notes |
+|--------------|------|--------------|-------|
+| LPL Bond-5516 | lpl | 342 | Bond portfolio |
+| LPL Equities-4015 | lpl | 322 | Equity portfolio |
+
+### Merrill Accounts (2)
+| Account Name | Type | Transactions | Notes |
+|--------------|------|--------------|-------|
+| Merrill Managed-2241 | merrill | 1275 | Managed account |
+| Merrill Other-0282 | merrill | 55 | Other brokerage |
+
+**Total: 10 accounts, 2,418 transactions**
+
+---
+
+### FINAL ACCEPTANCE TEST
+
+**This is the exit condition for Ralph. Do not declare ALL_DONE until this passes.**
+
+Using Playwright MCP, verify the dashboard matches etrade-checkpoint.png:
+
+```
+1. browser_navigate to http://localhost:7777
+2. browser_snapshot - verify page loads without errors
+3. browser_console_messages - no errors
+4. browser_take_screenshot filename=final-dashboard.png
+5. Compare against etrade-checkpoint.png in repo root
+```
+
+#### E*Trade Verification (Primary)
+
+Compare dashboard against `etrade-checkpoint.png`. The E*Trade accounts are the primary validation target:
+
+**Account Presence (must match E*Trade screenshot):**
+- [ ] Employee Stock Plan RSU visible with holdings
+- [ ] Stock Plan ESPP visible with holdings
+- [ ] Stock Plan DRIP visible with holdings
+- [ ] E*Trade Joint-2060 visible with holdings
+- [ ] E*Trade Joint-3652 visible with holdings
+- [ ] E*Trade Maya-3758 visible with holdings
+
+**Holdings Accuracy (spot check against E*Trade):**
+
+Stock Plan accounts (all GILD):
+- [ ] Employee Stock Plan RSU: 3,248 shares GILD (~$394k cost basis)
+- [ ] Stock Plan DRIP: 150 shares GILD (~$18k cost basis)
+- [ ] Stock Plan ESPP: 309 shares GILD (~$37.5k cost basis)
+
+E*Trade Joint-2060 holdings should include:
+- [ ] VFIAX, VGHCX (Vanguard funds)
+- [ ] LLY, LMT, META, TSLA, ESLT (individual stocks)
+
+E*Trade Joint-3652:
+- [ ] GILD holdings (transferred from stock plans)
+
+E*Trade Maya-3758 holdings should include:
+- [ ] Biotech: ALLO, CRSP, DVAX, KURA, PRVB
+- [ ] Tech: EA, ZS, UBER, RBLX, APP, AMZN
+- [ ] VIG (Vanguard dividend fund)
+
+General:
+- [ ] No phantom holdings (holdings not in E*Trade)
+- [ ] No missing holdings (holdings in E*Trade but not dashboard)
+
+**Value Sanity:**
+- [ ] Total portfolio value within 10% of E*Trade total (market fluctuation OK)
+- [ ] Individual position values calculated correctly (shares × current price)
+- [ ] Cost basis preserved from import (if displayed)
+
+#### All Accounts Verification (Secondary)
+
+**LPL Accounts:**
+- [ ] LPL Bond-5516: Municipal bonds (CUSIPs like 870462SA7, 13048T5L3)
+- [ ] LPL Equities-4015 should include: NVDA, AAPL, GOOG, QQQJ, SOXX, XLY, MGM
+
+**Merrill Accounts:**
+- [ ] Merrill Managed-2241 should include: AAPL, NVDA, META, LLY, MSFT, GOOGL, JPM, WMT, V
+- [ ] Merrill Other-0282 visible with holdings
+
+**Must match:**
+- [ ] All 10 accounts visible in dashboard
+- [ ] All 6 E*Trade accounts show correct holdings
+- [ ] Both LPL accounts show bond/equity positions
+- [ ] Both Merrill accounts show holdings
+- [ ] Holdings show real market prices (not $0 or mock data)
+- [ ] Charts render with actual data
+- [ ] No console errors, no loading spinners stuck
+
+#### API Verification
+
+```bash
+# Verify all accounts returned
+curl -s http://localhost:8888/api/v1/accounts | jq length
+# Expected: 10
+
+# Verify holdings exist for E*Trade accounts
+curl -s http://localhost:8888/api/v1/holdings | jq 'group_by(.account_id) | length'
+# Expected: accounts with holdings
+
+# Verify lots computed correctly (for tax lot tracking)
+curl -s http://localhost:8888/api/v1/lots | jq length
+# Expected: > 0
+```
