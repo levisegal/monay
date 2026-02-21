@@ -1,8 +1,6 @@
 services:
   holdings:
     container_name: monay-holdings
-    depends_on:
-      postgres: { condition: service_started }
     build:
       context: ../services
       dockerfile: holdings/build/dev.Dockerfile
@@ -13,6 +11,30 @@ services:
       - dev.orbstack.domains=holdings.monay.local
     volumes:
       - ../services/holdings/:/go/src/monay/holdings
+      - holdings_data:/go/src/monay/holdings/data
     networks: [monay]
     profiles: [monay-apis]
 
+  portfolio:
+    container_name: monay-portfolio
+    depends_on:
+      holdings: { condition: service_started }
+    build:
+      context: ../services/portfolio
+      dockerfile: build/dev.Dockerfile
+    ports: ["8889:8889"]
+    env_file:
+      - ../services/portfolio/.env
+    environment:
+      - MONAY_PORTFOLIO_HOLDINGS_URL=http://holdings:8888
+    labels:
+      - dev.orbstack.domains=portfolio.monay.local
+    volumes:
+      - ../services/portfolio:/app
+      - portfolio_cache:/app/cache
+    networks: [monay]
+    profiles: [monay-apis]
+
+volumes:
+  holdings_data:
+  portfolio_cache:
