@@ -124,6 +124,7 @@ func (rt *Router) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 type HoldingResponse struct {
+	AccountID    string  `json:"account_id"`
 	AccountName  string  `json:"account_name"`
 	Symbol       string  `json:"symbol"`
 	SecurityName *string `json:"security_name,omitempty"`
@@ -159,7 +160,7 @@ func (rt *Router) listHoldings(w http.ResponseWriter, r *http.Request) {
 		slog.Info("listHoldingsByAccount", "rows", len(rows))
 		holdings = make([]HoldingResponse, len(rows))
 		for i, h := range rows {
-			holdings[i] = holdingByAccountToResponse(h, account.Name)
+			holdings[i] = holdingByAccountToResponse(h, account.Name, account.ID)
 		}
 	} else {
 		rows, err := rt.queries.ListAllHoldings(r.Context())
@@ -195,9 +196,12 @@ func accountToResponse(a db.Account) AccountResponse {
 
 func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	resp := HoldingResponse{
+		AccountID:   h.AccountID,
 		AccountName: h.AccountName,
 		Symbol:      h.Symbol,
-		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
+	}
+	if h.QuantityMicros.Valid {
+		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
 	}
 	if h.SecurityName.Valid {
 		resp.SecurityName = &h.SecurityName.String
@@ -209,11 +213,14 @@ func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	return resp
 }
 
-func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string) HoldingResponse {
+func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string, accountID string) HoldingResponse {
 	resp := HoldingResponse{
+		AccountID:   accountID,
 		AccountName: accountName,
 		Symbol:      h.Symbol,
-		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
+	}
+	if h.QuantityMicros.Valid {
+		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
 	}
 	if h.SecurityName.Valid {
 		resp.SecurityName = &h.SecurityName.String

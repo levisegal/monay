@@ -1,4 +1,5 @@
 import asyncio
+import re
 from datetime import date, timedelta
 from typing import TYPE_CHECKING
 
@@ -6,6 +7,23 @@ import yfinance as yf
 
 if TYPE_CHECKING:
     from services.cache import PriceCache
+
+
+def _is_valid_ticker(symbol: str) -> bool:
+    """Filter out CUSIPs and other non-tradeable identifiers.
+
+    CUSIPs are 9-character alphanumeric identifiers (e.g., 542433VL8, 870462SA7).
+    Valid stock/ETF tickers are typically 1-5 letters, sometimes with a dot (BRK.B).
+    """
+    if not symbol:
+        return False
+    if len(symbol) >= 8 and re.search(r"\d", symbol):
+        return False
+    if re.fullmatch(r"[A-Z]{1,5}(\.[A-Z])?", symbol.upper()):
+        return True
+    if re.fullmatch(r"[A-Z]{2,6}", symbol.upper()):
+        return True
+    return False
 
 
 class MarketService:
@@ -16,27 +34,70 @@ class MarketService:
         if not symbols:
             return []
 
+        tradeable = [s for s in symbols if _is_valid_ticker(s)]
+        if not tradeable:
+            return []
+
+        cached = await self.cache.get_cached_quotes(tradeable)
+        missing = [s for s in tradeable if s.upper() not in cached]
+
+        if missing:
+            fresh = await self._fetch_quotes_from_yfinance(missing)
+            if fresh:
+                await self.cache.store_quotes(fresh)
+                for q in fresh:
+                    cached[q["symbol"]] = q
+
+        return list(cached.values())
+
+    async def _fetch_quotes_from_yfinance(self, symbols: list[str]) -> list[dict]:
         def fetch():
-            tickers = yf.Tickers(" ".join(symbols))
+            df = yf.download(
+                symbols,
+                period="2d",
+                interval="1d",
+                progress=False,
+                threads=True,
+            )
+            if df.empty:
+                return []
+
             results = []
             for symbol in symbols:
-                ticker = tickers.tickers.get(symbol.upper())
-                if not ticker:
+                try:
+                    if len(symbols) == 1:
+                        close_col = df["Close"]
+                    else:
+                        if symbol not in df["Close"].columns:
+                            continue
+                        close_col = df["Close"][symbol]
+
+                    if close_col.empty or close_col.isna().all():
+                        continue
+
+                    prices = close_col.dropna()
+                    if len(prices) < 1:
+                        continue
+
+                    current_price = float(prices.iloc[-1])
+                    prev_close = float(prices.iloc[-2]) if len(prices) >= 2 else None
+                    change = current_price - prev_close if prev_close else None
+                    change_pct = (change / prev_close * 100) if prev_close else None
+
+                    results.append(
+                        {
+                            "symbol": symbol.upper(),
+                            "name": None,
+                            "price": current_price,
+                            "change": change,
+                            "change_percent": change_pct,
+                            "previous_close": prev_close,
+                            "volume": None,
+                            "asset_type": "equity",
+                        }
+                    )
+                except (KeyError, IndexError):
                     continue
-                info = ticker.info
-                results.append(
-                    {
-                        "symbol": symbol.upper(),
-                        "name": info.get("shortName") or info.get("longName"),
-                        "price": info.get("currentPrice")
-                        or info.get("regularMarketPrice"),
-                        "change": info.get("regularMarketChange"),
-                        "change_percent": info.get("regularMarketChangePercent"),
-                        "previous_close": info.get("previousClose"),
-                        "volume": info.get("volume"),
-                        "asset_type": _determine_asset_type(info),
-                    }
-                )
             return results
 
         return await asyncio.to_thread(fetch)
@@ -44,6 +105,9 @@ class MarketService:
     async def get_daily_chart(
         self, symbol: str, start_date: date, end_date: date
     ) -> list[dict]:
+        if not _is_valid_ticker(symbol):
+            return []
+
         cached = await self.cache.get_daily_prices(symbol, start_date, end_date)
         cached_dates = {p["timestamp"] for p in cached}
 
@@ -65,6 +129,9 @@ class MarketService:
         return cached
 
     async def get_intraday_chart(self, symbol: str, range_str: str) -> list[dict]:
+        if not _is_valid_ticker(symbol):
+            return []
+
         def fetch():
             ticker = yf.Ticker(symbol)
             interval, period = _parse_range(range_str)

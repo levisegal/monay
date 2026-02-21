@@ -180,6 +180,7 @@ func (q *Queries) GetLot(ctx context.Context, id string) (Lot, error) {
 
 const listAllHoldings = `-- name: ListAllHoldings :many
 select
+    a.id as account_id,
     a.institution_name as broker,
     a.name as account_name,
     s.symbol,
@@ -195,11 +196,12 @@ from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id
 where l.remaining_micros > 0
-group by a.institution_name, a.name, s.symbol, s.name
+group by a.id, a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc
 `
 
 type ListAllHoldingsRow struct {
+	AccountID        string          `json:"account_id"`
 	Broker           string          `json:"broker"`
 	AccountName      string          `json:"account_name"`
 	Symbol           string          `json:"symbol"`
@@ -219,6 +221,7 @@ func (q *Queries) ListAllHoldings(ctx context.Context) ([]ListAllHoldingsRow, er
 	for rows.Next() {
 		var i ListAllHoldingsRow
 		if err := rows.Scan(
+			&i.AccountID,
 			&i.Broker,
 			&i.AccountName,
 			&i.Symbol,

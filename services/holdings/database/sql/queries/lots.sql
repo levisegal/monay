@@ -145,6 +145,7 @@ order by s.symbol;
 
 -- name: ListAllHoldings :many
 select
+    a.id as account_id,
     a.institution_name as broker,
     a.name as account_name,
     s.symbol,
@@ -160,7 +161,7 @@ from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id
 where l.remaining_micros > 0
-group by a.institution_name, a.name, s.symbol, s.name
+group by a.id, a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc;
 
 -- name: ListPositions :many

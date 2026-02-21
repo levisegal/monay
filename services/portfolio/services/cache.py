@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 import aiosqlite
 
@@ -15,6 +15,15 @@ CREATE TABLE IF NOT EXISTS daily_prices (
     volume INTEGER,
     PRIMARY KEY (symbol, date)
 );
+
+CREATE TABLE IF NOT EXISTS quote_cache (
+    symbol TEXT PRIMARY KEY,
+    price REAL,
+    change REAL,
+    change_percent REAL,
+    previous_close REAL,
+    cached_at TEXT NOT NULL
+);
 """
 
 
@@ -26,7 +35,9 @@ class PriceCache:
 
     async def connect(self):
         self._db = await aiosqlite.connect(self.db_path)
-        await self._db.execute(SCHEMA)
+        for stmt in SCHEMA.strip().split(";"):
+            if stmt.strip():
+                await self._db.execute(stmt)
         await self._db.commit()
 
     async def close(self):
@@ -92,6 +103,67 @@ class PriceCache:
                     p.get("volume"),
                 )
                 for p in points
+            ],
+        )
+        await self._db.commit()
+
+    async def get_cached_quotes(self, symbols: list[str], max_age_minutes: int = 5) -> dict[str, dict]:
+        """Get cached quotes that are not stale."""
+        if not self._db:
+            raise RuntimeError("Database not connected")
+
+        if not symbols:
+            return {}
+
+        placeholders = ",".join("?" for _ in symbols)
+        cursor = await self._db.execute(
+            f"""
+            SELECT symbol, price, change, change_percent, previous_close, cached_at
+            FROM quote_cache
+            WHERE symbol IN ({placeholders})
+            """,
+            [s.upper() for s in symbols],
+        )
+        rows = await cursor.fetchall()
+
+        result = {}
+        for row in rows:
+            cached_at = datetime.fromisoformat(row[5])
+            age_minutes = (datetime.utcnow() - cached_at).total_seconds() / 60
+            if age_minutes <= max_age_minutes:
+                result[row[0]] = {
+                    "symbol": row[0],
+                    "name": None,
+                    "price": row[1],
+                    "change": row[2],
+                    "change_percent": row[3],
+                    "previous_close": row[4],
+                    "volume": None,
+                    "asset_type": "equity",
+                }
+        return result
+
+    async def store_quotes(self, quotes: list[dict]):
+        """Store quotes in cache."""
+        if not self._db:
+            raise RuntimeError("Database not connected")
+
+        now = datetime.utcnow().isoformat()
+        await self._db.executemany(
+            """
+            INSERT OR REPLACE INTO quote_cache (symbol, price, change, change_percent, previous_close, cached_at)
+            VALUES (?, ?, ?, ?, ?, ?)
+            """,
+            [
+                (
+                    q["symbol"].upper(),
+                    q.get("price"),
+                    q.get("change"),
+                    q.get("change_percent"),
+                    q.get("previous_close"),
+                    now,
+                )
+                for q in quotes
             ],
         )
         await self._db.commit()

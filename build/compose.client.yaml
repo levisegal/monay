@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
       target: dev
     ports:
-      - "7777:3000"
+      - "7777:7777"
     volumes:
       - ../services/client:/app
       - /app/node_modules
