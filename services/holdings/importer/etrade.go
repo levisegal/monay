@@ -18,6 +18,7 @@ type ETradeParser struct{}
 func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) {
 	reader := csv.NewReader(r)
 	reader.FieldsPerRecord = -1
+	reader.LazyQuotes = true
 
 	var transactions []Transaction
 	var externalAccountNumber string
@@ -36,12 +37,12 @@ func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, e
 			continue
 		}
 
-		if len(record) >= 2 && record[0] == "For Account:" {
-			externalAccountNumber = strings.TrimSpace(record[1])
+		if strings.HasPrefix(record[0], "Account Activity for ") {
+			externalAccountNumber = extractAccountNumber(record[0])
 			continue
 		}
 
-		if record[0] == "TransactionDate" {
+		if record[0] == "Activity/Trade Date" {
 			headerFound = true
 			continue
 		}
@@ -50,7 +51,7 @@ func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, e
 			continue
 		}
 
-		if len(record) < 9 {
+		if len(record) < 11 {
 			continue
 		}
 
@@ -71,14 +72,14 @@ func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, e
 }
 
 func parseETradeRow(record []string) (*Transaction, error) {
-	dateStr := strings.TrimSpace(record[0])
-	txnType := strings.TrimSpace(record[1])
-	symbol := normalizeSymbol(strings.TrimSpace(record[3]))
-	quantityStr := strings.TrimSpace(record[4])
-	amountStr := strings.TrimSpace(record[5])
-	priceStr := strings.TrimSpace(record[6])
-	commissionStr := strings.TrimSpace(record[7])
-	description := strings.TrimSpace(record[8])
+	dateStr := strings.TrimSpace(record[1])
+	txnType := strings.TrimSpace(record[3])
+	description := strings.TrimSpace(record[4])
+	symbol := normalizeSymbol(strings.TrimSpace(record[5]))
+	quantityStr := strings.TrimSpace(record[7])
+	priceStr := strings.TrimSpace(record[8])
+	amountStr := strings.TrimSpace(record[9])
+	commissionStr := strings.TrimSpace(record[10])
 
 	if dateStr == "" {
 		return nil, nil
@@ -136,10 +137,11 @@ func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) 
 		}
 		return TransactionTypeTransferOut
 	case "Transfer":
-		// Security transfer - shares coming in from another account
-		// Treat as a buy for lot purposes (creates a cost basis lot)
-		if quantity.IsPositive() || amount.IsPositive() {
+		if quantity.IsPositive() {
 			return TransactionTypeSecurityTransfer
+		}
+		if amount.IsPositive() {
+			return TransactionTypeTransferIn
 		}
 		return TransactionTypeTransferOut
 	case "Reorganization":
@@ -156,6 +158,19 @@ func mapETradeTransactionType(txnType string, quantity, amount decimal.Decimal) 
 	}
 }
 
+func extractAccountNumber(line string) string {
+	// "Account Activity for maya -3758 from ..." → "#####3758"
+	idx := strings.LastIndex(line, "-")
+	if idx < 0 {
+		return ""
+	}
+	rest := line[idx+1:]
+	if spaceIdx := strings.Index(rest, " "); spaceIdx > 0 {
+		rest = rest[:spaceIdx]
+	}
+	return "#####" + strings.TrimSpace(rest)
+}
+
 func extractSecurityName(description string) string {
 	parts := strings.SplitN(description, " ", 4)
 	if len(parts) >= 3 {
@@ -168,22 +183,18 @@ func toMicros(d decimal.Decimal) int64 {
 	return d.Mul(decimal.NewFromInt(microsMultiplier)).IntPart()
 }
 
-// normalizeSymbol handles CUSIP-to-ticker mapping and cleanup
 func normalizeSymbol(symbol string) string {
-	// Skip empty or whitespace-only
-	if strings.TrimSpace(symbol) == "" {
+	if strings.TrimSpace(symbol) == "" || symbol == "--" {
 		return ""
 	}
 
-	// Known CUSIP mappings (E*TRADE sometimes uses CUSIPs for reorgs)
 	cusipMap := map[string]string{
-		"74374N102": "PRVB", // Provention Bio
+		"74374N102": "PRVB",
 	}
 	if ticker, ok := cusipMap[symbol]; ok {
 		return ticker
 	}
 
-	// Skip internal account references like #2145605
 	if strings.HasPrefix(symbol, "#") {
 		return ""
 	}

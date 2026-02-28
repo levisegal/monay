@@ -86,6 +86,19 @@ func (q *Queries) DeleteTransactionsByAccount(ctx context.Context, accountID str
 	return err
 }
 
+const getEarliestTransactionDate = `-- name: GetEarliestTransactionDate :one
+select min(transaction_date) as earliest_date
+from transactions
+where account_id = ?1
+`
+
+func (q *Queries) GetEarliestTransactionDate(ctx context.Context, accountID string) (interface{}, error) {
+	row := q.db.QueryRowContext(ctx, getEarliestTransactionDate, accountID)
+	var earliest_date interface{}
+	err := row.Scan(&earliest_date)
+	return earliest_date, err
+}
+
 const getTransaction = `-- name: GetTransaction :one
 select id, account_id, security_id, transaction_type, transaction_date, quantity_micros, price_micros, amount_micros, fees_micros, description, created_at
 from transactions

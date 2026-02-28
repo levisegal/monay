@@ -15,6 +15,7 @@ import (
 	"github.com/levisegal/monay/services/holdings/config"
 	"github.com/levisegal/monay/services/holdings/database"
 	"github.com/levisegal/monay/services/holdings/gen/db"
+	"github.com/levisegal/monay/services/holdings/taxlots"
 )
 
 func cashCommand() *cobra.Command {
@@ -27,6 +28,7 @@ func cashCommand() *cobra.Command {
 	cmd.AddCommand(cashBalanceCommand())
 	cmd.AddCommand(cashLedgerCommand())
 	cmd.AddCommand(cashGenerateCommand())
+	cmd.AddCommand(cashReconcileCommand())
 
 	return cmd
 }
@@ -149,6 +151,117 @@ func cashGenerateCommand() *cobra.Command {
 	cmd.MarkFlagRequired("account-name")
 
 	return cmd
+}
+
+func cashReconcileCommand() *cobra.Command {
+	var (
+		accountName   string
+		positionsFile string
+	)
+
+	cmd := &cobra.Command{
+		Use:   "reconcile",
+		Short: "Reconcile cash balance against positions JSON",
+		RunE: func(cmd *cobra.Command, args []string) error {
+			ctx := cmd.Context()
+
+			cfg, err := config.Load()
+			if err != nil {
+				return err
+			}
+
+			return reconcileCash(ctx, cfg, accountName, positionsFile)
+		},
+	}
+
+	cmd.Flags().StringVar(&accountName, "account-name", "", "Account name")
+	cmd.Flags().StringVar(&positionsFile, "positions-file", "", "Path to positions JSON")
+
+	cmd.MarkFlagRequired("account-name")
+	cmd.MarkFlagRequired("positions-file")
+
+	return cmd
+}
+
+func reconcileCash(ctx context.Context, cfg *config.Config, accountName, positionsPath string) error {
+	pf, err := taxlots.LoadPositions(positionsPath)
+	if err != nil {
+		return err
+	}
+
+	expectedMicros := decimal.NewFromFloat(pf.Summary.CashPurchasingPower).
+		Mul(decimal.NewFromInt(1_000_000)).IntPart()
+
+	conn, err := database.Open(ctx, cfg.DBPath)
+	if err != nil {
+		return err
+	}
+	defer conn.Close()
+
+	queries := db.New(conn)
+
+	account, err := queries.GetAccountByName(ctx, accountName)
+	if err != nil {
+		return fmt.Errorf("account not found: %s", accountName)
+	}
+
+	balanceVal, err := queries.GetCashBalance(ctx, account.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get cash balance: %w", err)
+	}
+	computedMicros := toInt64(balanceVal)
+
+	diff := expectedMicros - computedMicros
+
+	fmt.Printf("Account:  %s\n", accountName)
+	fmt.Printf("Expected: %s (from positions JSON)\n", formatMicros(expectedMicros))
+	fmt.Printf("Computed: %s\n", formatMicros(computedMicros))
+	fmt.Printf("Diff:     %s\n", formatMicros(diff))
+
+	if diff == 0 {
+		fmt.Println("Cash balance matches — no adjustment needed.")
+		return nil
+	}
+
+	_, err = queries.GetOpeningCashBalance(ctx, account.ID)
+	if err == nil {
+		fmt.Println("Opening cash balance already exists — skipping reconciliation.")
+		return nil
+	}
+
+	earliestVal, err := queries.GetEarliestTransactionDate(ctx, account.ID)
+	if err != nil {
+		return fmt.Errorf("failed to get earliest transaction date: %w", err)
+	}
+	earliestStr, ok := earliestVal.(string)
+	if !ok || earliestStr == "" {
+		return fmt.Errorf("no transactions found for account")
+	}
+	earliest, err := time.Parse("2006-01-02", earliestStr)
+	if err != nil {
+		return fmt.Errorf("failed to parse earliest date %s: %w", earliestStr, err)
+	}
+	openingDate := earliest.AddDate(0, 0, -1)
+
+	err = queries.CreateCashTransaction(ctx, db.CreateCashTransactionParams{
+		ID:              database.NewID(database.PrefixCashTxn),
+		AccountID:       account.ID,
+		TransactionDate: openingDate.Format("2006-01-02"),
+		CashType:        "opening",
+		AmountMicros:    diff,
+		Description:     sql.NullString{String: "Opening cash balance (reconciled from positions)", Valid: true},
+	})
+	if err != nil {
+		return fmt.Errorf("failed to create opening balance: %w", err)
+	}
+
+	slog.Info("created opening cash balance",
+		"account", accountName,
+		"date", openingDate.Format("2006-01-02"),
+		"amount", formatMicros(diff),
+	)
+
+	return nil
 }
 
 func setCashOpening(ctx context.Context, cfg *config.Config, accountName string, date time.Time, balanceMicros int64) error {

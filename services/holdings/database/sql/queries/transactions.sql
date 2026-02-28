@@ -56,6 +56,11 @@ on conflict do nothing;
 delete from transactions
 where id = @id;
 
+-- name: GetEarliestTransactionDate :one
+select min(transaction_date) as earliest_date
+from transactions
+where account_id = @account_id;
+
 -- name: DeleteTransactionsByAccount :exec
 delete from transactions
 where account_id = @account_id;
