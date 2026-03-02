@@ -22,6 +22,7 @@ create table if not exists securities (
     name text,
     security_type text,
     cusip text,
+    cash_equivalent integer not null default 0,
     created_at text not null default (datetime('now')),
     updated_at text not null default (datetime('now'))
 );

@@ -36,6 +36,7 @@ type Transaction struct {
 	AmountMicros    int64 // amount * 1,000,000
 	FeesMicros      int64 // fees * 1,000,000
 	Description     string
+	CashEquivalent  bool
 }
 
 type Position struct {

@@ -400,10 +400,13 @@ func autoFixFromPositions(ctx context.Context, queries *db.Queries, accountID st
 	}
 
 	earliestDate, latestDate, netBySymbol := summarizeTransactions(txns)
+	var acquiredDate time.Time
 	if earliestDate.IsZero() {
-		return fmt.Errorf("no transactions found for account")
+		acquiredDate = time.Now().AddDate(0, 0, -1)
+		latestDate = time.Now()
+	} else {
+		acquiredDate = earliestDate.AddDate(0, 0, -1)
 	}
-	acquiredDate := earliestDate.AddDate(0, 0, -1)
 
 	remainingBySymbol, err := queries.SumRemainingBySymbol(ctx, accountID)
 	if err != nil {
@@ -516,8 +519,71 @@ func autoFixFromPositions(ctx context.Context, queries *db.Queries, accountID st
 		created++
 	}
 
+	created += reconcileMoneyMarkets(ctx, queries, positions, accountID, acquiredDate, netBySymbol)
+
 	fmt.Printf("\nCreated %d transactions. Run 'lots process' to rebuild lots.\n", created)
 	return nil
+}
+
+func reconcileMoneyMarkets(ctx context.Context, queries *db.Queries, positions *taxlots.PositionsFile, accountID string, acquiredDate time.Time, netBySymbol map[string]int64) int {
+	if positions.Summary.CashPurchasingPower <= 0 {
+		return 0
+	}
+
+	cashEquivSymbols, err := queries.ListCashEquivalentsByAccount(ctx, accountID)
+	if err != nil || len(cashEquivSymbols) == 0 {
+		return 0
+	}
+
+	created := 0
+	for _, symbol := range cashEquivSymbols {
+		if positions.FindBySymbol(symbol) != nil {
+			continue
+		}
+
+		expectedMicros := int64(positions.Summary.CashPurchasingPower * 1_000_000)
+		netMicros := netBySymbol[strings.ToUpper(symbol)]
+		diffMicros := expectedMicros - netMicros
+		if diffMicros <= 0 {
+			continue
+		}
+
+		sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+			ID:             database.NewID(database.PrefixSecurity),
+			Symbol:         symbol,
+			Name:           sql.NullString{},
+			CashEquivalent: 1,
+		})
+		if err != nil {
+			slog.Error("failed to upsert security for money market", "symbol", symbol, "error", err)
+			continue
+		}
+
+		err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+			ID:              database.NewID(database.PrefixTransaction),
+			AccountID:       accountID,
+			SecurityID:      sql.NullString{String: sec.ID, Valid: true},
+			TransactionType: string(importer.TransactionTypeOpeningBalance),
+			TransactionDate: acquiredDate.Format("2006-01-02"),
+			QuantityMicros:  sql.NullInt64{Int64: diffMicros, Valid: true},
+			PriceMicros:     sql.NullInt64{Int64: 1_000_000, Valid: true},
+			AmountMicros:    diffMicros,
+			FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+			Description:     sql.NullString{String: "Opening balance - money market from cash_purchasing_power", Valid: true},
+		})
+		if err != nil {
+			slog.Error("failed to create money market opening balance", "symbol", symbol, "error", err)
+			continue
+		}
+
+		slog.Info("created money market opening balance",
+			"symbol", symbol,
+			"quantity", float64(diffMicros)/1_000_000,
+			"from_cash_purchasing_power", positions.Summary.CashPurchasingPower,
+		)
+		created++
+	}
+	return created
 }
 
 func summarizeTransactions(txns []db.ListTransactionsByAccountRow) (earliest time.Time, latest time.Time, net map[string]int64) {

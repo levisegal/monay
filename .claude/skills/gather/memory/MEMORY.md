@@ -51,12 +51,13 @@
 
 ## Recommendations for gather skill
 
-1. Use `--headed` mode (no profile) as the default — accept the re-login cost
+1. Use `--headed --profile=.playwright-cli/profiles/<broker>` as default — persistent sessions survive tab switches
 2. Consider `--extension` as an advanced option for users who install the bridge extension
 3. Always check browser status before navigation commands
 4. Move downloaded files immediately after each download
 5. Don't rely on the browser surviving across long pauses
 6. Always use element refs from snapshot YAML, not named selectors
+7. After filling date inputs, click on the field to trigger validation before clicking Apply
 
 ## Multi-Broker Learnings
 

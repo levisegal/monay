@@ -102,9 +102,10 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 
 		if txn.Symbol != "" {
 			sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
-				ID:     database.NewID(database.PrefixSecurity),
-				Symbol: txn.Symbol,
-				Name:   sql.NullString{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+				ID:             database.NewID(database.PrefixSecurity),
+				Symbol:         txn.Symbol,
+				Name:           sql.NullString{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+				CashEquivalent: boolToInt(txn.CashEquivalent),
 			})
 			if err != nil {
 				return fmt.Errorf("failed to upsert security %s: %w", txn.Symbol, err)
@@ -160,4 +161,11 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 	)
 
 	return nil
+}
+
+func boolToInt(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
 }

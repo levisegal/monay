@@ -205,6 +205,16 @@ func reconcileCash(ctx context.Context, cfg *config.Config, accountName, positio
 		return fmt.Errorf("account not found: %s", accountName)
 	}
 
+	cashEquivSymbols, _ := queries.ListCashEquivalentsByAccount(ctx, account.ID)
+	for _, symbol := range cashEquivSymbols {
+		if pf.FindBySymbol(symbol) == nil {
+			slog.Info("cash_purchasing_power represents money market position, expected cash = $0",
+				"symbol", symbol)
+			expectedMicros = 0
+			break
+		}
+	}
+
 	balanceVal, err := queries.GetCashBalance(ctx, account.ID)
 	if err != nil {
 		return fmt.Errorf("failed to get cash balance: %w", err)

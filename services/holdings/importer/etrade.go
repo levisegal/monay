@@ -13,6 +13,11 @@ import (
 
 const microsMultiplier = 1_000_000
 
+var etradeCashEquivalents = map[string]bool{
+	"WMPXX": true, // Allspring Money Market Premier
+	"VMFXX": true, // Vanguard Federal Money Market
+}
+
 type ETradeParser struct{}
 
 func (p *ETradeParser) Parse(ctx context.Context, r io.Reader) (*ImportResult, error) {
@@ -110,6 +115,7 @@ func parseETradeRow(record []string) (*Transaction, error) {
 		AmountMicros:    toMicros(amount.Abs()),
 		FeesMicros:      toMicros(commission),
 		Description:     description,
+		CashEquivalent:  etradeCashEquivalents[symbol],
 	}, nil
 }
 

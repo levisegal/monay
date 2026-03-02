@@ -11,7 +11,7 @@ import (
 )
 
 const getSecurity = `-- name: GetSecurity :one
-select id, symbol, name, security_type, cusip, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
 from securities
 where id = ?1
 `
@@ -25,6 +25,7 @@ func (q *Queries) GetSecurity(ctx context.Context, id string) (Security, error) 
 		&i.Name,
 		&i.SecurityType,
 		&i.Cusip,
+		&i.CashEquivalent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -32,7 +33,7 @@ func (q *Queries) GetSecurity(ctx context.Context, id string) (Security, error) 
 }
 
 const getSecurityBySymbol = `-- name: GetSecurityBySymbol :one
-select id, symbol, name, security_type, cusip, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
 from securities
 where symbol = ?1
 `
@@ -46,14 +47,46 @@ func (q *Queries) GetSecurityBySymbol(ctx context.Context, symbol string) (Secur
 		&i.Name,
 		&i.SecurityType,
 		&i.Cusip,
+		&i.CashEquivalent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
 	return i, err
 }
 
+const listCashEquivalentsByAccount = `-- name: ListCashEquivalentsByAccount :many
+select distinct s.symbol
+from transactions t
+join securities s on t.security_id = s.id
+where t.account_id = ?1
+    and s.cash_equivalent = 1
+`
+
+func (q *Queries) ListCashEquivalentsByAccount(ctx context.Context, accountID string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, listCashEquivalentsByAccount, accountID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []string{}
+	for rows.Next() {
+		var symbol string
+		if err := rows.Scan(&symbol); err != nil {
+			return nil, err
+		}
+		items = append(items, symbol)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const listSecurities = `-- name: ListSecurities :many
-select id, symbol, name, security_type, cusip, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
 from securities
 order by symbol
 `
@@ -73,6 +106,7 @@ func (q *Queries) ListSecurities(ctx context.Context) ([]Security, error) {
 			&i.Name,
 			&i.SecurityType,
 			&i.Cusip,
+			&i.CashEquivalent,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -95,28 +129,32 @@ insert into securities (
     symbol,
     name,
     security_type,
-    cusip
+    cusip,
+    cash_equivalent
 ) values (
     ?1,
     ?2,
     ?3,
     ?4,
-    ?5
+    ?5,
+    ?6
 )
 on conflict (symbol) do update set
     name = coalesce(excluded.name, securities.name),
     security_type = coalesce(excluded.security_type, securities.security_type),
     cusip = coalesce(excluded.cusip, securities.cusip),
+    cash_equivalent = max(excluded.cash_equivalent, securities.cash_equivalent),
     updated_at = datetime('now')
-returning id, symbol, name, security_type, cusip, created_at, updated_at
+returning id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
 `
 
 type UpsertSecurityParams struct {
-	ID           string         `json:"id"`
-	Symbol       string         `json:"symbol"`
-	Name         sql.NullString `json:"name"`
-	SecurityType sql.NullString `json:"security_type"`
-	Cusip        sql.NullString `json:"cusip"`
+	ID             string         `json:"id"`
+	Symbol         string         `json:"symbol"`
+	Name           sql.NullString `json:"name"`
+	SecurityType   sql.NullString `json:"security_type"`
+	Cusip          sql.NullString `json:"cusip"`
+	CashEquivalent int64          `json:"cash_equivalent"`
 }
 
 func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) (Security, error) {
@@ -126,6 +164,7 @@ func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) 
 		arg.Name,
 		arg.SecurityType,
 		arg.Cusip,
+		arg.CashEquivalent,
 	)
 	var i Security
 	err := row.Scan(
@@ -134,6 +173,7 @@ func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) 
 		&i.Name,
 		&i.SecurityType,
 		&i.Cusip,
+		&i.CashEquivalent,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
