@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"os"
 	"sort"
@@ -89,7 +90,12 @@ func listHoldingsCommand() *cobra.Command {
 					acquired = s
 				}
 
-				tbl.AddRow(h.Symbol, formatQty(qty), formatCurrency(cost), acquired)
+				costStr := formatCurrency(cost)
+				if interfaceToInt(h.EstimatedBasis) != 0 {
+					costStr = "~" + costStr
+				}
+
+				tbl.AddRow(h.Symbol, formatQty(qty), costStr, acquired)
 			}
 
 			tbl.Print()
@@ -162,7 +168,12 @@ func listAllHoldings(queries *db.Queries, ctx context.Context, sortBy string) er
 			broker = "-"
 		}
 
-		tbl.AddRow(broker, h.AccountName, h.Symbol, formatQty(qty), formatCurrency(cost), acquired)
+		costStr := formatCurrency(cost)
+		if interfaceToInt(h.EstimatedBasis) != 0 {
+			costStr = "~" + costStr
+		}
+
+		tbl.AddRow(broker, h.AccountName, h.Symbol, formatQty(qty), costStr, acquired)
 	}
 
 	tbl.Print()
@@ -215,7 +226,12 @@ func positionsCommand() *cobra.Command {
 					acquired = s
 				}
 
-				tbl.AddRow(p.Symbol, formatQty(qty), formatCurrency(cost), p.AccountCount, acquired)
+				costStr := formatCurrency(cost)
+				if interfaceToInt(p.EstimatedBasis) != 0 {
+					costStr = "~" + costStr
+				}
+
+				tbl.AddRow(p.Symbol, formatQty(qty), costStr, p.AccountCount, acquired)
 			}
 
 			tbl.Print()
@@ -241,6 +257,8 @@ func formatQty(qty float64) string {
 
 func nullFloat64ToFloat(nf interface{}) float64 {
 	switch v := nf.(type) {
+	case sql.NullFloat64:
+		return v.Float64
 	case float64:
 		return v
 	case int64:
@@ -256,6 +274,17 @@ func toInt64Val(v interface{}) int64 {
 		return val
 	case int:
 		return int64(val)
+	case float64:
+		return int64(val)
+	default:
+		return 0
+	}
+}
+
+func interfaceToInt(v interface{}) int64 {
+	switch val := v.(type) {
+	case int64:
+		return val
 	case float64:
 		return int64(val)
 	default:

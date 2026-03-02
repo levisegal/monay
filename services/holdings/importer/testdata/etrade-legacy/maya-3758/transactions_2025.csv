@@ -1,0 +1,40 @@
+All Transactions Activity Types
+
+Account Activity for maya -3758 from Prior Year
+
+Total:,18304.7
+
+Activity/Trade Date,Transaction Date,Settlement Date,Activity Type,Description,Symbol,Cusip,Quantity #,Price $,Amount $,Commission,Category,Note
+12/31/25,12/31/25,12/31/25,Interest Income,MORGAN STANLEY BANK N.A. (Period 12/01-12/31),MSBNK,--,,,0.01,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-80.0,11.29,903.2,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-100.0,11.27,1126.98,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-291.0,11.261,3276.93,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-100.0,11.28,1127.99,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-10.0,11.3,113.0,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-643.0,11.26,7240.13,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-300.0,11.27,3380.98,0.0,--,--
+12/26/25,12/26/25,12/29/25,Sold,INSTIL BIO INC NEW UNSOLICITED TRADE,TIL,--,-100.0,11.275,1127.48,0.0,--,--
+11/28/25,11/28/25,11/28/25,Interest Income,MORGAN STANLEY BANK N.A. (Period 11/01-11/30),MSBNK,--,,,0.01,0.0,--,--
+06/30/25,06/30/25,06/30/25,Interest Income,MORGAN STANLEY BANK N.A. (Period 06/01-06/30),MSBNK,--,,,0.09,0.0,--,--
+06/02/25,06/02/25,06/03/25,Bought,BLOCK INC CL A UNSOLICITED TRADE,XYZ,--,931.0,61.738,-57477.71,0.0,--,--
+06/02/25,06/02/25,06/03/25,Bought,ROBLOX CORP CL A UNSOLICITED TRADE,RBLX,--,620.0,89.959,-55774.39,0.0,--,--
+06/02/25,06/02/25,06/03/25,Bought,APPLOVIN CORP UNSOLICITED TRADE,APP,--,140.0,398.059,-55728.23,0.0,--,--
+05/30/25,05/30/25,05/30/25,Interest Income,MORGAN STANLEY BANK N.A. (Period 05/01-05/31),MSBNK,--,,,0.79,0.0,--,--
+05/14/25,05/14/25,05/15/25,Sold,UROGEN PHARMA LTD. UNSOLICITED TRADE,URGN,--,-5200.0,10.125,52649.14,0.0,--,--
+05/14/25,05/14/25,05/15/25,Sold,DYNAVAX TECHNOLOGIES CORP UNSOLICITED TRADE,DVAX,--,-6000.0,9.32,55919.0,0.0,--,--
+05/14/25,05/14/25,05/15/25,Sold,ELECTRONIC ARTS INC UNSOLICITED TRADE,EA,--,-0.844,147.5,124.49,0.0,--,--
+05/14/25,05/14/25,05/15/25,Sold,UROGEN PHARMA LTD. UNSOLICITED TRADE,URGN,--,-800.0,10.1,8079.87,0.0,--,--
+05/14/25,05/14/25,05/15/25,Sold,ELECTRONIC ARTS INC UNSOLICITED TRADE,EA,--,-354.0,147.5,52214.94,0.0,--,--
+03/19/25,03/19/25,03/19/25,Dividend,ELECTRONIC ARTS INC DIVIDEND REINVESTMENT,EA,--,0.472,142.69,-67.33,0.0,--,--
+03/19/25,03/19/25,03/19/25,Qualified Dividend,ELECTRONIC ARTS INC REC 03/19/25 PAY 03/19/25 RATE 0.00000000 QTY 0.00000000,EA,--,,,67.33,0.0,--,--
+
+
+
+"For all accounts, the Activity Date and the Processing Date are displayed. However, for Morgan Stanley and Co. and Externally Held accounts, only the Activity Date is available; therefore, the Processing Date listed for these accounts will be equivalent to the Activity Date. Please rely on the official account statements of your Morgan Stanley & Co. or Externally Held account for the actual Processing Date of any of these assets, and refer to the definitions section for more information on these categories."
+
+"The information provided with respect to your employee stock option plan (""ESOP"") was obtained from third party sources which Morgan Stanley believes to be reliable. However, we make no representation or guarantee that the information is accurate or complete. There may be other requirements, details, and criteria governing your ESOP. Please refer to the documentation provided by your employer for the terms and conditions governing your ESOP."
+
+E*TRADE from Morgan Stanley credits and offers may be subject to U.S. withholding taxes and reporting at retail value. Taxes related to these credits and offers are the customer's responsibility.
+
+"Under the Bank Deposit Program, free credit balances held in an account(s) at Morgan Stanley Smith Barney LLC are automatically deposited into an interest bearing deposit account(s), at FDIC-insured banks. For more information, view the Bank Deposit Program Disclosure Statement."
+

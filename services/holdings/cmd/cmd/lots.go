@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bufio"
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -235,6 +236,7 @@ type lotInput struct {
 func checkLotsCommand() *cobra.Command {
 	var accountName string
 	var fix bool
+	var positionsFile string
 
 	cmd := &cobra.Command{
 		Use:   "check",
@@ -245,7 +247,8 @@ Categorizes gaps as:
 - SAFE TO IGNORE: fully sold positions, no current holdings affected
 - NEEDS REVIEW: still held positions with missing cost basis
 
-Use --fix to interactively add opening balances for positions needing review.`,
+Use --fix to interactively add opening balances for positions needing review.
+Use --fix --positions-file <path> to auto-synthesize opening balances from scraped positions.`,
 		RunE: func(cmd *cobra.Command, args []string) error {
 			ctx := cmd.Context()
 
@@ -306,6 +309,10 @@ Use --fix to interactively add opening balances for positions needing review.`,
 
 			fmt.Printf("\nSummary: %d historical gaps (ignorable), %d need opening balances\n",
 				len(safeToIgnore), len(needsReview))
+
+			if fix && positionsFile != "" {
+				return autoFixFromPositions(ctx, queries, account.ID, positionsFile)
+			}
 
 			if len(needsReview) == 0 {
 				fmt.Println("No action needed.")
@@ -375,10 +382,174 @@ Use --fix to interactively add opening balances for positions needing review.`,
 
 	cmd.Flags().StringVar(&accountName, "account-name", "", "Account name to check")
 	cmd.Flags().BoolVar(&fix, "fix", false, "Interactively add opening balances for positions needing review")
+	cmd.Flags().StringVar(&positionsFile, "positions-file", "", "Positions JSON for auto-synthesizing opening balances (use with --fix)")
 	cmd.MarkFlagRequired("account-name")
 
 	return cmd
 }
+
+func autoFixFromPositions(ctx context.Context, queries *db.Queries, accountID string, positionsPath string) error {
+	positions, err := taxlots.LoadPositions(positionsPath)
+	if err != nil {
+		return err
+	}
+
+	txns, err := queries.ListTransactionsByAccount(ctx, accountID)
+	if err != nil {
+		return err
+	}
+
+	earliestDate, latestDate, netBySymbol := summarizeTransactions(txns)
+	if earliestDate.IsZero() {
+		return fmt.Errorf("no transactions found for account")
+	}
+	acquiredDate := earliestDate.AddDate(0, 0, -1)
+
+	remainingBySymbol, err := queries.SumRemainingBySymbol(ctx, accountID)
+	if err != nil {
+		return err
+	}
+	existingCost := make(map[string]int64)
+	for _, row := range remainingBySymbol {
+		existingCost[strings.ToUpper(row.Symbol)] = toInt64(row.RemainingCostMicros)
+	}
+
+	slog.Info("auto-fix from positions",
+		"positions_file", positionsPath,
+		"acquired_date", acquiredDate.Format("2006-01-02"),
+		"scraped_positions", len(positions.Positions),
+	)
+
+	created := 0
+	for _, pos := range positions.Positions {
+		scrapedMicros := int64(pos.Quantity * 1_000_000)
+		netMicros := netBySymbol[strings.ToUpper(pos.Symbol)]
+		diffMicros := scrapedMicros - netMicros
+		if diffMicros == 0 {
+			continue
+		}
+
+		scrapedCostMicros := int64((pos.Value - pos.TotalGain) * 1_000_000)
+		lotCostMicros := existingCost[strings.ToUpper(pos.Symbol)]
+
+		sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
+			ID:     database.NewID(database.PrefixSecurity),
+			Symbol: pos.Symbol,
+			Name:   sql.NullString{},
+		})
+		if err != nil {
+			return fmt.Errorf("failed to upsert security %s: %w", pos.Symbol, err)
+		}
+
+		if diffMicros > 0 {
+			costBasisMicros := scrapedCostMicros - lotCostMicros
+			if costBasisMicros < 0 {
+				costBasisMicros = 0
+			}
+			priceMicros := costBasisMicros / diffMicros
+			err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+				ID:              database.NewID(database.PrefixTransaction),
+				AccountID:       accountID,
+				SecurityID:      sql.NullString{String: sec.ID, Valid: true},
+				TransactionType: string(importer.TransactionTypeOpeningBalance),
+				TransactionDate: acquiredDate.Format("2006-01-02"),
+				QuantityMicros:  sql.NullInt64{Int64: diffMicros, Valid: true},
+				PriceMicros:     sql.NullInt64{Int64: priceMicros, Valid: true},
+				AmountMicros:    costBasisMicros,
+				FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+				Description:     sql.NullString{String: "Opening balance - synthesized from positions", Valid: true},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create opening balance for %s: %w", pos.Symbol, err)
+			}
+			slog.Info("created opening balance",
+				"symbol", pos.Symbol,
+				"quantity", float64(diffMicros)/1_000_000,
+				"cost_basis", float64(costBasisMicros)/1_000_000,
+				"scraped_cost", float64(scrapedCostMicros)/1_000_000,
+				"existing_lot_cost", float64(lotCostMicros)/1_000_000,
+			)
+		} else {
+			adjustDate := latestDate.Format("2006-01-02")
+			balanceDate := latestDate.AddDate(0, 0, 1).Format("2006-01-02")
+
+			err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+				ID:              database.NewID(database.PrefixTransaction),
+				AccountID:       accountID,
+				SecurityID:      sql.NullString{String: sec.ID, Valid: true},
+				TransactionType: string(importer.TransactionTypeReorgOut),
+				TransactionDate: adjustDate,
+				QuantityMicros:  sql.NullInt64{Int64: netMicros, Valid: true},
+				PriceMicros:     sql.NullInt64{Int64: 0, Valid: true},
+				AmountMicros:    0,
+				FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+				Description:     sql.NullString{String: "Adjustment - remove excess shares for reconciliation", Valid: true},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create adjustment for %s: %w", pos.Symbol, err)
+			}
+
+			priceMicros := scrapedCostMicros / scrapedMicros
+			err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+				ID:              database.NewID(database.PrefixTransaction),
+				AccountID:       accountID,
+				SecurityID:      sql.NullString{String: sec.ID, Valid: true},
+				TransactionType: string(importer.TransactionTypeOpeningBalance),
+				TransactionDate: balanceDate,
+				QuantityMicros:  sql.NullInt64{Int64: scrapedMicros, Valid: true},
+				PriceMicros:     sql.NullInt64{Int64: priceMicros, Valid: true},
+				AmountMicros:    scrapedCostMicros,
+				FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+				Description:     sql.NullString{String: "Opening balance - reconcile with positions", Valid: true},
+			})
+			if err != nil {
+				return fmt.Errorf("failed to create opening balance for %s: %w", pos.Symbol, err)
+			}
+
+			slog.Info("created adjustment + opening balance",
+				"symbol", pos.Symbol,
+				"removed", float64(netMicros)/1_000_000,
+				"added", float64(scrapedMicros)/1_000_000,
+				"cost_basis", float64(scrapedCostMicros)/1_000_000,
+			)
+		}
+		created++
+	}
+
+	fmt.Printf("\nCreated %d transactions. Run 'lots process' to rebuild lots.\n", created)
+	return nil
+}
+
+func summarizeTransactions(txns []db.ListTransactionsByAccountRow) (earliest time.Time, latest time.Time, net map[string]int64) {
+	net = make(map[string]int64)
+
+	for _, txn := range txns {
+		t, err := time.Parse("2006-01-02", txn.TransactionDate)
+		if err == nil {
+			if earliest.IsZero() || t.Before(earliest) {
+				earliest = t
+			}
+			if latest.IsZero() || t.After(latest) {
+				latest = t
+			}
+		}
+
+		if !txn.SecurityID.Valid || !txn.QuantityMicros.Valid {
+			continue
+		}
+
+		sym := strings.ToUpper(txn.Symbol.String)
+		switch txn.TransactionType {
+		case "buy", "security_transfer", "opening_balance", "reorg_in":
+			net[sym] += txn.QuantityMicros.Int64
+		case "sell", "reorg_out":
+			net[sym] -= txn.QuantityMicros.Int64
+		}
+	}
+
+	return earliest, latest, net
+}
+
 
 func promptForLotWithSymbol(scanner *bufio.Scanner, symbol string, suggestedQtyMicros int64) (*lotInput, error) {
 	fmt.Printf("Quantity (shares) [%.2f]: ", float64(suggestedQtyMicros)/1_000_000)

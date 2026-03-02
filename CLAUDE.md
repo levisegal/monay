@@ -78,6 +78,19 @@ All services use **SQLite** (no PostgreSQL).
 - Cache tables: daily_prices, quote_cache
 - Caches yfinance market data to avoid repeated API calls
 
+### Estimated Basis
+
+Brokerage web UIs typically provide ~2 years of transaction history. Positions acquired before that window have no lot-level purchase records. These are imported as `opening_balance` transactions using broker-reported average cost (from scraped positions or statements).
+
+The `lots.estimated_basis` flag (0/1) marks lots created from opening balances. When true:
+- **Cost basis is the broker's reported average cost** — accurate for total position value, but not broken down by original lot
+- **Acquired date is synthetic** — set to the day before the earliest real transaction, not the actual purchase date
+- **Lot-level detail is lost** — multiple real purchases are collapsed into one lot at average cost
+
+The flag propagates through aggregated queries via `max(estimated_basis)` — if any lot in a position is estimated, the whole position is flagged. The CLI shows `~` before estimated cost basis values. The API returns `estimated_basis: true`.
+
+This does not affect: rebalancing, current allocations, quantity accuracy, or forward-looking management. It affects: specific lot identification for tax optimization, per-lot gain/loss precision, and historical performance attribution.
+
 ### Common Workflows
 1. **Schema Changes**: Edit `services/holdings/database/sql/schema.sql`, then `cd services/holdings && make db.generate`
 2. **Query Changes**: Edit files in `database/sql/queries/`, then `make db.generate`

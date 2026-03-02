@@ -70,13 +70,22 @@ The Complete View page shows 6 accounts:
 
 **Duration resets to "Last 30 Days" when switching accounts** — must re-select after each account change.
 
-## Files Gathered (as of 2026-02-20)
+## Custom Date Range (Backfill)
 
-| Account | 2025 | 2026 |
-|---------|------|------|
-| maya-3758 | 40 lines | 33 lines |
-| joint-2060 | 84 lines | 25 lines |
-| joint-3652 | 26 lines | 15 lines |
-| joint-2813 | 26 lines | 20 lines |
-| stockplan-3652 (GILD) | skip (not in dropdown) | skip |
-| stockplan-2813 (KITE) | skip ($0 balance) | skip |
+The Duration dropdown "Custom" option allows arbitrary date ranges with these constraints:
+- **Lookback limit: ~2 years** from today (e.g., Feb 22, 2024 works on Feb 22, 2026; Jan 1, 2024 fails)
+- **Max range per request: ~6 months** — full-year ranges fail even within the lookback window
+- **Strategy:** Download in two halves per year: H1 (Feb 22-Jun 30) and H2 (Jul 1-Dec 31), combine afterward
+- Jan 1 to ~Feb 21 of the oldest reachable year is lost (within the 2-year cutoff)
+- Pre-2024 data is not available via the web UI at all (as of Feb 2026)
+
+## Files Gathered (as of 2026-02-21)
+
+| Account | 2024 | 2025 | 2026 |
+|---------|------|------|------|
+| maya-3758 | 8 rows (EA divs) | 40 lines | 33 lines |
+| joint-2060 | 42 rows (PTOAX, VGHCX, VFIAX, etc.) | 84 lines | 25 lines |
+| joint-3652 | 8 rows (GILD divs) | 26 lines | 15 lines |
+| joint-2813 | 6 rows (FCX divs) | 26 lines | 20 lines |
+| stockplan-3652 (GILD) | skip (not in dropdown) | skip | skip |
+| stockplan-2813 (KITE) | skip ($0 balance) | skip | skip |

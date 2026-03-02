@@ -124,12 +124,13 @@ func (rt *Router) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 type HoldingResponse struct {
-	AccountID    string  `json:"account_id"`
-	AccountName  string  `json:"account_name"`
-	Symbol       string  `json:"symbol"`
-	SecurityName *string `json:"security_name,omitempty"`
-	Quantity     float64 `json:"quantity"`
-	CostBasis    *int64  `json:"cost_basis_micros,omitempty"`
+	AccountID      string  `json:"account_id"`
+	AccountName    string  `json:"account_name"`
+	Symbol         string  `json:"symbol"`
+	SecurityName   *string `json:"security_name,omitempty"`
+	Quantity       float64 `json:"quantity"`
+	CostBasis      *int64  `json:"cost_basis_micros,omitempty"`
+	EstimatedBasis bool    `json:"estimated_basis"`
 }
 
 type HoldingsListResponse struct {
@@ -196,9 +197,10 @@ func accountToResponse(a db.Account) AccountResponse {
 
 func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	resp := HoldingResponse{
-		AccountID:   h.AccountID,
-		AccountName: h.AccountName,
-		Symbol:      h.Symbol,
+		AccountID:      h.AccountID,
+		AccountName:    h.AccountName,
+		Symbol:         h.Symbol,
+		EstimatedBasis: interfaceToBool(h.EstimatedBasis),
 	}
 	if h.QuantityMicros.Valid {
 		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
@@ -215,9 +217,10 @@ func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 
 func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string, accountID string) HoldingResponse {
 	resp := HoldingResponse{
-		AccountID:   accountID,
-		AccountName: accountName,
-		Symbol:      h.Symbol,
+		AccountID:      accountID,
+		AccountName:    accountName,
+		Symbol:         h.Symbol,
+		EstimatedBasis: interfaceToBool(h.EstimatedBasis),
 	}
 	if h.QuantityMicros.Valid {
 		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
@@ -244,4 +247,17 @@ func respond(w http.ResponseWriter, status int, data any) {
 
 func respondError(w http.ResponseWriter, status int, message string) {
 	respond(w, status, ErrorResponse{Error: message})
+}
+
+func interfaceToBool(v interface{}) bool {
+	switch val := v.(type) {
+	case int64:
+		return val != 0
+	case float64:
+		return val != 0
+	case bool:
+		return val
+	default:
+		return false
+	}
 }

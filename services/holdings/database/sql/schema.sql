@@ -72,6 +72,7 @@ create table if not exists lots (
     quantity_micros integer not null,
     remaining_micros integer not null,
     cost_basis_micros integer not null,
+    estimated_basis integer not null default 0,
     created_at text not null default (datetime('now'))
 );
 

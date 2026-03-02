@@ -40,6 +40,7 @@ type Lot struct {
 	QuantityMicros  int64  `json:"quantity_micros"`
 	RemainingMicros int64  `json:"remaining_micros"`
 	CostBasisMicros int64  `json:"cost_basis_micros"`
+	EstimatedBasis  int64  `json:"estimated_basis"`
 	CreatedAt       string `json:"created_at"`
 }
 

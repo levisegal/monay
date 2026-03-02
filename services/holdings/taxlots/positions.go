@@ -27,6 +27,15 @@ type ScrapedPosition struct {
 	Symbol    string  `json:"symbol"`
 	Quantity  float64 `json:"quantity"`
 	PricePaid float64 `json:"price_paid"`
+	Value     float64 `json:"value"`
+	TotalGain float64 `json:"total_gain"`
+}
+
+func (p *ScrapedPosition) CostPerUnit() float64 {
+	if p.Quantity == 0 {
+		return 0
+	}
+	return (p.Value - p.TotalGain) / p.Quantity
 }
 
 func LoadPositions(path string) (*PositionsFile, error) {

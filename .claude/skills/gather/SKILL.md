@@ -1,6 +1,6 @@
 ---
 name: gather
-description: Automates downloading transaction CSVs from brokerage websites using playwright-cli browser automation. The user logs in manually; the skill handles navigation, screenshots, and file management.
+description: Automates downloading transaction CSVs and scraping position data from brokerage websites using playwright-cli browser automation. The user logs in manually; the skill handles navigation, screenshots, position scraping, and file management.
 user_invocable: true
 argument: "<broker> — which brokerage to gather from (e.g., etrade)"
 ---
@@ -12,10 +12,13 @@ Automate the tedious part of downloading transaction CSVs from brokerage sites. 
 ## Invocation
 
 ```
-/gather etrade
+/gather etrade              # standard gather (current + prior year)
+/gather etrade backfill     # backfill: download all available prior years
 ```
 
-The argument is the broker name. Load the matching guide from `brokers/<broker>.md`. If no guide exists, tell the user and offer to help create one from `brokers/_template.md`.
+The first argument is the broker name. Load the matching guide from `brokers/<broker>.md`. If no guide exists, tell the user and offer to help create one from `brokers/_template.md`.
+
+The optional second argument `backfill` activates backfill mode (see below).
 
 ## Allowed Tools
 
@@ -59,7 +62,9 @@ Session logs are append-only — never edit previous entries.
 - Load the broker guide from `brokers/<broker>.md`
 - Print known accounts for the broker (from the guide + memory)
 - Confirm target directory exists: `data/imports/<broker>/`
-- Check what files already exist (avoid re-downloading)
+- Check what files already exist
+  - **Prior year CSVs** (e.g., `transactions_2025.csv`) are immutable — skip if already downloaded
+  - **Current year CSVs** are rolling — always re-download to pick up new transactions
 - Ask user which accounts to gather (default: all remaining)
 - Remind user to have credentials ready
 
@@ -96,8 +101,46 @@ For each account (from the broker guide):
 
 **b. Screenshot portfolio**
 ```bash
-playwright-cli screenshot --filename=data/imports/<broker>/<account>/screenshot_portfolio.png
+playwright-cli screenshot --filename=data/imports/<broker>/<account>/screenshot_portfolio_YYYY-MM-DD.png
 ```
+
+**b.5. Scrape positions**
+
+While still on the Portfolios page, extract structured position data:
+
+1. `playwright-cli snapshot` — capture the accessibility tree
+2. Parse the snapshot following the broker guide's "Portfolios Page" section
+3. Write to `data/imports/<broker>/<account>/positions_YYYY-MM-DDTHH-MM.json`
+
+Output schema (broker-agnostic):
+
+```json
+{
+  "account": "<account>",
+  "broker": "<broker>",
+  "date": "YYYY-MM-DDTHH:MM",
+  "summary": {
+    "net_value": 1151838.24,
+    "unrealized_gain": 179665.83,
+    "unrealized_gain_pct": 20.60,
+    "days_gain": -1537.65,
+    "cash_purchasing_power": 100061.82
+  },
+  "positions": [
+    {
+      "symbol": "APP",
+      "quantity": 140,
+      "price_paid": 398.0588,
+      "last_price": 418.68,
+      "value": 58615.20,
+      "total_gain": 2886.97,
+      "total_gain_pct": 5.18
+    }
+  ]
+}
+```
+
+Numbers are floats (not strings). The `summary` fields vary by broker — include whatever the page provides. The `positions` array uses the fields above; omit any the broker doesn't show.
 
 **c. Navigate to transactions**
 - Follow broker guide steps to reach transaction history
@@ -141,8 +184,10 @@ Then print the import commands.
 - **Never automate login or MFA.** The user handles all authentication.
 - **Snapshot after every navigation.** Describe what you see. Ask user to confirm before proceeding.
 - **On unexpected state:** Don't guess. Offer: (1) retry the action, (2) user navigates manually, (3) skip this account.
-- **File naming:** `transactions_<year>.csv` — if the broker exports a single file spanning years, name it `transactions_<start>_<end>.csv`.
+- **File naming:** `transactions_<year>.csv` for CSVs. `screenshot_portfolio_YYYY-MM-DD.png` for screenshots (timestamped so successive gathers don't overwrite).
 - **Idempotent:** If a file already exists at the target path, ask before overwriting.
+- **Scrape positions from every account.** After the portfolio screenshot, always parse the snapshot into a positions JSON. Don't skip step 4b.5.
+- **Screenshot every account.** Take portfolio screenshots for every account, not just the first one. Don't skip step 4b.
 - **Move downloads immediately.** Files download to `.playwright-cli/` and may be overwritten by the next download.
 - **Log as you go.** Append observations to the session log throughout the gather, not just at the end.
 - **Distill after every session.** Promote durable learnings from session logs to long-term memory.
@@ -167,11 +212,31 @@ data/imports/
     <account>/
       transactions_2025.csv
       transactions_2026.csv
-      screenshot_portfolio.png
-      screenshot_transactions.png
+      positions_2026-02-20T17-30.json
+      screenshot_portfolio_2026-02-20.png
+      screenshot_transactions_2026-02-20.png
 ```
 
 Clean split: `brokers/` = how to navigate, `memory/` = what we've learned.
+
+## Backfill Mode
+
+Invoked with `/gather <broker> backfill`. Downloads as many prior years as the broker allows, filling in historical transaction data.
+
+### Backfill Loop (per account)
+
+1. Start from the year before the current year and iterate backward
+2. **Skip** years where `transactions_<year>.csv` already exists in the account directory (idempotent)
+3. For each missing year: select the date range for that year, download CSV
+4. **Stop** when a downloaded CSV has zero transaction rows (broker has no more data for that account)
+5. Current year is always re-downloaded (rolling data)
+
+### Key Differences from Standard Gather
+
+- Standard gather downloads current year + prior year only
+- Backfill keeps going backward until the broker runs out of data
+- Existing year files are never re-downloaded (except current year)
+- The broker guide's "Backfill" section documents available date range options
 
 ## Adding New Brokers
 

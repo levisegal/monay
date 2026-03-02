@@ -15,7 +15,8 @@ insert into lots (
     acquired_date,
     quantity_micros,
     remaining_micros,
-    cost_basis_micros
+    cost_basis_micros,
+    estimated_basis
 ) values (
     @id,
     @account_id,
@@ -24,7 +25,8 @@ insert into lots (
     @acquired_date,
     @quantity_micros,
     @remaining_micros,
-    @cost_basis_micros
+    @cost_basis_micros,
+    @estimated_basis
 )
 returning *;
 
@@ -116,7 +118,13 @@ where strftime('%Y', disposed_date) = @year;
 select
     s.symbol,
     s.id as security_id,
-    coalesce(sum(l.remaining_micros), 0) as remaining_micros
+    coalesce(sum(l.remaining_micros), 0) as remaining_micros,
+    coalesce(sum(
+        case when l.quantity_micros > 0
+            then l.cost_basis_micros * l.remaining_micros / l.quantity_micros
+            else 0
+        end
+    ), 0) as remaining_cost_micros
 from securities s
 left join lots l on l.security_id = s.id and l.account_id = @account_id
 where s.id in (
@@ -136,7 +144,8 @@ select
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 where l.account_id = @account_id and l.remaining_micros > 0
@@ -156,7 +165,8 @@ select
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id
@@ -175,7 +185,8 @@ select
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id

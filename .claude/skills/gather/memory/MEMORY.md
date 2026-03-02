@@ -57,3 +57,10 @@
 4. Move downloaded files immediately after each download
 5. Don't rely on the browser surviving across long pauses
 6. Always use element refs from snapshot YAML, not named selectors
+
+## Multi-Broker Learnings
+
+- Some brokers export all accounts in a single CSV — must split by account name + year after download
+- When splitting CSVs by year, match the Trade Date field at the start of the line only — descriptions can contain other dates (e.g., "PAY DATE 03/07/2024")
+- Merrill exports include metadata rows (header, footer) that don't match data format — grep-based splitting naturally skips these
+- Export confirmation dialogs are common — always check snapshot after clicking Export for popups

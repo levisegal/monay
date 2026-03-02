@@ -34,6 +34,13 @@ Each broker has a mapping from directory names to account names used by the hold
 | joint-3652 | Joint 3652 |
 | joint-2813 | Joint 2813 |
 
+### Merrill Lynch
+
+| Directory | Account Name |
+|-----------|-------------|
+| managed-2241 | Managed |
+| other-0282 | Other |
+
 ## Workflow
 
 ### 1. Pre-flight
@@ -54,7 +61,7 @@ For each account, run these steps in order:
 # 1. Clear existing data for clean reimport
 go run cmd/main.go lots clear --account-name "<name>"
 
-# 2. Import all CSVs (opening balance first, then by year ascending)
+# 2. Import all CSVs (year files ascending)
 go run cmd/main.go import --broker etrade --account-name "<name>" --file <csv1> --file <csv2> ...
 
 # 3. Process tax lots (FIFO matching)
@@ -84,9 +91,9 @@ go run cmd/main.go cash reconcile --account-name "<name>" --positions-file <most
 
 **Auto-fix behavior:** Step 4 uses the most recent `positions_*.json` for the account. If no positions file exists, fall back to `lots check` without `--fix` and report gaps. The positions file provides `price_paid` (average cost per share) which is used to compute approximate cost basis for opening balance transactions.
 
-**File ordering:** Opening balance CSVs (`transactions_opening.csv`) first, then year files ascending (`transactions_2021.csv`, `transactions_2022.csv`, ...). Pass all as `--file` flags to a single import command.
+**File ordering:** Year files ascending (`transactions_2021.csv`, `transactions_2022.csv`, ...). Pass all as `--file` flags to a single import command. Opening balances are synthesized automatically from the positions JSON in step 4 — do NOT import `transactions_opening.csv` files.
 
-**CSV paths:** Use paths relative to `services/holdings/`, e.g., `../../data/imports/etrade/maya-3758/transactions_2026.csv`. Also check `importer/testdata/etrade/<dir>/` for opening balance files that may not be in `data/imports/`.
+**CSV paths:** Use paths relative to `services/holdings/`, e.g., `../../data/imports/etrade/maya-3758/transactions_2026.csv`. Only use files from `data/imports/<broker>/`.
 
 ### 3. Position Comparison
 

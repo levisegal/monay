@@ -1,0 +1,43 @@
+All Transactions Activity Types
+
+Account Activity for Joint JTWROS -2060 from 2022
+
+Total:,2.2737367544323206e-13
+
+Activity/Trade Date,Transaction Date,Settlement Date,Activity Type,Description,Symbol,Cusip,Quantity #,Price $,Amount $,Commission,Category,Note
+12/29/22,12/29/22,,Dividend,Vanguard Health Care Inv      VANGUARD                      REINVEST PRICE $210.40,VGHCX,--,1.588,0,-334.07,0,--,--
+12/29/22,12/29/22,,Dividend,Vanguard Health Care Inv      VANGUARD                      REINVEST PRICE $210.40,VGHCX,--,1.042,0,-219.26,0,--,--
+12/29/22,12/29/22,,Dividend,Vanguard Health Care Inv      VANGUARD                      RECORD 12/27/22 PAY 12/29/22  DIVIDEND RATE      1.53520000,VGHCX,--,0,0,219.26,0,--,--
+12/29/22,12/29/22,,Dividend,Vanguard Health Care Inv      VANGUARD                      L/T CAPITAL GAIN              RECORD 12/27/22 PAY 12/29/22,VGHCX,--,0,0,334.07,0,--,--
+12/28/22,12/28/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         REINVEST PRICE $  8.65,PTOAX,--,6.105,0,-52.81,0,--,--
+12/28/22,12/28/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         RECORD 12/23/22 PAY 12/27/22  DIVIDEND RATE      0.01297000,PTOAX,--,0,0,52.81,0,--,--
+12/20/22,12/20/22,,Dividend,Vanguard 500 Index Admiral    VANGUARD                      REINVEST PRICE $351.93,VFIAX,--,0.507,0,-178.42,0,--,--
+12/20/22,12/20/22,,Dividend,Vanguard 500 Index Admiral    VANGUARD                      RECORD 12/16/22 PAY 12/20/22  DIVIDEND RATE      1.67650000,VFIAX,--,0,0,178.42,0,--,--
+12/16/22,12/16/22,,Dividend,T. Rowe Price QM US Small-Cap T. ROWE PRICE                 REINVEST PRICE $ 34.97,PRDSX,--,26.511,0,-927.09,0,--,--
+12/16/22,12/16/22,,Dividend,T. Rowe Price QM US Small-Cap T. ROWE PRICE                 L/T CAPITAL GAIN              RECORD 12/14/22 PAY 12/16/22,PRDSX,--,0,0,927.09,0,--,--
+12/15/22,12/15/22,,Dividend,Schwab Health Care            SCHWAB FUNDS                  REINVEST PRICE $ 26.93,SWHFX,--,48.425,0,-1304.09,0,--,--
+12/15/22,12/15/22,,Dividend,Schwab Health Care            SCHWAB FUNDS                  REINVEST PRICE $ 26.93,SWHFX,--,10.515,0,-283.16,0,--,--
+12/15/22,12/15/22,,Dividend,Schwab Health Care            SCHWAB FUNDS                  RECORD 12/13/22 PAY 12/14/22  DIVIDEND RATE      0.19490000,SWHFX,--,0,0,283.16,0,--,--
+12/15/22,12/15/22,,Dividend,Schwab Health Care            SCHWAB FUNDS                  L/T CAPITAL GAIN              RECORD 12/13/22 PAY 12/14/22,SWHFX,--,0,0,1304.09,0,--,--
+12/12/22,12/12/22,,Dividend,Schwab 1000 Index??            SCHWAB FUNDS                  REINVEST PRICE $ 84.04,SNXFX,--,7.032,0,-590.99,0,--,--
+12/12/22,12/12/22,,Dividend,Schwab 1000 Index??            SCHWAB FUNDS                  RECORD 12/08/22 PAY 12/09/22  DIVIDEND RATE      1.32220000,SNXFX,--,0,0,590.99,0,--,--
+12/08/22,12/08/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         REINVEST PRICE $  8.89,PTOAX,--,68.112,0,-605.52,0,--,--
+12/08/22,12/08/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         REINVEST PRICE $  8.89,PTOAX,--,36.118,0,-321.09,0,--,--
+12/08/22,12/08/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         S/T CAPITAL GAIN              RECORD 12/06/22 PAY 12/07/22,PTOAX,--,0,0,321.09,0,--,--
+12/08/22,12/08/22,,Dividend,PIMCO StocksPLUS?? Absolute RetPIMCO                         L/T CAPITAL GAIN              RECORD 12/06/22 PAY 12/07/22,PTOAX,--,0,0,605.52,0,--,--
+09/28/22,09/28/22,,Dividend,Vanguard 500 Index Admiral    VANGUARD                      REINVEST PRICE $336.43,VFIAX,--,0.463,0,-155.9,0,--,--
+09/28/22,09/28/22,,Dividend,Vanguard 500 Index Admiral    VANGUARD                      RECORD 09/26/22 PAY 09/28/22  DIVIDEND RATE      1.47130000,VFIAX,--,0,0,155.9,0,--,--
+09/09/22,09/09/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         REINVEST PRICE $  9.36,PTOAX,--,6.078,0,-56.89,0,--,--
+09/09/22,09/09/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         RECORD 09/07/22 PAY 09/08/22  DIVIDEND RATE      0.01436000,PTOAX,--,0,0,56.89,0,--,--
+06/29/22,06/29/22,,Dividend,VANGUARD 500 INDEX ADMIRAL    VANGUARD                      REINVEST PRICE $352.61,VFIAX,--,0.429,0,-151.22,0,--,--
+06/29/22,06/29/22,,Dividend,VANGUARD 500 INDEX ADMIRAL    VANGUARD                      RECORD 06/27/22 PAY 06/29/22  DIVIDEND RATE      1.43290000,VFIAX,--,0,0,151.22,0,--,--
+06/10/22,06/10/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         REINVEST PRICE $  9.45,PTOAX,--,6.081,0,-57.47,0,--,--
+06/10/22,06/10/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         RECORD 06/08/22 PAY 06/09/22  DIVIDEND RATE      0.01453000,PTOAX,--,0,0,57.47,0,--,--
+03/29/22,03/29/22,,Dividend,VANGUARD HEALTH CARE INV      VANGUARD                      REINVEST PRICE $212.41,VGHCX,--,4.927,0,-1046.55,0,--,--
+03/29/22,03/29/22,,Dividend,VANGUARD HEALTH CARE INV      VANGUARD                      REINVEST PRICE $212.41,VGHCX,--,0.08,0,-17.05,0,--,--
+03/29/22,03/29/22,,Dividend,VANGUARD HEALTH CARE INV      VANGUARD                      RECORD 03/25/22 PAY 03/29/22  DIVIDEND RATE      0.12370000,VGHCX,--,0,0,17.05,0,--,--
+03/29/22,03/29/22,,Dividend,VANGUARD HEALTH CARE INV      VANGUARD                      L/T CAPITAL GAIN              RECORD 03/25/22 PAY 03/29/22,VGHCX,--,0,0,1046.55,0,--,--
+03/24/22,03/24/22,,Dividend,VANGUARD 500 INDEX ADMIRAL    VANGUARD                      REINVEST PRICE $411.20,VFIAX,--,0.351,0,-144.31,0,--,--
+03/24/22,03/24/22,,Dividend,VANGUARD 500 INDEX ADMIRAL    VANGUARD                      RECORD 03/22/22 PAY 03/24/22  DIVIDEND RATE      1.37200000,VFIAX,--,0,0,144.31,0,--,--
+03/11/22,03/11/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         REINVEST PRICE $ 10.14,PTOAX,--,42.288,0,-428.8,0,--,--
+03/11/22,03/11/22,,Dividend,PIMCO STOCKSPLUS?? ABSOLUTE RETPIMCO                         RECORD 03/09/22 PAY 03/10/22  DIVIDEND RATE      0.10958000,PTOAX,--,0,0,428.8,0,--,--

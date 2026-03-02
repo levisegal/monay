@@ -1,0 +1,33 @@
+All Transactions Activity Types
+
+Account Activity for maya -3758 from Current Year
+
+Total:,-18247.05
+
+Activity/Trade Date,Transaction Date,Settlement Date,Activity Type,Description,Symbol,Cusip,Quantity #,Price $,Amount $,Commission,Category,Note
+02/17/26,02/17/26,02/18/26,Bought,UNITED PARCEL SER INC CL-B UNSOLICITED TRADE,UPS,--,78.0,115.85,-9036.3,0.0,--,--
+02/17/26,02/17/26,02/18/26,Bought,UNITED PARCEL SER INC CL-B UNSOLICITED TRADE,UPS,--,800.0,115.869,-92695.2,0.0,--,--
+02/17/26,02/17/26,02/18/26,Bought,VERIZON COMMUNICATIONS UNSOLICITED TRADE,VZ,--,2000.0,49.056,-98111.2,0.0,--,--
+02/17/26,02/17/26,02/18/26,Bought,PFIZER INC UNSOLICITED TRADE,PFE,--,4500.0,27.399,-123297.3,0.0,--,--
+02/13/26,02/13/26,02/13/26,Online Transfer,ACH DEPOSIT  REFID:12717702395;,--,--,,,100000.0,0.0,--,--
+02/12/26,02/12/26,02/12/26,Online Transfer,ACH DEPOSIT  REFID:12613722395;,--,--,,,100000.0,0.0,--,--
+02/11/26,02/11/26,02/11/26,Online Transfer,ACH DEPOSIT  REFID:12518445395;,--,--,,,100000.0,0.0,--,--
+02/10/26,02/10/26,02/11/26,Bought,ALLSPRING MONEY MARKET PREMIER CONFIRM NBR UNSOLICITED TRADE,WMPXX,--,100005.0,1.0,-100005.0,0.0,--,--
+02/10/26,02/10/26,02/10/26,Online Transfer,ACH DEPOSIT  REFID:12411372395;,--,--,,,100000.0,0.0,--,--
+02/10/26,02/10/26,02/11/26,Bought,COCA COLA CO UNSOLICITED TRADE,KO,--,1000.0,76.798,-76798.2,0.0,--,--
+02/09/26,02/09/26,02/09/26,Online Transfer,ACH DEPOSIT  REFID:12209124395;,--,--,,,100000.0,0.0,--,--
+02/02/26,02/02/26,01/30/26,Dividend,50.690000 ALLSPRING MONEY MARKET PREMIER REINVEST PRICE $ 1 As of 01/30/26,WMPXX,--,50.69,1.0,-50.69,0.0,--,--
+02/02/26,02/02/26,01/30/26,Dividend,ALLSPRING MONEY MARKET PREMIER DIV PAYMENT,WMPXX,--,,,50.69,0.0,--,--
+01/30/26,01/30/26,01/30/26,Interest Income,MORGAN STANLEY BANK N.A. (Period 01/01-01/31),MSBNK,--,,,0.02,0.0,--,--
+01/02/26,01/02/26,01/05/26,Bought,ALLSPRING MONEY MARKET PREMIER CONFIRM NBR UNSOLICITED TRADE,WMPXX,--,18303.87,1.0,-18303.87,0.0,--,--
+
+
+
+"For all accounts, the Activity Date and the Processing Date are displayed. However, for Morgan Stanley and Co. and Externally Held accounts, only the Activity Date is available; therefore, the Processing Date listed for these accounts will be equivalent to the Activity Date. Please rely on the official account statements of your Morgan Stanley & Co. or Externally Held account for the actual Processing Date of any of these assets, and refer to the definitions section for more information on these categories."
+
+"The information provided with respect to your employee stock option plan (""ESOP"") was obtained from third party sources which Morgan Stanley believes to be reliable. However, we make no representation or guarantee that the information is accurate or complete. There may be other requirements, details, and criteria governing your ESOP. Please refer to the documentation provided by your employer for the terms and conditions governing your ESOP."
+
+E*TRADE from Morgan Stanley credits and offers may be subject to U.S. withholding taxes and reporting at retail value. Taxes related to these credits and offers are the customer's responsibility.
+
+"Under the Bank Deposit Program, free credit balances held in an account(s) at Morgan Stanley Smith Barney LLC are automatically deposited into an interest bearing deposit account(s), at FDIC-insured banks. For more information, view the Bank Deposit Program Disclosure Statement."
+
