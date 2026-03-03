@@ -519,10 +519,62 @@ func autoFixFromPositions(ctx context.Context, queries *db.Queries, accountID st
 		created++
 	}
 
+	created += removeStalePositions(ctx, queries, positions, accountID, latestDate, netBySymbol)
 	created += reconcileMoneyMarkets(ctx, queries, positions, accountID, acquiredDate, netBySymbol)
 
 	fmt.Printf("\nCreated %d transactions. Run 'lots process' to rebuild lots.\n", created)
 	return nil
+}
+
+func removeStalePositions(ctx context.Context, queries *db.Queries, positions *taxlots.PositionsFile, accountID string, latestDate time.Time, netBySymbol map[string]int64) int {
+	scrapedSymbols := make(map[string]bool)
+	for _, pos := range positions.Positions {
+		scrapedSymbols[strings.ToUpper(pos.Symbol)] = true
+	}
+
+	cashEquivSymbols, _ := queries.ListCashEquivalentsByAccount(ctx, accountID)
+	cashEquivSet := make(map[string]bool)
+	for _, s := range cashEquivSymbols {
+		cashEquivSet[strings.ToUpper(s)] = true
+	}
+
+	created := 0
+	for sym, netMicros := range netBySymbol {
+		if netMicros <= 0 || scrapedSymbols[sym] {
+			continue
+		}
+		if cashEquivSet[sym] && positions.Summary.CashPurchasingPower > 0 {
+			continue
+		}
+
+		sec, err := queries.GetSecurityBySymbol(ctx, sym)
+		if err != nil {
+			slog.Error("failed to get security for stale position", "symbol", sym, "error", err)
+			continue
+		}
+
+		adjustDate := latestDate.Format("2006-01-02")
+		err = queries.CreateTransaction(ctx, db.CreateTransactionParams{
+			ID:              database.NewID(database.PrefixTransaction),
+			AccountID:       accountID,
+			SecurityID:      sql.NullString{String: sec.ID, Valid: true},
+			TransactionType: string(importer.TransactionTypeReorgOut),
+			TransactionDate: adjustDate,
+			QuantityMicros:  sql.NullInt64{Int64: netMicros, Valid: true},
+			PriceMicros:     sql.NullInt64{Int64: 0, Valid: true},
+			AmountMicros:    0,
+			FeesMicros:      sql.NullInt64{Int64: 0, Valid: true},
+			Description:     sql.NullString{String: "Remove stale position not in scraped positions", Valid: true},
+		})
+		if err != nil {
+			slog.Error("failed to create stale position removal", "symbol", sym, "error", err)
+			continue
+		}
+
+		slog.Info("removed stale position", "symbol", sym, "quantity", float64(netMicros)/1_000_000)
+		created++
+	}
+	return created
 }
 
 func reconcileMoneyMarkets(ctx context.Context, queries *db.Queries, positions *taxlots.PositionsFile, accountID string, acquiredDate time.Time, netBySymbol map[string]int64) int {
