@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import get_settings
-from routers import chart, portfolio, quotes
+from routers import chart, optimize, portfolio, quotes
 from services.cache import PriceCache
 from services.holdings_client import HoldingsClient
 from services.market import MarketService
@@ -39,6 +39,9 @@ async def lifespan(app: FastAPI):
     app.include_router(chart.create_router(market), prefix="/api/v1", tags=["chart"])
     app.include_router(
         portfolio.create_router(holdings, market), prefix="/api/v1", tags=["portfolio"]
+    )
+    app.include_router(
+        optimize.create_router(market), prefix="/api/v1", tags=["optimize"]
     )
 
     yield

@@ -2,8 +2,10 @@
 
 ## Accounts
 
-| Directory | Account Number | Account Type | Balance (2026-03-02) |
-|-----------|---------------|--------------|---------------------|
+### Login 1 (gathered 2026-03-02)
+
+| Directory | Account Number | Account Type | Balance |
+|-----------|---------------|--------------|---------|
 | rollover-0850 | 257524850 | Rollover IRA | $2,830,795 |
 | sep-0740 | 249148740 | SEP-IRA | $56,745 |
 | roth-2094 | 114712094 | ROTH IRA | $6,520 |
@@ -11,6 +13,18 @@
 | astellas-3509 | 93509 | ASTELLAS RSP | $40 |
 
 Zero-balance accounts (skipped): GILEAD SCIENCES 401K 40049, INSTIL BIO RET PLAN 56193
+
+### Login 2 (gathered 2026-03-04)
+
+| Directory | Account Number | Account Type | Balance |
+|-----------|---------------|--------------|---------|
+| rollover-1820 | 114641820 | Rollover IRA | $735,773 |
+| roth-2108 | 114712108 | ROTH IRA | $278,255 |
+| joint-7807 | X66087807 | Joint WROS - TOD | $3,767 |
+
+Zero-balance accounts (skipped): JEWISH FED CNCL-L A 68440
+
+**Note:** Joint WROS X66087807 appears on BOTH logins (same account, shared between users).
 
 ## Login
 

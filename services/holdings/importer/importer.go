@@ -36,6 +36,7 @@ type Transaction struct {
 	AmountMicros    int64 // amount * 1,000,000
 	FeesMicros      int64 // fees * 1,000,000
 	Description     string
+	SecurityType    string
 	CashEquivalent  bool
 }
 
@@ -46,6 +47,7 @@ type Position struct {
 	CostBasisMicros   int64 // cost basis * 1,000,000
 	MarketValueMicros int64 // market value * 1,000,000
 	AsOfDate          time.Time
+	SecurityType      string
 }
 
 type ImportResult struct {

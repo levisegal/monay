@@ -110,6 +110,11 @@ func parseLPLRow(record []string) (*Transaction, error) {
 	// Clean up symbol
 	symbol = normalizeLPLSymbol(symbol)
 
+	var securityType string
+	if strings.Contains(description, " CPN ") {
+		securityType = "bond"
+	}
+
 	return &Transaction{
 		Symbol:          symbol,
 		SecurityName:    extractLPLSecurityName(description),
@@ -120,6 +125,7 @@ func parseLPLRow(record []string) (*Transaction, error) {
 		AmountMicros:    toMicros(value.Abs()),
 		FeesMicros:      0,
 		Description:     description,
+		SecurityType:    securityType,
 	}, nil
 }
 
@@ -142,13 +148,18 @@ func mapLPLTransactionType(activity string, value decimal.Decimal) TransactionTy
 	case "reinvest interest":
 		// Interest reinvested into cash account - treat as interest
 		return TransactionTypeInterest
+	case "long term cap gain", "short term cap gain":
+		return TransactionTypeCapGain
+	case "lt cap gain reinvest", "st cap gain reinvest":
+		return TransactionTypeBuy
+	case "ach funds":
+		return TransactionTypeTransferOut
 	case "ica transfer":
 		if value.IsPositive() {
 			return TransactionTypeTransferIn
 		}
 		return TransactionTypeTransferOut
 	case "journal":
-		// Distribution to linked account
 		return TransactionTypeTransferOut
 	case "fee":
 		return TransactionTypeFee

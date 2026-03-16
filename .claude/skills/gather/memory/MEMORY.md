@@ -65,3 +65,6 @@
 - When splitting CSVs by year, match the Trade Date field at the start of the line only — descriptions can contain other dates (e.g., "PAY DATE 03/07/2024")
 - Merrill exports include metadata rows (header, footer) that don't match data format — grep-based splitting naturally skips these
 - Export confirmation dialogs are common — always check snapshot after clicking Export for popups
+- LPL exports all download as same filename (`Activity.csv`) — move immediately between accounts
+- Some brokers have dropdown sub-menus (chevron expanders) that don't render in accessibility tree — may need manual user interaction for those options
+- LPL date range resets when navigating away from Activity page — re-select after switching tabs

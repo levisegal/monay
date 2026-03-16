@@ -22,7 +22,14 @@ CREATE TABLE IF NOT EXISTS quote_cache (
     change REAL,
     change_percent REAL,
     previous_close REAL,
-    cached_at TEXT NOT NULL
+    cached_at TEXT NOT NULL,
+    sector TEXT,
+    industry TEXT,
+    name TEXT,
+    category TEXT,
+    dividend_rate REAL,
+    dividend_yield REAL,
+    yield_pct REAL
 );
 """
 
@@ -118,7 +125,8 @@ class PriceCache:
         placeholders = ",".join("?" for _ in symbols)
         cursor = await self._db.execute(
             f"""
-            SELECT symbol, price, change, change_percent, previous_close, cached_at
+            SELECT symbol, price, change, change_percent, previous_close, cached_at,
+                   sector, industry, name, category, dividend_rate, dividend_yield, yield_pct
             FROM quote_cache
             WHERE symbol IN ({placeholders})
             """,
@@ -133,13 +141,19 @@ class PriceCache:
             if age_minutes <= max_age_minutes:
                 result[row[0]] = {
                     "symbol": row[0],
-                    "name": None,
+                    "name": row[8] if len(row) > 8 else None,
                     "price": row[1],
                     "change": row[2],
                     "change_percent": row[3],
                     "previous_close": row[4],
                     "volume": None,
                     "asset_type": "equity",
+                    "sector": row[6] if len(row) > 6 else None,
+                    "industry": row[7] if len(row) > 7 else None,
+                    "category": row[9] if len(row) > 9 else None,
+                    "dividend_rate": row[10] if len(row) > 10 else None,
+                    "dividend_yield": row[11] if len(row) > 11 else None,
+                    "yield_pct": row[12] if len(row) > 12 else None,
                 }
         return result
 
@@ -151,8 +165,10 @@ class PriceCache:
         now = datetime.utcnow().isoformat()
         await self._db.executemany(
             """
-            INSERT OR REPLACE INTO quote_cache (symbol, price, change, change_percent, previous_close, cached_at)
-            VALUES (?, ?, ?, ?, ?, ?)
+            INSERT OR REPLACE INTO quote_cache
+                (symbol, price, change, change_percent, previous_close, cached_at,
+                 sector, industry, name, category, dividend_rate, dividend_yield, yield_pct)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -162,6 +178,13 @@ class PriceCache:
                     q.get("change_percent"),
                     q.get("previous_close"),
                     now,
+                    q.get("sector"),
+                    q.get("industry"),
+                    q.get("name"),
+                    q.get("category"),
+                    q.get("dividend_rate"),
+                    q.get("dividend_yield"),
+                    q.get("yield_pct"),
                 )
                 for q in quotes
             ],

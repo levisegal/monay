@@ -98,21 +98,42 @@ select
     l.acquired_date,
     l.security_id,
     s.symbol,
-    s.name as security_name
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name
 from lot_dispositions d
 join lots l on l.id = d.lot_id
 join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
 where
     strftime('%Y', d.disposed_date) = @year
+    and a.account_type = 'taxable'
 order by d.disposed_date asc;
 
 -- name: SumRealizedGainsByYear :one
 select
-    coalesce(sum(case when holding_period = 'short_term' then realized_gain_micros else 0 end), 0) as short_term_gains,
-    coalesce(sum(case when holding_period = 'long_term' then realized_gain_micros else 0 end), 0) as long_term_gains,
-    coalesce(sum(realized_gain_micros), 0) as total_gains
-from lot_dispositions
-where strftime('%Y', disposed_date) = @year;
+    coalesce(sum(case when d.holding_period = 'short_term' then d.realized_gain_micros else 0 end), 0) as short_term_gains,
+    coalesce(sum(case when d.holding_period = 'long_term' then d.realized_gain_micros else 0 end), 0) as long_term_gains,
+    coalesce(sum(d.realized_gain_micros), 0) as total_gains
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+where
+    strftime('%Y', d.disposed_date) = @year
+    and a.account_type = 'taxable';
+
+-- name: SumRealizedGainLossByYear :one
+select
+    coalesce(sum(case when d.holding_period = 'short_term' and d.realized_gain_micros > 0 then d.realized_gain_micros else 0 end), 0) as st_gains,
+    coalesce(sum(case when d.holding_period = 'short_term' and d.realized_gain_micros < 0 then d.realized_gain_micros else 0 end), 0) as st_losses,
+    coalesce(sum(case when d.holding_period = 'long_term' and d.realized_gain_micros > 0 then d.realized_gain_micros else 0 end), 0) as lt_gains,
+    coalesce(sum(case when d.holding_period = 'long_term' and d.realized_gain_micros < 0 then d.realized_gain_micros else 0 end), 0) as lt_losses
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+where
+    strftime('%Y', d.disposed_date) = @year
+    and a.account_type = 'taxable';
 
 -- name: SumRemainingBySymbol :many
 select
@@ -138,6 +159,7 @@ group by s.symbol, s.id;
 select
     s.symbol,
     s.name as security_name,
+    s.security_type,
     sum(l.remaining_micros) as quantity_micros,
     sum(
         case when l.remaining_micros > 0
@@ -159,6 +181,7 @@ select
     a.name as account_name,
     s.symbol,
     s.name as security_name,
+    s.security_type,
     sum(l.remaining_micros) as quantity_micros,
     sum(
         case when l.remaining_micros > 0
@@ -174,10 +197,61 @@ where l.remaining_micros > 0
 group by a.id, a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc;
 
+-- name: ListOpenLotsByAccountType :many
+select
+    l.id,
+    l.account_id,
+    l.security_id,
+    l.acquired_date,
+    l.quantity_micros,
+    l.remaining_micros,
+    l.cost_basis_micros,
+    l.estimated_basis,
+    s.symbol,
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
+where l.remaining_micros > 0 and a.account_type = @account_type
+order by a.name, s.symbol, l.acquired_date asc;
+
+-- name: ListLotsForPerformance :many
+select
+    l.id,
+    l.account_id,
+    l.security_id,
+    l.acquired_date,
+    l.quantity_micros,
+    l.remaining_micros,
+    l.cost_basis_micros,
+    l.estimated_basis,
+    s.symbol,
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name,
+    a.account_type
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
+order by a.name, s.symbol, l.acquired_date asc;
+
+-- name: ListLotDispositionsForPerformance :many
+select
+    d.lot_id,
+    d.disposed_date,
+    d.quantity_micros
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+order by d.disposed_date asc, d.created_at asc;
+
 -- name: ListPositions :many
 select
     s.symbol,
     s.name as security_name,
+    s.security_type,
     count(distinct a.id) as account_count,
     sum(l.remaining_micros) as quantity_micros,
     sum(
