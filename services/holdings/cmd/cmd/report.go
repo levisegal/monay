@@ -27,6 +27,7 @@ import (
 func reportCommand() *cobra.Command {
 	var output string
 	var convictionsFlag string
+	var coreTiltsFlag string
 
 	cmd := &cobra.Command{
 		Use:   "report",
@@ -50,14 +51,20 @@ func reportCommand() *cobra.Command {
 				convPath = cfg.ConvictionsPath
 			}
 
+			ctPath := coreTiltsFlag
+			if ctPath == "" {
+				ctPath = cfg.CoreTiltsPath
+			}
+
 			queries := db.New(conn)
-			return generateReport(ctx, queries, cfg.PortfolioURL, output, convPath)
+			return generateReport(ctx, queries, cfg.PortfolioURL, output, convPath, ctPath)
 		},
 	}
 
 	cmd.Flags().StringVarP(&output, "output", "o", "", "Output file path (required)")
 	cmd.MarkFlagRequired("output")
 	cmd.Flags().StringVar(&convictionsFlag, "convictions", "", "Path to convictions YAML file")
+	cmd.Flags().StringVar(&coreTiltsFlag, "core-tilts", "", "Path to core-tilts YAML config")
 
 	return cmd
 }
@@ -78,6 +85,8 @@ type reportData struct {
 	accountRisk    []accountRiskRow
 	totalReturns   []dailyReturn
 	riskFreeRate   float64
+	coreTiltCfg    *coreTiltConfig
+	securities     []db.Security
 }
 
 type accountRiskRow struct {
@@ -343,7 +352,7 @@ type analyzeAssetClassOverride struct {
 	TargetRange [2]float64 `json:"target_range"`
 }
 
-func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, output, convictionsPath string) error {
+func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, output, convictionsPath, coreTiltsPath string) error {
 	var conv *convictionsConfig
 	if convictionsPath != "" {
 		var err error
@@ -359,12 +368,27 @@ func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, outp
 		)
 	}
 
+	var ctCfg *coreTiltConfig
+	if coreTiltsPath != "" {
+		var err error
+		ctCfg, err = loadCoreTiltConfig(coreTiltsPath)
+		if err != nil {
+			return fmt.Errorf("failed to load core-tilts config: %w", err)
+		}
+	}
+
 	data, err := loadReportData(ctx, queries, portfolioURL, conv)
 	if err != nil {
 		return err
 	}
 	if data.analysis == nil {
 		return fmt.Errorf("portfolio analysis unavailable from %s", portfolioURL)
+	}
+
+	data.coreTiltCfg = ctCfg
+	if ctCfg != nil {
+		secs, _ := queries.ListSecuritiesWithOpenLots(ctx)
+		data.securities = secs
 	}
 
 	f := excelize.NewFile()
@@ -382,6 +406,7 @@ func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, outp
 	writeConcentrationSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeReturnsSheet(f, data, headerStyle)
 	writeRiskSheet(f, data, currencyFmt, pctFmt, headerStyle)
+	writeCoreTiltSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writePerformanceSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writePlaybookSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeTaxHarvestingSheet(f, data, currencyFmt, pctFmt, headerStyle)
@@ -1779,6 +1804,211 @@ func setOptionalPct(f *excelize.File, sheet, col string, row int, v *float64, pc
 	if v != nil {
 		f.SetCellValue(sheet, cell(col, row), *v)
 		f.SetCellStyle(sheet, cell(col, row), cell(col, row), pctFmt)
+	}
+}
+
+func writeCoreTiltSheet(f *excelize.File, data *reportData, currencyFmt, pctFmt, headerStyle int) {
+	if data.coreTiltCfg == nil {
+		return
+	}
+
+	sheet := "Core & Tilts"
+	f.NewSheet(sheet)
+
+	secMap := make(map[string]db.Security)
+	for _, s := range data.securities {
+		secMap[s.Symbol] = s
+	}
+
+	symbolToTilt := make(map[string]string)
+	for tiltName, td := range data.coreTiltCfg.Tilts {
+		for _, sym := range td.Symbols {
+			symbolToTilt[sym] = tiltName
+		}
+	}
+
+	posMap := aggregatePositions(data.positions, data.quotes, data.totalValue)
+	for sym, cp := range posMap {
+		sec := secMap[sym]
+		cp.ExpenseBps = expenseBps(sec, data.quotes[sym])
+		cp.FundFamily = fundFamily(sec, data.quotes[sym])
+		cp.AnnualFee = float64(cp.ExpenseBps) / 10000.0 * cp.Value
+		posMap[sym] = cp
+	}
+
+	bpsFmt, _ := f.NewStyle(&excelize.Style{NumFmt: 1})
+	sectionStyle, _ := f.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true, Size: 12}})
+	subtotalStyle, _ := f.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+
+	headers := []string{"Symbol", "Name", "Class", "Value", "Weight", "ER (bps)", "Ann. Fee", "Manager"}
+	row := 1
+	for i, h := range headers {
+		col := excelCol(i)
+		f.SetCellValue(sheet, cell(col, row), h)
+		f.SetCellStyle(sheet, cell(col, row), cell(col, row), headerStyle)
+	}
+	row++
+
+	f.SetCellValue(sheet, cell("A", row), "CORE HOLDINGS")
+	f.SetCellStyle(sheet, cell("A", row), cell("A", row), sectionStyle)
+	row++
+
+	coreValue, coreFee := 0.0, 0.0
+	var coreSymbols []string
+	for sym := range data.coreTiltCfg.Core {
+		coreSymbols = append(coreSymbols, sym)
+	}
+	sort.Slice(coreSymbols, func(i, j int) bool {
+		return posMap[coreSymbols[i]].Value > posMap[coreSymbols[j]].Value
+	})
+	for _, sym := range coreSymbols {
+		cp, ok := posMap[sym]
+		if !ok {
+			continue
+		}
+		role := data.coreTiltCfg.Core[sym]
+		writeCoreTiltRow(f, sheet, row, sym, role, "Core", cp, currencyFmt, pctFmt, bpsFmt)
+		coreValue += cp.Value
+		coreFee += cp.AnnualFee
+		row++
+	}
+	f.SetCellValue(sheet, cell("A", row), "Core Total")
+	f.SetCellStyle(sheet, cell("A", row), cell("A", row), subtotalStyle)
+	setCurrency(f, sheet, "D", row, coreValue, currencyFmt)
+	f.SetCellValue(sheet, cell("E", row), coreValue/data.totalValue)
+	f.SetCellStyle(sheet, cell("E", row), cell("E", row), pctFmt)
+	setCurrency(f, sheet, "G", row, coreFee, currencyFmt)
+	row += 2
+
+	sortedTilts := make([]string, 0, len(data.coreTiltCfg.Tilts))
+	for name := range data.coreTiltCfg.Tilts {
+		sortedTilts = append(sortedTilts, name)
+	}
+	sort.Slice(sortedTilts, func(i, j int) bool {
+		vi, vj := 0.0, 0.0
+		for _, s := range data.coreTiltCfg.Tilts[sortedTilts[i]].Symbols {
+			vi += posMap[s].Value
+		}
+		for _, s := range data.coreTiltCfg.Tilts[sortedTilts[j]].Symbols {
+			vj += posMap[s].Value
+		}
+		return vi > vj
+	})
+
+	tiltValue, tiltFee := 0.0, 0.0
+	for _, tiltName := range sortedTilts {
+		td := data.coreTiltCfg.Tilts[tiltName]
+		f.SetCellValue(sheet, cell("A", row), strings.ToUpper(tiltName))
+		f.SetCellValue(sheet, cell("B", row), td.Thesis)
+		f.SetCellStyle(sheet, cell("A", row), cell("A", row), sectionStyle)
+		row++
+
+		syms := make([]string, len(td.Symbols))
+		copy(syms, td.Symbols)
+		sort.Slice(syms, func(i, j int) bool { return posMap[syms[i]].Value > posMap[syms[j]].Value })
+
+		groupValue, groupFee := 0.0, 0.0
+		for _, sym := range syms {
+			cp, ok := posMap[sym]
+			if !ok {
+				continue
+			}
+			writeCoreTiltRow(f, sheet, row, sym, cp.Name, tiltName, cp, currencyFmt, pctFmt, bpsFmt)
+			groupValue += cp.Value
+			groupFee += cp.AnnualFee
+			row++
+		}
+		tiltValue += groupValue
+		tiltFee += groupFee
+
+		f.SetCellValue(sheet, cell("A", row), fmt.Sprintf("%s Total", tiltName))
+		f.SetCellStyle(sheet, cell("A", row), cell("A", row), subtotalStyle)
+		setCurrency(f, sheet, "D", row, groupValue, currencyFmt)
+		f.SetCellValue(sheet, cell("E", row), groupValue/data.totalValue)
+		f.SetCellStyle(sheet, cell("E", row), cell("E", row), pctFmt)
+		setCurrency(f, sheet, "G", row, groupFee, currencyFmt)
+		row += 2
+	}
+
+	f.SetCellValue(sheet, cell("A", row), "UNCLASSIFIED")
+	f.SetCellStyle(sheet, cell("A", row), cell("A", row), sectionStyle)
+	row++
+
+	unclValue, unclFee := 0.0, 0.0
+	var unclSyms []string
+	for sym := range posMap {
+		if _, isCore := data.coreTiltCfg.Core[sym]; isCore {
+			continue
+		}
+		if _, isTilt := symbolToTilt[sym]; isTilt {
+			continue
+		}
+		unclSyms = append(unclSyms, sym)
+	}
+	sort.Slice(unclSyms, func(i, j int) bool { return posMap[unclSyms[i]].Value > posMap[unclSyms[j]].Value })
+	for _, sym := range unclSyms {
+		cp := posMap[sym]
+		writeCoreTiltRow(f, sheet, row, sym, cp.Name, "", cp, currencyFmt, pctFmt, bpsFmt)
+		unclValue += cp.Value
+		unclFee += cp.AnnualFee
+		row++
+	}
+
+	row += 2
+	f.SetCellValue(sheet, cell("A", row), "FEE SUMMARY")
+	f.SetCellStyle(sheet, cell("A", row), cell("A", row), sectionStyle)
+	row++
+	totalFee := coreFee + tiltFee + unclFee
+
+	for _, sr := range []struct {
+		label string
+		value float64
+		fee   float64
+	}{
+		{"Core", coreValue, coreFee},
+		{"Tilts", tiltValue, tiltFee},
+		{"Unclassified", unclValue, unclFee},
+		{"Total", data.totalValue, totalFee},
+	} {
+		f.SetCellValue(sheet, cell("A", row), sr.label)
+		if sr.label == "Total" {
+			f.SetCellStyle(sheet, cell("A", row), cell("A", row), subtotalStyle)
+		}
+		setCurrency(f, sheet, "D", row, sr.value, currencyFmt)
+		f.SetCellValue(sheet, cell("E", row), sr.value/data.totalValue)
+		f.SetCellStyle(sheet, cell("E", row), cell("E", row), pctFmt)
+		if sr.value > 0 {
+			f.SetCellValue(sheet, cell("F", row), sr.fee/sr.value*10000)
+			f.SetCellStyle(sheet, cell("F", row), cell("F", row), bpsFmt)
+		}
+		setCurrency(f, sheet, "G", row, sr.fee, currencyFmt)
+		row++
+	}
+
+	f.SetColWidth(sheet, "A", "A", 12)
+	f.SetColWidth(sheet, "B", "B", 30)
+	f.SetColWidth(sheet, "C", "C", 14)
+	f.SetColWidth(sheet, "D", "D", 14)
+	f.SetColWidth(sheet, "E", "E", 10)
+	f.SetColWidth(sheet, "F", "F", 10)
+	f.SetColWidth(sheet, "G", "G", 12)
+	f.SetColWidth(sheet, "H", "H", 20)
+}
+
+func writeCoreTiltRow(f *excelize.File, sheet string, row int, symbol, name, class string, cp classifiedPosition, currencyFmt, pctFmt, bpsFmt int) {
+	f.SetCellValue(sheet, cell("A", row), symbol)
+	f.SetCellValue(sheet, cell("B", row), name)
+	f.SetCellValue(sheet, cell("C", row), class)
+	setCurrency(f, sheet, "D", row, cp.Value, currencyFmt)
+	f.SetCellValue(sheet, cell("E", row), cp.Weight)
+	f.SetCellStyle(sheet, cell("E", row), cell("E", row), pctFmt)
+	if cp.ExpenseBps > 0 {
+		f.SetCellValue(sheet, cell("F", row), cp.ExpenseBps)
+		f.SetCellStyle(sheet, cell("F", row), cell("F", row), bpsFmt)
+	}
+	setCurrency(f, sheet, "G", row, cp.AnnualFee, currencyFmt)
+	if cp.FundFamily != "" {
+		f.SetCellValue(sheet, cell("H", row), cp.FundFamily)
 	}
 }
 
