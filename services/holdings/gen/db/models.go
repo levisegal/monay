@@ -40,6 +40,7 @@ type Lot struct {
 	QuantityMicros  int64  `json:"quantity_micros"`
 	RemainingMicros int64  `json:"remaining_micros"`
 	CostBasisMicros int64  `json:"cost_basis_micros"`
+	EstimatedBasis  int64  `json:"estimated_basis"`
 	CreatedAt       string `json:"created_at"`
 }
 
@@ -69,13 +70,14 @@ type Position struct {
 }
 
 type Security struct {
-	ID           string         `json:"id"`
-	Symbol       string         `json:"symbol"`
-	Name         sql.NullString `json:"name"`
-	SecurityType sql.NullString `json:"security_type"`
-	Cusip        sql.NullString `json:"cusip"`
-	CreatedAt    string         `json:"created_at"`
-	UpdatedAt    string         `json:"updated_at"`
+	ID             string         `json:"id"`
+	Symbol         string         `json:"symbol"`
+	Name           sql.NullString `json:"name"`
+	SecurityType   sql.NullString `json:"security_type"`
+	Cusip          sql.NullString `json:"cusip"`
+	CashEquivalent int64          `json:"cash_equivalent"`
+	CreatedAt      string         `json:"created_at"`
+	UpdatedAt      string         `json:"updated_at"`
 }
 
 type Transaction struct {

@@ -10,6 +10,12 @@ class Quote(BaseModel):
     previous_close: float | None
     volume: int | None
     asset_type: str | None
+    sector: str | None = None
+    industry: str | None = None
+    category: str | None = None
+    dividend_rate: float | None = None
+    dividend_yield: float | None = None
+    yield_pct: float | None = None
 
 
 class QuotesResponse(BaseModel):

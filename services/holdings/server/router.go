@@ -124,11 +124,13 @@ func (rt *Router) getAccount(w http.ResponseWriter, r *http.Request) {
 }
 
 type HoldingResponse struct {
-	AccountName  string  `json:"account_name"`
-	Symbol       string  `json:"symbol"`
-	SecurityName *string `json:"security_name,omitempty"`
-	Quantity     float64 `json:"quantity"`
-	CostBasis    *int64  `json:"cost_basis_micros,omitempty"`
+	AccountID      string  `json:"account_id"`
+	AccountName    string  `json:"account_name"`
+	Symbol         string  `json:"symbol"`
+	SecurityName   *string `json:"security_name,omitempty"`
+	Quantity       float64 `json:"quantity"`
+	CostBasis      *int64  `json:"cost_basis_micros,omitempty"`
+	EstimatedBasis bool    `json:"estimated_basis"`
 }
 
 type HoldingsListResponse struct {
@@ -159,7 +161,7 @@ func (rt *Router) listHoldings(w http.ResponseWriter, r *http.Request) {
 		slog.Info("listHoldingsByAccount", "rows", len(rows))
 		holdings = make([]HoldingResponse, len(rows))
 		for i, h := range rows {
-			holdings[i] = holdingByAccountToResponse(h, account.Name)
+			holdings[i] = holdingByAccountToResponse(h, account.Name, account.ID)
 		}
 	} else {
 		rows, err := rt.queries.ListAllHoldings(r.Context())
@@ -195,9 +197,13 @@ func accountToResponse(a db.Account) AccountResponse {
 
 func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	resp := HoldingResponse{
-		AccountName: h.AccountName,
-		Symbol:      h.Symbol,
-		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
+		AccountID:      h.AccountID,
+		AccountName:    h.AccountName,
+		Symbol:         h.Symbol,
+		EstimatedBasis: interfaceToBool(h.EstimatedBasis),
+	}
+	if h.QuantityMicros.Valid {
+		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
 	}
 	if h.SecurityName.Valid {
 		resp.SecurityName = &h.SecurityName.String
@@ -209,11 +215,15 @@ func holdingToResponse(h db.ListAllHoldingsRow) HoldingResponse {
 	return resp
 }
 
-func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string) HoldingResponse {
+func holdingByAccountToResponse(h db.ListHoldingsByAccountRow, accountName string, accountID string) HoldingResponse {
 	resp := HoldingResponse{
-		AccountName: accountName,
-		Symbol:      h.Symbol,
-		Quantity:    h.QuantityMicros.Float64 / 1_000_000,
+		AccountID:      accountID,
+		AccountName:    accountName,
+		Symbol:         h.Symbol,
+		EstimatedBasis: interfaceToBool(h.EstimatedBasis),
+	}
+	if h.QuantityMicros.Valid {
+		resp.Quantity = h.QuantityMicros.Float64 / 1_000_000
 	}
 	if h.SecurityName.Valid {
 		resp.SecurityName = &h.SecurityName.String
@@ -237,4 +247,17 @@ func respond(w http.ResponseWriter, status int, data any) {
 
 func respondError(w http.ResponseWriter, status int, message string) {
 	respond(w, status, ErrorResponse{Error: message})
+}
+
+func interfaceToBool(v interface{}) bool {
+	switch val := v.(type) {
+	case int64:
+		return val != 0
+	case float64:
+		return val != 0
+	case bool:
+		return val
+	default:
+		return false
+	}
 }

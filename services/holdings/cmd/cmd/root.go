@@ -24,6 +24,7 @@ func Command() *cobra.Command {
 	command.AddCommand(holdingsCommand())
 	command.AddCommand(accountsCommand())
 	command.AddCommand(cashCommand())
+	command.AddCommand(incomeCommand())
 
 	return command
 }

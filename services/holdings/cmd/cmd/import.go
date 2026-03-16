@@ -20,6 +20,7 @@ func importCommand() *cobra.Command {
 		broker      string
 		files       []string
 		accountName string
+		accountType string
 	)
 
 	cmd := &cobra.Command{
@@ -33,8 +34,12 @@ func importCommand() *cobra.Command {
 				return err
 			}
 
+			if accountType == "" {
+				accountType = "brokerage"
+			}
+
 			for _, file := range files {
-				if err := runImport(ctx, cfg, broker, file, accountName); err != nil {
+				if err := runImport(ctx, cfg, broker, file, accountName, accountType); err != nil {
 					return err
 				}
 			}
@@ -45,6 +50,7 @@ func importCommand() *cobra.Command {
 	cmd.Flags().StringVar(&broker, "broker", "", "Broker name (etrade, schwab, fidelity, vanguard, lpl)")
 	cmd.Flags().StringArrayVar(&files, "file", nil, "Path to CSV file(s) - can be repeated")
 	cmd.Flags().StringVar(&accountName, "account-name", "", "Account name for imported data")
+	cmd.Flags().StringVar(&accountType, "account-type", "", "Account type (taxable, traditional_ira, roth_ira, sep_ira, savings)")
 
 	cmd.MarkFlagRequired("broker")
 	cmd.MarkFlagRequired("file")
@@ -53,7 +59,7 @@ func importCommand() *cobra.Command {
 	return cmd
 }
 
-func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, accountName string) error {
+func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, accountName, accountType string) error {
 	parser, err := importer.GetParser(importer.Broker(brokerName))
 	if err != nil {
 		return err
@@ -89,7 +95,7 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 			ID:              database.NewID(database.PrefixAccount),
 			Name:            accountName,
 			InstitutionName: brokerName,
-			AccountType:     "brokerage",
+			AccountType:     accountType,
 		})
 		if err != nil {
 			return fmt.Errorf("failed to create account: %w", err)
@@ -102,9 +108,11 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 
 		if txn.Symbol != "" {
 			sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
-				ID:     database.NewID(database.PrefixSecurity),
-				Symbol: txn.Symbol,
-				Name:   sql.NullString{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+				ID:             database.NewID(database.PrefixSecurity),
+				Symbol:         txn.Symbol,
+				Name:           sql.NullString{String: txn.SecurityName, Valid: txn.SecurityName != ""},
+				SecurityType:   sql.NullString{String: txn.SecurityType, Valid: txn.SecurityType != ""},
+				CashEquivalent: boolToInt(txn.CashEquivalent),
 			})
 			if err != nil {
 				return fmt.Errorf("failed to upsert security %s: %w", txn.Symbol, err)
@@ -131,9 +139,10 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 
 	for _, pos := range result.Positions {
 		sec, err := queries.UpsertSecurity(ctx, db.UpsertSecurityParams{
-			ID:     database.NewID(database.PrefixSecurity),
-			Symbol: pos.Symbol,
-			Name:   sql.NullString{String: pos.SecurityName, Valid: pos.SecurityName != ""},
+			ID:           database.NewID(database.PrefixSecurity),
+			Symbol:       pos.Symbol,
+			Name:         sql.NullString{String: pos.SecurityName, Valid: pos.SecurityName != ""},
+			SecurityType: sql.NullString{String: pos.SecurityType, Valid: pos.SecurityType != ""},
 		})
 		if err != nil {
 			return fmt.Errorf("failed to upsert security %s: %w", pos.Symbol, err)
@@ -160,4 +169,11 @@ func runImport(ctx context.Context, cfg *config.Config, brokerName, filePath, ac
 	)
 
 	return nil
+}
+
+func boolToInt(b bool) int64 {
+	if b {
+		return 1
+	}
+	return 0
 }

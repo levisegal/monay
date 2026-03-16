@@ -60,6 +60,11 @@ func (p *Processor) processBuy(ctx context.Context, txn db.ListTransactionsByAcc
 		return nil
 	}
 
+	var estimated int64
+	if txn.TransactionType == "opening_balance" {
+		estimated = 1
+	}
+
 	_, err := p.queries.CreateLot(ctx, db.CreateLotParams{
 		ID:              database.NewID(database.PrefixLot),
 		AccountID:       txn.AccountID,
@@ -69,6 +74,7 @@ func (p *Processor) processBuy(ctx context.Context, txn db.ListTransactionsByAcc
 		QuantityMicros:  txn.QuantityMicros.Int64,
 		RemainingMicros: txn.QuantityMicros.Int64,
 		CostBasisMicros: txn.AmountMicros,
+		EstimatedBasis:  estimated,
 	})
 	if err != nil {
 		return err

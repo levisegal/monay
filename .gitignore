@@ -74,3 +74,16 @@ tmp/
 # Test data with potentially sensitive information
 **/testdata/**/*.pdf
 **/testdata/**/transactions_opening.csv
+
+# Local data and artifacts
+*.db
+*.xlsx
+*.png
+*.json
+!package.json
+!package-lock.json
+!tsconfig.json
+data/
+.playwright-cli/
+convictions.yaml
+analysis/

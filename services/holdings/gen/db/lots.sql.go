@@ -19,7 +19,8 @@ insert into lots (
     acquired_date,
     quantity_micros,
     remaining_micros,
-    cost_basis_micros
+    cost_basis_micros,
+    estimated_basis
 ) values (
     ?1,
     ?2,
@@ -28,9 +29,10 @@ insert into lots (
     ?5,
     ?6,
     ?7,
-    ?8
+    ?8,
+    ?9
 )
-returning id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, created_at
+returning id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, estimated_basis, created_at
 `
 
 type CreateLotParams struct {
@@ -42,6 +44,7 @@ type CreateLotParams struct {
 	QuantityMicros  int64  `json:"quantity_micros"`
 	RemainingMicros int64  `json:"remaining_micros"`
 	CostBasisMicros int64  `json:"cost_basis_micros"`
+	EstimatedBasis  int64  `json:"estimated_basis"`
 }
 
 func (q *Queries) CreateLot(ctx context.Context, arg CreateLotParams) (Lot, error) {
@@ -54,6 +57,7 @@ func (q *Queries) CreateLot(ctx context.Context, arg CreateLotParams) (Lot, erro
 		arg.QuantityMicros,
 		arg.RemainingMicros,
 		arg.CostBasisMicros,
+		arg.EstimatedBasis,
 	)
 	var i Lot
 	err := row.Scan(
@@ -65,6 +69,7 @@ func (q *Queries) CreateLot(ctx context.Context, arg CreateLotParams) (Lot, erro
 		&i.QuantityMicros,
 		&i.RemainingMicros,
 		&i.CostBasisMicros,
+		&i.EstimatedBasis,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -156,7 +161,7 @@ func (q *Queries) DeleteLotsForAccount(ctx context.Context, accountID string) er
 }
 
 const getLot = `-- name: GetLot :one
-select id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, created_at
+select id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, estimated_basis, created_at
 from lots
 where id = ?1
 `
@@ -173,6 +178,7 @@ func (q *Queries) GetLot(ctx context.Context, id string) (Lot, error) {
 		&i.QuantityMicros,
 		&i.RemainingMicros,
 		&i.CostBasisMicros,
+		&i.EstimatedBasis,
 		&i.CreatedAt,
 	)
 	return i, err
@@ -180,33 +186,39 @@ func (q *Queries) GetLot(ctx context.Context, id string) (Lot, error) {
 
 const listAllHoldings = `-- name: ListAllHoldings :many
 select
+    a.id as account_id,
     a.institution_name as broker,
     a.name as account_name,
     s.symbol,
     s.name as security_name,
+    s.security_type,
     sum(l.remaining_micros) as quantity_micros,
     sum(
         case when l.remaining_micros > 0
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id
 where l.remaining_micros > 0
-group by a.institution_name, a.name, s.symbol, s.name
+group by a.id, a.institution_name, a.name, s.symbol, s.name
 order by cost_basis_micros desc
 `
 
 type ListAllHoldingsRow struct {
+	AccountID        string          `json:"account_id"`
 	Broker           string          `json:"broker"`
 	AccountName      string          `json:"account_name"`
 	Symbol           string          `json:"symbol"`
 	SecurityName     sql.NullString  `json:"security_name"`
+	SecurityType     sql.NullString  `json:"security_type"`
 	QuantityMicros   sql.NullFloat64 `json:"quantity_micros"`
 	CostBasisMicros  sql.NullFloat64 `json:"cost_basis_micros"`
 	EarliestAcquired interface{}     `json:"earliest_acquired"`
+	EstimatedBasis   interface{}     `json:"estimated_basis"`
 }
 
 func (q *Queries) ListAllHoldings(ctx context.Context) ([]ListAllHoldingsRow, error) {
@@ -219,13 +231,16 @@ func (q *Queries) ListAllHoldings(ctx context.Context) ([]ListAllHoldingsRow, er
 	for rows.Next() {
 		var i ListAllHoldingsRow
 		if err := rows.Scan(
+			&i.AccountID,
 			&i.Broker,
 			&i.AccountName,
 			&i.Symbol,
 			&i.SecurityName,
+			&i.SecurityType,
 			&i.QuantityMicros,
 			&i.CostBasisMicros,
 			&i.EarliestAcquired,
+			&i.EstimatedBasis,
 		); err != nil {
 			return nil, err
 		}
@@ -307,12 +322,16 @@ select
     l.acquired_date,
     l.security_id,
     s.symbol,
-    s.name as security_name
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name
 from lot_dispositions d
 join lots l on l.id = d.lot_id
 join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
 where
     strftime('%Y', d.disposed_date) = ?1
+    and a.account_type = 'taxable'
 order by d.disposed_date asc
 `
 
@@ -331,6 +350,8 @@ type ListDispositionsByYearRow struct {
 	SecurityID         string         `json:"security_id"`
 	Symbol             string         `json:"symbol"`
 	SecurityName       sql.NullString `json:"security_name"`
+	SecurityType       sql.NullString `json:"security_type"`
+	AccountName        string         `json:"account_name"`
 }
 
 func (q *Queries) ListDispositionsByYear(ctx context.Context, year string) ([]ListDispositionsByYearRow, error) {
@@ -357,6 +378,8 @@ func (q *Queries) ListDispositionsByYear(ctx context.Context, year string) ([]Li
 			&i.SecurityID,
 			&i.Symbol,
 			&i.SecurityName,
+			&i.SecurityType,
+			&i.AccountName,
 		); err != nil {
 			return nil, err
 		}
@@ -375,13 +398,15 @@ const listHoldingsByAccount = `-- name: ListHoldingsByAccount :many
 select
     s.symbol,
     s.name as security_name,
+    s.security_type,
     sum(l.remaining_micros) as quantity_micros,
     sum(
         case when l.remaining_micros > 0
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 where l.account_id = ?1 and l.remaining_micros > 0
@@ -392,9 +417,11 @@ order by s.symbol
 type ListHoldingsByAccountRow struct {
 	Symbol           string          `json:"symbol"`
 	SecurityName     sql.NullString  `json:"security_name"`
+	SecurityType     sql.NullString  `json:"security_type"`
 	QuantityMicros   sql.NullFloat64 `json:"quantity_micros"`
 	CostBasisMicros  sql.NullFloat64 `json:"cost_basis_micros"`
 	EarliestAcquired interface{}     `json:"earliest_acquired"`
+	EstimatedBasis   interface{}     `json:"estimated_basis"`
 }
 
 func (q *Queries) ListHoldingsByAccount(ctx context.Context, accountID string) ([]ListHoldingsByAccountRow, error) {
@@ -409,10 +436,52 @@ func (q *Queries) ListHoldingsByAccount(ctx context.Context, accountID string) (
 		if err := rows.Scan(
 			&i.Symbol,
 			&i.SecurityName,
+			&i.SecurityType,
 			&i.QuantityMicros,
 			&i.CostBasisMicros,
 			&i.EarliestAcquired,
+			&i.EstimatedBasis,
 		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLotDispositionsForPerformance = `-- name: ListLotDispositionsForPerformance :many
+select
+    d.lot_id,
+    d.disposed_date,
+    d.quantity_micros
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+order by d.disposed_date asc, d.created_at asc
+`
+
+type ListLotDispositionsForPerformanceRow struct {
+	LotID          string `json:"lot_id"`
+	DisposedDate   string `json:"disposed_date"`
+	QuantityMicros int64  `json:"quantity_micros"`
+}
+
+func (q *Queries) ListLotDispositionsForPerformance(ctx context.Context) ([]ListLotDispositionsForPerformanceRow, error) {
+	rows, err := q.db.QueryContext(ctx, listLotDispositionsForPerformance)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListLotDispositionsForPerformanceRow{}
+	for rows.Next() {
+		var i ListLotDispositionsForPerformanceRow
+		if err := rows.Scan(&i.LotID, &i.DisposedDate, &i.QuantityMicros); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
@@ -428,7 +497,7 @@ func (q *Queries) ListHoldingsByAccount(ctx context.Context, accountID string) (
 
 const listLotsByAccount = `-- name: ListLotsByAccount :many
 select
-    l.id, l.account_id, l.security_id, l.transaction_id, l.acquired_date, l.quantity_micros, l.remaining_micros, l.cost_basis_micros, l.created_at,
+    l.id, l.account_id, l.security_id, l.transaction_id, l.acquired_date, l.quantity_micros, l.remaining_micros, l.cost_basis_micros, l.estimated_basis, l.created_at,
     s.symbol,
     s.name as security_name
 from lots l
@@ -446,6 +515,7 @@ type ListLotsByAccountRow struct {
 	QuantityMicros  int64          `json:"quantity_micros"`
 	RemainingMicros int64          `json:"remaining_micros"`
 	CostBasisMicros int64          `json:"cost_basis_micros"`
+	EstimatedBasis  int64          `json:"estimated_basis"`
 	CreatedAt       string         `json:"created_at"`
 	Symbol          string         `json:"symbol"`
 	SecurityName    sql.NullString `json:"security_name"`
@@ -469,6 +539,7 @@ func (q *Queries) ListLotsByAccount(ctx context.Context, accountID string) ([]Li
 			&i.QuantityMicros,
 			&i.RemainingMicros,
 			&i.CostBasisMicros,
+			&i.EstimatedBasis,
 			&i.CreatedAt,
 			&i.Symbol,
 			&i.SecurityName,
@@ -487,7 +558,7 @@ func (q *Queries) ListLotsByAccount(ctx context.Context, accountID string) ([]Li
 }
 
 const listLotsByAccountAndSecurity = `-- name: ListLotsByAccountAndSecurity :many
-select id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, created_at
+select id, account_id, security_id, transaction_id, acquired_date, quantity_micros, remaining_micros, cost_basis_micros, estimated_basis, created_at
 from lots
 where
     account_id = ?1
@@ -519,7 +590,154 @@ func (q *Queries) ListLotsByAccountAndSecurity(ctx context.Context, arg ListLots
 			&i.QuantityMicros,
 			&i.RemainingMicros,
 			&i.CostBasisMicros,
+			&i.EstimatedBasis,
 			&i.CreatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listLotsForPerformance = `-- name: ListLotsForPerformance :many
+select
+    l.id,
+    l.account_id,
+    l.security_id,
+    l.acquired_date,
+    l.quantity_micros,
+    l.remaining_micros,
+    l.cost_basis_micros,
+    l.estimated_basis,
+    s.symbol,
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name,
+    a.account_type
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
+order by a.name, s.symbol, l.acquired_date asc
+`
+
+type ListLotsForPerformanceRow struct {
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      string         `json:"security_id"`
+	AcquiredDate    string         `json:"acquired_date"`
+	QuantityMicros  int64          `json:"quantity_micros"`
+	RemainingMicros int64          `json:"remaining_micros"`
+	CostBasisMicros int64          `json:"cost_basis_micros"`
+	EstimatedBasis  int64          `json:"estimated_basis"`
+	Symbol          string         `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
+	SecurityType    sql.NullString `json:"security_type"`
+	AccountName     string         `json:"account_name"`
+	AccountType     string         `json:"account_type"`
+}
+
+func (q *Queries) ListLotsForPerformance(ctx context.Context) ([]ListLotsForPerformanceRow, error) {
+	rows, err := q.db.QueryContext(ctx, listLotsForPerformance)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListLotsForPerformanceRow{}
+	for rows.Next() {
+		var i ListLotsForPerformanceRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.SecurityID,
+			&i.AcquiredDate,
+			&i.QuantityMicros,
+			&i.RemainingMicros,
+			&i.CostBasisMicros,
+			&i.EstimatedBasis,
+			&i.Symbol,
+			&i.SecurityName,
+			&i.SecurityType,
+			&i.AccountName,
+			&i.AccountType,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listOpenLotsByAccountType = `-- name: ListOpenLotsByAccountType :many
+select
+    l.id,
+    l.account_id,
+    l.security_id,
+    l.acquired_date,
+    l.quantity_micros,
+    l.remaining_micros,
+    l.cost_basis_micros,
+    l.estimated_basis,
+    s.symbol,
+    s.name as security_name,
+    s.security_type,
+    a.name as account_name
+from lots l
+join securities s on s.id = l.security_id
+join accounts a on a.id = l.account_id
+where l.remaining_micros > 0 and a.account_type = ?1
+order by a.name, s.symbol, l.acquired_date asc
+`
+
+type ListOpenLotsByAccountTypeRow struct {
+	ID              string         `json:"id"`
+	AccountID       string         `json:"account_id"`
+	SecurityID      string         `json:"security_id"`
+	AcquiredDate    string         `json:"acquired_date"`
+	QuantityMicros  int64          `json:"quantity_micros"`
+	RemainingMicros int64          `json:"remaining_micros"`
+	CostBasisMicros int64          `json:"cost_basis_micros"`
+	EstimatedBasis  int64          `json:"estimated_basis"`
+	Symbol          string         `json:"symbol"`
+	SecurityName    sql.NullString `json:"security_name"`
+	SecurityType    sql.NullString `json:"security_type"`
+	AccountName     string         `json:"account_name"`
+}
+
+func (q *Queries) ListOpenLotsByAccountType(ctx context.Context, accountType string) ([]ListOpenLotsByAccountTypeRow, error) {
+	rows, err := q.db.QueryContext(ctx, listOpenLotsByAccountType, accountType)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []ListOpenLotsByAccountTypeRow{}
+	for rows.Next() {
+		var i ListOpenLotsByAccountTypeRow
+		if err := rows.Scan(
+			&i.ID,
+			&i.AccountID,
+			&i.SecurityID,
+			&i.AcquiredDate,
+			&i.QuantityMicros,
+			&i.RemainingMicros,
+			&i.CostBasisMicros,
+			&i.EstimatedBasis,
+			&i.Symbol,
+			&i.SecurityName,
+			&i.SecurityType,
+			&i.AccountName,
 		); err != nil {
 			return nil, err
 		}
@@ -538,6 +756,7 @@ const listPositions = `-- name: ListPositions :many
 select
     s.symbol,
     s.name as security_name,
+    s.security_type,
     count(distinct a.id) as account_count,
     sum(l.remaining_micros) as quantity_micros,
     sum(
@@ -545,7 +764,8 @@ select
         then cast(cast(l.cost_basis_micros as real) / cast(l.quantity_micros as real) * cast(l.remaining_micros as real) as integer)
         else 0 end
     ) as cost_basis_micros,
-    min(l.acquired_date) as earliest_acquired
+    min(l.acquired_date) as earliest_acquired,
+    (select max(l2.estimated_basis) from lots l2 where l2.security_id = l.security_id and l2.account_id = l.account_id) as estimated_basis
 from lots l
 join securities s on s.id = l.security_id
 join accounts a on a.id = l.account_id
@@ -557,10 +777,12 @@ order by cost_basis_micros desc
 type ListPositionsRow struct {
 	Symbol           string          `json:"symbol"`
 	SecurityName     sql.NullString  `json:"security_name"`
+	SecurityType     sql.NullString  `json:"security_type"`
 	AccountCount     int64           `json:"account_count"`
 	QuantityMicros   sql.NullFloat64 `json:"quantity_micros"`
 	CostBasisMicros  sql.NullFloat64 `json:"cost_basis_micros"`
 	EarliestAcquired interface{}     `json:"earliest_acquired"`
+	EstimatedBasis   interface{}     `json:"estimated_basis"`
 }
 
 func (q *Queries) ListPositions(ctx context.Context) ([]ListPositionsRow, error) {
@@ -575,10 +797,12 @@ func (q *Queries) ListPositions(ctx context.Context) ([]ListPositionsRow, error)
 		if err := rows.Scan(
 			&i.Symbol,
 			&i.SecurityName,
+			&i.SecurityType,
 			&i.AccountCount,
 			&i.QuantityMicros,
 			&i.CostBasisMicros,
 			&i.EarliestAcquired,
+			&i.EstimatedBasis,
 		); err != nil {
 			return nil, err
 		}
@@ -593,13 +817,50 @@ func (q *Queries) ListPositions(ctx context.Context) ([]ListPositionsRow, error)
 	return items, nil
 }
 
+const sumRealizedGainLossByYear = `-- name: SumRealizedGainLossByYear :one
+select
+    coalesce(sum(case when d.holding_period = 'short_term' and d.realized_gain_micros > 0 then d.realized_gain_micros else 0 end), 0) as st_gains,
+    coalesce(sum(case when d.holding_period = 'short_term' and d.realized_gain_micros < 0 then d.realized_gain_micros else 0 end), 0) as st_losses,
+    coalesce(sum(case when d.holding_period = 'long_term' and d.realized_gain_micros > 0 then d.realized_gain_micros else 0 end), 0) as lt_gains,
+    coalesce(sum(case when d.holding_period = 'long_term' and d.realized_gain_micros < 0 then d.realized_gain_micros else 0 end), 0) as lt_losses
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+where
+    strftime('%Y', d.disposed_date) = ?1
+    and a.account_type = 'taxable'
+`
+
+type SumRealizedGainLossByYearRow struct {
+	StGains  interface{} `json:"st_gains"`
+	StLosses interface{} `json:"st_losses"`
+	LtGains  interface{} `json:"lt_gains"`
+	LtLosses interface{} `json:"lt_losses"`
+}
+
+func (q *Queries) SumRealizedGainLossByYear(ctx context.Context, year string) (SumRealizedGainLossByYearRow, error) {
+	row := q.db.QueryRowContext(ctx, sumRealizedGainLossByYear, year)
+	var i SumRealizedGainLossByYearRow
+	err := row.Scan(
+		&i.StGains,
+		&i.StLosses,
+		&i.LtGains,
+		&i.LtLosses,
+	)
+	return i, err
+}
+
 const sumRealizedGainsByYear = `-- name: SumRealizedGainsByYear :one
 select
-    coalesce(sum(case when holding_period = 'short_term' then realized_gain_micros else 0 end), 0) as short_term_gains,
-    coalesce(sum(case when holding_period = 'long_term' then realized_gain_micros else 0 end), 0) as long_term_gains,
-    coalesce(sum(realized_gain_micros), 0) as total_gains
-from lot_dispositions
-where strftime('%Y', disposed_date) = ?1
+    coalesce(sum(case when d.holding_period = 'short_term' then d.realized_gain_micros else 0 end), 0) as short_term_gains,
+    coalesce(sum(case when d.holding_period = 'long_term' then d.realized_gain_micros else 0 end), 0) as long_term_gains,
+    coalesce(sum(d.realized_gain_micros), 0) as total_gains
+from lot_dispositions d
+join lots l on l.id = d.lot_id
+join accounts a on a.id = l.account_id
+where
+    strftime('%Y', d.disposed_date) = ?1
+    and a.account_type = 'taxable'
 `
 
 type SumRealizedGainsByYearRow struct {
@@ -619,7 +880,13 @@ const sumRemainingBySymbol = `-- name: SumRemainingBySymbol :many
 select
     s.symbol,
     s.id as security_id,
-    coalesce(sum(l.remaining_micros), 0) as remaining_micros
+    coalesce(sum(l.remaining_micros), 0) as remaining_micros,
+    coalesce(sum(
+        case when l.quantity_micros > 0
+            then l.cost_basis_micros * l.remaining_micros / l.quantity_micros
+            else 0
+        end
+    ), 0) as remaining_cost_micros
 from securities s
 left join lots l on l.security_id = s.id and l.account_id = ?1
 where s.id in (
@@ -631,9 +898,10 @@ group by s.symbol, s.id
 `
 
 type SumRemainingBySymbolRow struct {
-	Symbol          string      `json:"symbol"`
-	SecurityID      string      `json:"security_id"`
-	RemainingMicros interface{} `json:"remaining_micros"`
+	Symbol              string      `json:"symbol"`
+	SecurityID          string      `json:"security_id"`
+	RemainingMicros     interface{} `json:"remaining_micros"`
+	RemainingCostMicros interface{} `json:"remaining_cost_micros"`
 }
 
 func (q *Queries) SumRemainingBySymbol(ctx context.Context, accountID string) ([]SumRemainingBySymbolRow, error) {
@@ -645,7 +913,12 @@ func (q *Queries) SumRemainingBySymbol(ctx context.Context, accountID string) ([
 	items := []SumRemainingBySymbolRow{}
 	for rows.Next() {
 		var i SumRemainingBySymbolRow
-		if err := rows.Scan(&i.Symbol, &i.SecurityID, &i.RemainingMicros); err != nil {
+		if err := rows.Scan(
+			&i.Symbol,
+			&i.SecurityID,
+			&i.RemainingMicros,
+			&i.RemainingCostMicros,
+		); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
