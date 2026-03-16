@@ -54,4 +54,5 @@ type Config struct {
 	PortfolioURL    string `env:"PORTFOLIO_URL"`
 	BondServiceURL  string `env:"BOND_SERVICE_URL"`
 	ConvictionsPath string `env:"CONVICTIONS_PATH"`
+	CoreTiltsPath   string `env:"CORE_TILTS_PATH"`
 }

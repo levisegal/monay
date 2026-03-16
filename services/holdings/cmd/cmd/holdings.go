@@ -31,6 +31,7 @@ func holdingsCommand() *cobra.Command {
 	cmd.AddCommand(positionsCommand())
 	cmd.AddCommand(reportCommand())
 	cmd.AddCommand(sharpeCommand())
+	cmd.AddCommand(coreTiltCommand())
 
 	return cmd
 }

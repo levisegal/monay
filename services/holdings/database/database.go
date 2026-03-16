@@ -34,6 +34,7 @@ func Open(ctx context.Context, dbPath string) (*sql.DB, error) {
 	}
 
 	for _, col := range []string{
+		"ALTER TABLE securities ADD COLUMN cash_equivalent integer not null default 0",
 		"ALTER TABLE securities ADD COLUMN expense_ratio_bps integer",
 		"ALTER TABLE securities ADD COLUMN fund_family text",
 		"ALTER TABLE securities ADD COLUMN fund_category text",

@@ -1,0 +1,91 @@
+core:
+  SPY: "US large cap index"
+  IWM: "US small cap index"
+  IWR: "US mid cap index"
+  IXUS: "international developed + EM"
+  ITM: "intermediate muni bonds"
+  IBDW: "iBonds Dec 2031 corp"
+  IBDZ: "iBonds Dec 2034 corp"
+  IBMQ: "iBonds Dec 2028 muni"
+  PTLC: "US large cap trend-following"
+  XMHQ: "mid cap quality"
+  QQQJ: "next-gen nasdaq 100"
+  XLY: "consumer discretionary"
+
+tilts:
+  ai:
+    thesis: "AI infrastructure, platforms, and autonomy"
+    symbols:
+      - NVDA
+      - AVGO
+      - PLTR
+      - META
+      - MSFT
+      - GOOGL
+      - GOOG
+      - DELL
+      - ORCL
+      - AMZN
+      - APP
+      - RBLX
+      - U
+
+  biotech:
+    thesis: "pharma innovation and aging demographics"
+    symbols:
+      - LLY
+      - NVO
+      - GILD
+      - AZN
+      - SYK
+      - FLGT
+
+  defense:
+    thesis: "geopolitical instability and security spend"
+    symbols:
+      - ESLT
+      - LMT
+      - RTX
+      - XAR
+      - AXON
+      - ZS
+      - PANW
+
+  semiconductors:
+    thesis: "compute demand beyond AI — auto, IoT, edge"
+    symbols:
+      - SMH
+      - SOXX
+      - MU
+      - TXN
+
+  clean_energy:
+    thesis: "energy transition and renewables"
+    symbols:
+      - CTEC
+      - QCLN
+      - TAN
+      - XEL
+      - WMB
+
+  quality_income:
+    thesis: "dividend growth and quality factor"
+    symbols:
+      - GSFTX
+      - CMNIX
+      - MBXIX
+      - PDBZX
+      - FTXSX
+      - PMJPX
+
+  financials:
+    thesis: "financial sector strength and rates"
+    symbols:
+      - JPM
+      - AXP
+      - WFC
+      - FITB
+      - IBKR
+      - V
+      - SOFI
+      - TPG
