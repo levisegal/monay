@@ -16,6 +16,8 @@ class Quote(BaseModel):
     dividend_rate: float | None = None
     dividend_yield: float | None = None
     yield_pct: float | None = None
+    net_expense_ratio: float | None = None
+    fund_family: str | None = None
 
 
 class QuotesResponse(BaseModel):

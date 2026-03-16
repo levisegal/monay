@@ -401,14 +401,16 @@ func interfaceToInt(v interface{}) int64 {
 }
 
 type quoteData struct {
-	Price         float64
-	Name          string
-	Sector        string
-	Industry      string
-	Category      string
-	DividendRate  float64
-	DividendYield float64
-	YieldPct      float64
+	Price           float64
+	Name            string
+	Sector          string
+	Industry        string
+	Category        string
+	DividendRate    float64
+	DividendYield   float64
+	YieldPct        float64
+	NetExpenseRatio float64
+	FundFamily      string
 }
 
 func fetchQuotes(ctx context.Context, portfolioURL string, symbols []string, skipSymbols map[string]bool) map[string]quoteData {
@@ -459,9 +461,11 @@ func fetchQuotes(ctx context.Context, portfolioURL string, symbols []string, ski
 			Sector        string   `json:"sector"`
 			Industry      string   `json:"industry"`
 			Category      string   `json:"category"`
-			DividendRate  *float64 `json:"dividend_rate"`
-			DividendYield *float64 `json:"dividend_yield"`
-			YieldPct      *float64 `json:"yield_pct"`
+			DividendRate    *float64 `json:"dividend_rate"`
+			DividendYield   *float64 `json:"dividend_yield"`
+			YieldPct        *float64 `json:"yield_pct"`
+			NetExpenseRatio *float64 `json:"net_expense_ratio"`
+			FundFamily      string   `json:"fund_family"`
 		} `json:"quotes"`
 	}
 	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
@@ -486,6 +490,10 @@ func fetchQuotes(ctx context.Context, portfolioURL string, symbols []string, ski
 			if q.YieldPct != nil {
 				qd.YieldPct = *q.YieldPct
 			}
+			if q.NetExpenseRatio != nil {
+				qd.NetExpenseRatio = *q.NetExpenseRatio
+			}
+			qd.FundFamily = q.FundFamily
 			result[q.Symbol] = qd
 		}
 	}

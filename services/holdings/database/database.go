@@ -33,5 +33,14 @@ func Open(ctx context.Context, dbPath string) (*sql.DB, error) {
 		return nil, fmt.Errorf("failed to create schema: %w", err)
 	}
 
+	for _, col := range []string{
+		"ALTER TABLE securities ADD COLUMN expense_ratio_bps integer",
+		"ALTER TABLE securities ADD COLUMN fund_family text",
+		"ALTER TABLE securities ADD COLUMN fund_category text",
+		"ALTER TABLE lots ADD COLUMN estimated_basis integer not null default 0",
+	} {
+		db.ExecContext(ctx, col)
+	}
+
 	return db, nil
 }

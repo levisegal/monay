@@ -120,6 +120,8 @@ class MarketService:
                             "dividend_rate": info.get("dividendRate"),
                             "dividend_yield": info.get("dividendYield"),
                             "yield_pct": info.get("yield"),
+                            "net_expense_ratio": info.get("netExpenseRatio"),
+                            "fund_family": info.get("fundFamily"),
                         }
                     )
                 except (KeyError, IndexError):

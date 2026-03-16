@@ -29,7 +29,9 @@ CREATE TABLE IF NOT EXISTS quote_cache (
     category TEXT,
     dividend_rate REAL,
     dividend_yield REAL,
-    yield_pct REAL
+    yield_pct REAL,
+    net_expense_ratio REAL,
+    fund_family TEXT
 );
 """
 
@@ -126,7 +128,8 @@ class PriceCache:
         cursor = await self._db.execute(
             f"""
             SELECT symbol, price, change, change_percent, previous_close, cached_at,
-                   sector, industry, name, category, dividend_rate, dividend_yield, yield_pct
+                   sector, industry, name, category, dividend_rate, dividend_yield, yield_pct,
+                   net_expense_ratio, fund_family
             FROM quote_cache
             WHERE symbol IN ({placeholders})
             """,
@@ -154,6 +157,8 @@ class PriceCache:
                     "dividend_rate": row[10] if len(row) > 10 else None,
                     "dividend_yield": row[11] if len(row) > 11 else None,
                     "yield_pct": row[12] if len(row) > 12 else None,
+                    "net_expense_ratio": row[13] if len(row) > 13 else None,
+                    "fund_family": row[14] if len(row) > 14 else None,
                 }
         return result
 
@@ -167,8 +172,9 @@ class PriceCache:
             """
             INSERT OR REPLACE INTO quote_cache
                 (symbol, price, change, change_percent, previous_close, cached_at,
-                 sector, industry, name, category, dividend_rate, dividend_yield, yield_pct)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                 sector, industry, name, category, dividend_rate, dividend_yield, yield_pct,
+                 net_expense_ratio, fund_family)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
             """,
             [
                 (
@@ -185,6 +191,8 @@ class PriceCache:
                     q.get("dividend_rate"),
                     q.get("dividend_yield"),
                     q.get("yield_pct"),
+                    q.get("net_expense_ratio"),
+                    q.get("fund_family"),
                 )
                 for q in quotes
             ],

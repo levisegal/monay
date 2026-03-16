@@ -11,7 +11,7 @@ import (
 )
 
 const getSecurity = `-- name: GetSecurity :one
-select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, expense_ratio_bps, fund_family, fund_category, created_at, updated_at
 from securities
 where id = ?1
 `
@@ -26,6 +26,9 @@ func (q *Queries) GetSecurity(ctx context.Context, id string) (Security, error) 
 		&i.SecurityType,
 		&i.Cusip,
 		&i.CashEquivalent,
+		&i.ExpenseRatioBps,
+		&i.FundFamily,
+		&i.FundCategory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -33,7 +36,7 @@ func (q *Queries) GetSecurity(ctx context.Context, id string) (Security, error) 
 }
 
 const getSecurityBySymbol = `-- name: GetSecurityBySymbol :one
-select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, expense_ratio_bps, fund_family, fund_category, created_at, updated_at
 from securities
 where symbol = ?1
 `
@@ -48,6 +51,9 @@ func (q *Queries) GetSecurityBySymbol(ctx context.Context, symbol string) (Secur
 		&i.SecurityType,
 		&i.Cusip,
 		&i.CashEquivalent,
+		&i.ExpenseRatioBps,
+		&i.FundFamily,
+		&i.FundCategory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)
@@ -86,7 +92,7 @@ func (q *Queries) ListCashEquivalentsByAccount(ctx context.Context, accountID st
 }
 
 const listSecurities = `-- name: ListSecurities :many
-select id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
+select id, symbol, name, security_type, cusip, cash_equivalent, expense_ratio_bps, fund_family, fund_category, created_at, updated_at
 from securities
 order by symbol
 `
@@ -107,6 +113,9 @@ func (q *Queries) ListSecurities(ctx context.Context) ([]Security, error) {
 			&i.SecurityType,
 			&i.Cusip,
 			&i.CashEquivalent,
+			&i.ExpenseRatioBps,
+			&i.FundFamily,
+			&i.FundCategory,
 			&i.CreatedAt,
 			&i.UpdatedAt,
 		); err != nil {
@@ -121,6 +130,75 @@ func (q *Queries) ListSecurities(ctx context.Context) ([]Security, error) {
 		return nil, err
 	}
 	return items, nil
+}
+
+const listSecuritiesWithOpenLots = `-- name: ListSecuritiesWithOpenLots :many
+select distinct s.id, s.symbol, s.name, s.security_type, s.cusip, s.cash_equivalent, s.expense_ratio_bps, s.fund_family, s.fund_category, s.created_at, s.updated_at
+from securities s
+join lots l on l.security_id = s.id
+where l.remaining_micros > 0
+order by s.symbol
+`
+
+func (q *Queries) ListSecuritiesWithOpenLots(ctx context.Context) ([]Security, error) {
+	rows, err := q.db.QueryContext(ctx, listSecuritiesWithOpenLots)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	items := []Security{}
+	for rows.Next() {
+		var i Security
+		if err := rows.Scan(
+			&i.ID,
+			&i.Symbol,
+			&i.Name,
+			&i.SecurityType,
+			&i.Cusip,
+			&i.CashEquivalent,
+			&i.ExpenseRatioBps,
+			&i.FundFamily,
+			&i.FundCategory,
+			&i.CreatedAt,
+			&i.UpdatedAt,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const updateSecurityMetadata = `-- name: UpdateSecurityMetadata :exec
+update securities
+set expense_ratio_bps = ?1,
+    fund_family = ?2,
+    fund_category = ?3,
+    updated_at = datetime('now')
+where symbol = ?4
+`
+
+type UpdateSecurityMetadataParams struct {
+	ExpenseRatioBps sql.NullInt64  `json:"expense_ratio_bps"`
+	FundFamily      sql.NullString `json:"fund_family"`
+	FundCategory    sql.NullString `json:"fund_category"`
+	Symbol          string         `json:"symbol"`
+}
+
+func (q *Queries) UpdateSecurityMetadata(ctx context.Context, arg UpdateSecurityMetadataParams) error {
+	_, err := q.db.ExecContext(ctx, updateSecurityMetadata,
+		arg.ExpenseRatioBps,
+		arg.FundFamily,
+		arg.FundCategory,
+		arg.Symbol,
+	)
+	return err
 }
 
 const upsertSecurity = `-- name: UpsertSecurity :one
@@ -145,7 +223,7 @@ on conflict (symbol) do update set
     cusip = coalesce(excluded.cusip, securities.cusip),
     cash_equivalent = max(excluded.cash_equivalent, securities.cash_equivalent),
     updated_at = datetime('now')
-returning id, symbol, name, security_type, cusip, cash_equivalent, created_at, updated_at
+returning id, symbol, name, security_type, cusip, cash_equivalent, expense_ratio_bps, fund_family, fund_category, created_at, updated_at
 `
 
 type UpsertSecurityParams struct {
@@ -174,6 +252,9 @@ func (q *Queries) UpsertSecurity(ctx context.Context, arg UpsertSecurityParams) 
 		&i.SecurityType,
 		&i.Cusip,
 		&i.CashEquivalent,
+		&i.ExpenseRatioBps,
+		&i.FundFamily,
+		&i.FundCategory,
 		&i.CreatedAt,
 		&i.UpdatedAt,
 	)

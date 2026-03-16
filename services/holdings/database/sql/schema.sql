@@ -23,6 +23,9 @@ create table if not exists securities (
     security_type text,
     cusip text,
     cash_equivalent integer not null default 0,
+    expense_ratio_bps integer,
+    fund_family text,
+    fund_category text,
     created_at text not null default (datetime('now')),
     updated_at text not null default (datetime('now'))
 );

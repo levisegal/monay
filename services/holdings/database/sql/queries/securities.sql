@@ -20,6 +20,21 @@ join securities s on t.security_id = s.id
 where t.account_id = @account_id
     and s.cash_equivalent = 1;
 
+-- name: UpdateSecurityMetadata :exec
+update securities
+set expense_ratio_bps = @expense_ratio_bps,
+    fund_family = @fund_family,
+    fund_category = @fund_category,
+    updated_at = datetime('now')
+where symbol = @symbol;
+
+-- name: ListSecuritiesWithOpenLots :many
+select distinct s.*
+from securities s
+join lots l on l.security_id = s.id
+where l.remaining_micros > 0
+order by s.symbol;
+
 -- name: UpsertSecurity :one
 insert into securities (
     id,
