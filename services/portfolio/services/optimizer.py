@@ -31,7 +31,47 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 TRADING_DAYS_PER_YEAR = 252
-RISK_FREE_RATE = 0.045
+FALLBACK_RISK_FREE_RATE = 0.045
+
+
+async def _fetch_risk_free_rate(market: "MarketService") -> float:
+    quotes = await market.get_quotes(["^TNX"])
+    for q in quotes:
+        if q.get("price") is not None:
+            return q["price"] / 100.0
+    return FALLBACK_RISK_FREE_RATE
+
+
+async def compute_portfolio_returns(
+    market: "MarketService", holdings: list, total_value: float
+) -> tuple[list[tuple[str, float]], float]:
+    from models.optimize import DailyReturn
+
+    symbols, weights = aggregate_symbol_weights(holdings, total_value)
+    risk_free_rate, returns_df = await asyncio.gather(
+        _fetch_risk_free_rate(market),
+        _fetch_returns(market, symbols),
+    )
+
+    if returns_df.empty:
+        return [], risk_free_rate
+
+    available = [s for s in weights if s in returns_df.columns]
+    if not available:
+        return [], risk_free_rate
+
+    df = returns_df[available].dropna()
+    w = np.array([weights.get(s, 0.0) for s in available])
+    w_sum = w.sum()
+    if w_sum > 0:
+        w = w / w_sum
+
+    port_returns = df.values @ w
+    result = [
+        DailyReturn(date=str(df.index[i]), value=round(float(port_returns[i]), 6))
+        for i in range(len(port_returns))
+    ]
+    return result, risk_free_rate
 
 
 async def analyze_portfolio(
@@ -39,9 +79,12 @@ async def analyze_portfolio(
 ) -> AnalyzeResponse:
     symbols, weights = aggregate_symbol_weights(req.holdings, req.total_value)
 
-    returns_df = await _fetch_returns(market, symbols)
+    risk_free_rate, returns_df = await asyncio.gather(
+        _fetch_risk_free_rate(market),
+        _fetch_returns(market, symbols),
+    )
 
-    risk_metrics = compute_risk_metrics(returns_df, weights)
+    risk_metrics = compute_risk_metrics(returns_df, weights, risk_free_rate)
     clusters = find_correlation_clusters(returns_df, weights)
     violations = find_constraint_violations(
         req.holdings, req.total_value, req.constraints
@@ -87,7 +130,7 @@ async def analyze_portfolio(
     all_symbols = list(set(symbols + [d.symbol for d in deltas]))
     target_weight_list = [target_weights.get(s, 0.0) for s in all_symbols]
     target_risk = compute_risk_metrics(
-        returns_df, dict(zip(all_symbols, target_weight_list))
+        returns_df, dict(zip(all_symbols, target_weight_list)), risk_free_rate
     )
     performance = compute_performance_summary(returns_df, weights, target_weights)
 
@@ -121,7 +164,9 @@ def aggregate_symbol_weights(
 
 
 def compute_risk_metrics(
-    returns_df: pd.DataFrame, weights: dict[str, float]
+    returns_df: pd.DataFrame,
+    weights: dict[str, float],
+    risk_free_rate: float = FALLBACK_RISK_FREE_RATE,
 ) -> RiskMetrics:
     if returns_df.empty:
         return RiskMetrics()
@@ -149,7 +194,7 @@ def compute_risk_metrics(
     mean_daily = float(np.mean(port_returns))
     ann_return = mean_daily * TRADING_DAYS_PER_YEAR
 
-    sharpe = (ann_return - RISK_FREE_RATE) / ann_vol if ann_vol > 0 else None
+    sharpe = (ann_return - risk_free_rate) / ann_vol if ann_vol > 0 else None
 
     sorted_returns = np.sort(port_returns)
     cutoff = max(int(len(sorted_returns) * 0.05), 1)
@@ -163,9 +208,11 @@ def compute_risk_metrics(
 
     return RiskMetrics(
         annualized_volatility=round(ann_vol, 4),
+        annualized_return=round(ann_return, 4),
         cvar_95=round(cvar_ann, 4),
         max_drawdown=round(max_dd, 4),
         sharpe_ratio=round(sharpe, 4) if sharpe is not None else None,
+        risk_free_rate=round(risk_free_rate, 4),
     )
 
 
