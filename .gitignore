@@ -76,13 +76,8 @@ tmp/
 **/testdata/**/transactions_opening.csv
 
 # Local data and artifacts
-*.db
 *.xlsx
 *.png
-*.json
-!package.json
-!package-lock.json
-!tsconfig.json
 data/
 .playwright-cli/
 convictions.yaml
