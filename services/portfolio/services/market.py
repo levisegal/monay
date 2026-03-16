@@ -27,6 +27,8 @@ def _is_valid_ticker(symbol: str) -> bool:
         return True
     if re.fullmatch(r"[A-Z]{2,5}-[A-Z]{2,5}", symbol.upper()):
         return True
+    if symbol.startswith("^") and re.fullmatch(r"\^[A-Z]{2,6}", symbol.upper()):
+        return True
     return False
 
 

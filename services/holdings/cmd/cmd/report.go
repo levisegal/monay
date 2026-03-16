@@ -75,6 +75,33 @@ type reportData struct {
 	analysis          *analyzeResponse
 	actualPerformance *actualPerformanceReport
 	convictions       *convictionsConfig
+	accountRisk    []accountRiskRow
+	totalReturns   []dailyReturn
+	riskFreeRate   float64
+}
+
+type accountRiskRow struct {
+	Name       string
+	AcctType   string
+	Value      float64
+	Metrics    riskMetrics
+	NumSymbols int
+	Returns    []dailyReturn
+}
+
+type dailyReturn struct {
+	Date  string  `json:"date"`
+	Value float64 `json:"value"`
+}
+
+type returnsRequest struct {
+	Holdings   []analyzeHolding `json:"holdings"`
+	TotalValue float64          `json:"total_value"`
+}
+
+type returnsResponse struct {
+	Returns      []dailyReturn `json:"returns"`
+	RiskFreeRate float64       `json:"risk_free_rate"`
 }
 
 type actualPerformanceReport struct {
@@ -162,9 +189,11 @@ type analyzeResponse struct {
 
 type riskMetrics struct {
 	AnnualizedVolatility *float64 `json:"annualized_volatility"`
+	AnnualizedReturn     *float64 `json:"annualized_return"`
 	CVaR95               *float64 `json:"cvar_95"`
 	MaxDrawdown          *float64 `json:"max_drawdown"`
 	SharpeRatio          *float64 `json:"sharpe_ratio"`
+	RiskFreeRate         *float64 `json:"risk_free_rate"`
 }
 
 type performanceSummary struct {
@@ -351,6 +380,8 @@ func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, outp
 	writeAssetAllocationSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeSectorAllocationSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeConcentrationSheet(f, data, currencyFmt, pctFmt, headerStyle)
+	writeReturnsSheet(f, data, headerStyle)
+	writeRiskSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writePerformanceSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writePlaybookSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeTaxHarvestingSheet(f, data, currencyFmt, pctFmt, headerStyle)
@@ -426,6 +457,11 @@ func loadReportData(ctx context.Context, queries *db.Queries, portfolioURL strin
 		return nil, fmt.Errorf("failed to build performance report: %w", err)
 	}
 
+	acctRisk := buildAccountRisk(ctx, portfolioURL, allHoldings, accounts, acctMap, cashByAcct, quotes)
+
+	allInputs := buildAnalyzeInputs(allHoldings, acctMap, quotes)
+	totalReturns, riskFreeRate := fetchPortfolioReturnsWithRate(ctx, portfolioURL, allInputs, totalValue)
+
 	return &reportData{
 		allHoldings:       allHoldings,
 		positions:         positions,
@@ -439,7 +475,143 @@ func loadReportData(ctx context.Context, queries *db.Queries, portfolioURL strin
 		analysis:          analysis,
 		actualPerformance: actualPerformance,
 		convictions:       conv,
+		accountRisk:       acctRisk,
+		totalReturns:      totalReturns,
+		riskFreeRate:      riskFreeRate,
 	}, nil
+}
+
+func buildAccountRisk(ctx context.Context, portfolioURL string, allHoldings []db.ListAllHoldingsRow, accounts []db.Account, acctMap map[string]db.Account, cashByAcct map[string]int64, quotes map[string]quoteData) []accountRiskRow {
+	holdingsByAcct := groupHoldingsByAccount(allHoldings)
+	var rows []accountRiskRow
+
+	for _, acct := range accounts {
+		holdings := holdingsByAcct[acct.ID]
+		if len(holdings) == 0 {
+			continue
+		}
+
+		acctValue := accountMarketValue(holdings, cashByAcct[acct.ID], quotes)
+		if acctValue <= 0 {
+			continue
+		}
+
+		inputs := buildAnalyzeInputs(holdings, acctMap, quotes)
+		returns := fetchPortfolioReturns(ctx, portfolioURL, inputs, acctValue)
+
+		computed := computeMetricsFromReturns(returns, 0)
+		var maxDD, cvar *float64
+		if computed.MaxDD != nil {
+			maxDD = computed.MaxDD
+		}
+		if len(returns) >= 30 {
+			c := computeCVaR(returns)
+			cvar = &c
+		}
+
+		rows = append(rows, accountRiskRow{
+			Name:       fmt.Sprintf("%s %s", acct.InstitutionName, acct.Name),
+			AcctType:   acct.AccountType,
+			Value:      acctValue,
+			Metrics:    riskMetrics{MaxDrawdown: maxDD, CVaR95: cvar},
+			NumSymbols: countSymbols(holdings),
+			Returns:    returns,
+		})
+	}
+
+	sort.Slice(rows, func(i, j int) bool { return rows[i].Value > rows[j].Value })
+	return rows
+}
+
+func buildAnalyzeInputs(holdings []db.ListAllHoldingsRow, acctMap map[string]db.Account, quotes map[string]quoteData) []analyzeHolding {
+	var inputs []analyzeHolding
+	for _, h := range holdings {
+		acct := acctMap[h.AccountID]
+		qty := nullFloat64ToFloat(h.QuantityMicros) / 1_000_000
+		cost := nullFloat64ToFloat(h.CostBasisMicros) / 1_000_000
+		mv := marketValue(h.Symbol, h.SecurityType.String, qty, cost, quotes)
+		qd := quotes[h.Symbol]
+		name := bestName(h.SecurityName.String, qd.Name)
+		sector := resolveSector(qd, h.SecurityType.String, h.Symbol, name)
+		bucket := sectorToAssetBucket(sector, h.SecurityType.String)
+
+		assetClass := "equity"
+		switch bucket {
+		case "Fixed Income":
+			assetClass = "fixed_income"
+		case "Cash & Equivalents":
+			assetClass = "cash"
+		case "Alternatives":
+			assetClass = "alternatives"
+		case "Real Estate":
+			assetClass = "real_estate"
+		case "Crypto":
+			assetClass = "crypto"
+		}
+
+		inputs = append(inputs, analyzeHolding{
+			Symbol:        h.Symbol,
+			Value:         mv,
+			Sector:        sector,
+			AssetClass:    assetClass,
+			AccountType:   acct.AccountType,
+			IsMuni:        sector == "Municipal Bonds",
+			SecurityType:  h.SecurityType.String,
+			DividendYield: qd.DividendYield,
+		})
+	}
+	return inputs
+}
+
+func fetchPortfolioReturns(ctx context.Context, portfolioURL string, inputs []analyzeHolding, totalValue float64) []dailyReturn {
+	returns, _ := fetchPortfolioReturnsWithRate(ctx, portfolioURL, inputs, totalValue)
+	return returns
+}
+
+func fetchPortfolioReturnsWithRate(ctx context.Context, portfolioURL string, inputs []analyzeHolding, totalValue float64) ([]dailyReturn, float64) {
+	if totalValue <= 0 {
+		return nil, 0
+	}
+
+	req := returnsRequest{
+		Holdings:   inputs,
+		TotalValue: totalValue,
+	}
+
+	body, err := json.Marshal(req)
+	if err != nil {
+		slog.Warn("failed to marshal returns request", "error", err)
+		return nil, 0
+	}
+
+	url := fmt.Sprintf("%s/api/v1/portfolio/returns", portfolioURL)
+	httpReq, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewReader(body))
+	if err != nil {
+		slog.Warn("failed to create returns request", "error", err)
+		return nil, 0
+	}
+	httpReq.Header.Set("Content-Type", "application/json")
+
+	client := &http.Client{Timeout: 120 * time.Second}
+	resp, err := client.Do(httpReq)
+	if err != nil {
+		slog.Warn("portfolio returns unavailable", "error", err)
+		return nil, 0
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		slog.Warn("portfolio returns failed", "status", resp.StatusCode)
+		return nil, 0
+	}
+
+	var result returnsResponse
+	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
+		slog.Warn("failed to decode returns response", "error", err)
+		return nil, 0
+	}
+
+	return result.Returns, result.RiskFreeRate
 }
 
 func callPortfolioAnalyze(ctx context.Context, portfolioURL string, holdings []db.ListAllHoldingsRow, acctMap map[string]db.Account, cashByAcct map[string]int64, quotes map[string]quoteData, totalValue float64, conv *convictionsConfig) *analyzeResponse {
@@ -1426,6 +1598,187 @@ func writeConcentrationSheet(f *excelize.File, data *reportData, currencyFmt, pc
 		setCurrency(f, sheet, "C", row, locs["deferred"], currencyFmt)
 		setCurrency(f, sheet, "D", row, locs["roth"], currencyFmt)
 		row++
+	}
+}
+
+func writeReturnsSheet(f *excelize.File, data *reportData, headerStyle int) {
+	sheet := "Returns"
+	f.NewSheet(sheet)
+
+	f.SetCellValue(sheet, cell("A", 1), "Date")
+	f.SetCellStyle(sheet, cell("A", 1), cell("A", 1), headerStyle)
+
+	colIdx := 1
+	acctCols := make(map[int]int)
+	for i, r := range data.accountRisk {
+		if len(r.Returns) == 0 {
+			continue
+		}
+		col := excelCol(colIdx)
+		f.SetCellValue(sheet, cell(col, 1), r.Name)
+		f.SetCellStyle(sheet, cell(col, 1), cell(col, 1), headerStyle)
+		acctCols[i] = colIdx
+		colIdx++
+	}
+	totalCol := colIdx
+	f.SetCellValue(sheet, cell(excelCol(totalCol), 1), "Total Portfolio")
+	f.SetCellStyle(sheet, cell(excelCol(totalCol), 1), cell(excelCol(totalCol), 1), headerStyle)
+
+	dateSet := make(map[string]bool)
+	var dates []string
+	for _, r := range data.totalReturns {
+		if !dateSet[r.Date] {
+			dateSet[r.Date] = true
+			dates = append(dates, r.Date)
+		}
+	}
+	sort.Strings(dates)
+
+	dateRow := make(map[string]int, len(dates))
+	for i, d := range dates {
+		row := i + 2
+		dateRow[d] = row
+		f.SetCellValue(sheet, cell("A", row), d)
+	}
+
+	for i, r := range data.accountRisk {
+		ci, ok := acctCols[i]
+		if !ok {
+			continue
+		}
+		col := excelCol(ci)
+		for _, dr := range r.Returns {
+			if row, ok := dateRow[dr.Date]; ok {
+				f.SetCellValue(sheet, cell(col, row), dr.Value)
+			}
+		}
+	}
+
+	tcol := excelCol(totalCol)
+	for _, dr := range data.totalReturns {
+		if row, ok := dateRow[dr.Date]; ok {
+			f.SetCellValue(sheet, cell(tcol, row), dr.Value)
+		}
+	}
+
+	pctFmt4, _ := f.NewStyle(&excelize.Style{NumFmt: 10})
+	lastDataRow := len(dates) + 1
+	for ci := 1; ci <= totalCol; ci++ {
+		col := excelCol(ci)
+		f.SetCellStyle(sheet, cell(col, 2), cell(col, lastDataRow), pctFmt4)
+	}
+}
+
+func writeRiskSheet(f *excelize.File, data *reportData, currencyFmt, pctFmt, headerStyle int) {
+	sheet := "Risk"
+	f.NewSheet(sheet)
+
+	tradingDays := 252
+	rfrRow := 1
+	f.SetCellValue(sheet, cell("A", rfrRow), "Risk-free rate (10Y Treasury)")
+	f.SetCellStyle(sheet, cell("A", rfrRow), cell("A", rfrRow), headerStyle)
+	f.SetCellValue(sheet, cell("B", rfrRow), data.riskFreeRate)
+	f.SetCellStyle(sheet, cell("B", rfrRow), cell("B", rfrRow), pctFmt)
+
+	f.SetCellValue(sheet, cell("D", rfrRow), "Trading days/yr")
+	f.SetCellValue(sheet, cell("E", rfrRow), tradingDays)
+
+	headerRow := 3
+	headers := []string{"Account", "Type", "Value", "Symbols", "Ann. Return", "Ann. Volatility", "Sharpe Ratio", "Max Drawdown", "CVaR-95"}
+	for i, h := range headers {
+		col := excelCol(i)
+		f.SetCellValue(sheet, cell(col, headerRow), h)
+		f.SetCellStyle(sheet, cell(col, headerRow), cell(col, headerRow), headerStyle)
+	}
+
+	dates := make([]string, 0, len(data.totalReturns))
+	for _, dr := range data.totalReturns {
+		dates = append(dates, dr.Date)
+	}
+	numDates := len(dates)
+	lastDataRow := numDates + 1
+
+	ratioFmt, _ := f.NewStyle(&excelize.Style{NumFmt: 2})
+
+	dataRow := headerRow + 1
+	returnsColIdx := 1
+	for i, r := range data.accountRisk {
+		if len(r.Returns) == 0 {
+			f.SetCellValue(sheet, cell("A", dataRow), r.Name)
+			f.SetCellValue(sheet, cell("B", dataRow), formatAccountType(r.AcctType))
+			setCurrency(f, sheet, "C", dataRow, r.Value, currencyFmt)
+			f.SetCellValue(sheet, cell("D", dataRow), r.NumSymbols)
+			dataRow++
+			continue
+		}
+
+		_ = i
+		retCol := excelCol(returnsColIdx)
+		retRange := fmt.Sprintf("Returns!%s2:%s%d", retCol, retCol, lastDataRow)
+
+		f.SetCellValue(sheet, cell("A", dataRow), r.Name)
+		f.SetCellValue(sheet, cell("B", dataRow), formatAccountType(r.AcctType))
+		setCurrency(f, sheet, "C", dataRow, r.Value, currencyFmt)
+		f.SetCellValue(sheet, cell("D", dataRow), r.NumSymbols)
+
+		f.SetCellFormula(sheet, cell("E", dataRow), fmt.Sprintf("AVERAGE(%s)*%d", retRange, tradingDays))
+		f.SetCellStyle(sheet, cell("E", dataRow), cell("E", dataRow), pctFmt)
+
+		f.SetCellFormula(sheet, cell("F", dataRow), fmt.Sprintf("STDEV(%s)*SQRT(%d)", retRange, tradingDays))
+		f.SetCellStyle(sheet, cell("F", dataRow), cell("F", dataRow), pctFmt)
+
+		f.SetCellFormula(sheet, cell("G", dataRow), fmt.Sprintf("(E%d-$B$%d)/F%d", dataRow, rfrRow, dataRow))
+		f.SetCellStyle(sheet, cell("G", dataRow), cell("G", dataRow), ratioFmt)
+
+		setOptionalPct(f, sheet, "H", dataRow, r.Metrics.MaxDrawdown, pctFmt)
+		setOptionalPct(f, sheet, "I", dataRow, r.Metrics.CVaR95, pctFmt)
+
+		dataRow++
+		returnsColIdx++
+	}
+
+	dataRow++
+	totalStyle, _ := f.NewStyle(&excelize.Style{Font: &excelize.Font{Bold: true}})
+
+	totalRetCol := excelCol(returnsColIdx)
+	totalRange := fmt.Sprintf("Returns!%s2:%s%d", totalRetCol, totalRetCol, lastDataRow)
+
+	f.SetCellValue(sheet, cell("A", dataRow), "TOTAL PORTFOLIO")
+	f.SetCellStyle(sheet, cell("A", dataRow), cell("A", dataRow), totalStyle)
+	setCurrency(f, sheet, "C", dataRow, data.totalValue, currencyFmt)
+
+	f.SetCellFormula(sheet, cell("E", dataRow), fmt.Sprintf("AVERAGE(%s)*%d", totalRange, tradingDays))
+	f.SetCellStyle(sheet, cell("E", dataRow), cell("E", dataRow), pctFmt)
+
+	f.SetCellFormula(sheet, cell("F", dataRow), fmt.Sprintf("STDEV(%s)*SQRT(%d)", totalRange, tradingDays))
+	f.SetCellStyle(sheet, cell("F", dataRow), cell("F", dataRow), pctFmt)
+
+	f.SetCellFormula(sheet, cell("G", dataRow), fmt.Sprintf("(E%d-$B$%d)/F%d", dataRow, rfrRow, dataRow))
+	f.SetCellStyle(sheet, cell("G", dataRow), cell("G", dataRow), ratioFmt)
+
+	if data.analysis != nil {
+		setOptionalPct(f, sheet, "H", dataRow, data.analysis.RiskMetrics.MaxDrawdown, pctFmt)
+		setOptionalPct(f, sheet, "I", dataRow, data.analysis.RiskMetrics.CVaR95, pctFmt)
+	}
+
+	for i := range headers {
+		col := excelCol(i)
+		f.SetColWidth(sheet, col, col, 16)
+	}
+	f.SetColWidth(sheet, "A", "A", 32)
+}
+
+func excelCol(idx int) string {
+	if idx < 26 {
+		return string(rune('A' + idx))
+	}
+	return string(rune('A'+idx/26-1)) + string(rune('A'+idx%26))
+}
+
+func setOptionalPct(f *excelize.File, sheet, col string, row int, v *float64, pctFmt int) {
+	if v != nil {
+		f.SetCellValue(sheet, cell(col, row), *v)
+		f.SetCellStyle(sheet, cell(col, row), cell(col, row), pctFmt)
 	}
 }
 

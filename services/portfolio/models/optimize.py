@@ -51,6 +51,21 @@ class Convictions(BaseModel):
     asset_classes: dict[str, AssetClassOverride] = {}
 
 
+class ReturnsRequest(BaseModel):
+    holdings: list[HoldingInput]
+    total_value: float
+
+
+class DailyReturn(BaseModel):
+    date: str
+    value: float
+
+
+class ReturnsResponse(BaseModel):
+    returns: list[DailyReturn]
+    risk_free_rate: float
+
+
 class AnalyzeRequest(BaseModel):
     holdings: list[HoldingInput]
     total_value: float
@@ -60,9 +75,11 @@ class AnalyzeRequest(BaseModel):
 
 class RiskMetrics(BaseModel):
     annualized_volatility: float | None = None
+    annualized_return: float | None = None
     cvar_95: float | None = None
     max_drawdown: float | None = None
     sharpe_ratio: float | None = None
+    risk_free_rate: float | None = None
 
 
 class TrailingReturns(BaseModel):
