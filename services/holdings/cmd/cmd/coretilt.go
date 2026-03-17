@@ -148,6 +148,7 @@ func runCoreTilt(ctx context.Context, queries *db.Queries, portfolioURL, configP
 		cp.ExpenseBps = expenseBps(sec, quotes[sym])
 		cp.FundFamily = fundFamily(sec, quotes[sym])
 		cp.AnnualFee = float64(cp.ExpenseBps) / 10000.0 * cp.Value
+		positionsBySymbol[sym] = cp
 
 		if _, isCore := ctConfig.Core[sym]; isCore {
 			corePositions = append(corePositions, cp)
@@ -387,6 +388,8 @@ type overlapPair struct {
 	SymA, SymB  string
 	Correlation float64
 	Note        string
+	CombinedFee float64
+	Actionable  bool
 }
 
 func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string, posMap map[string]classifiedPosition) []overlapPair {
@@ -446,13 +449,28 @@ func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string,
 				continue
 			}
 
+			feeA := posMap[a].AnnualFee
+			feeB := posMap[b].AnnualFee
+			combinedFee := feeA + feeB
+			bothHaveFees := posMap[a].ExpenseBps > 0 && posMap[b].ExpenseBps > 0
+			eitherHasFees := posMap[a].ExpenseBps > 0 || posMap[b].ExpenseBps > 0
+
 			note := ""
-			if corr >= 0.95 {
-				note = "REDUNDANT — nearly identical exposure"
+			actionable := false
+			if corr >= 0.95 && bothHaveFees {
+				note = fmt.Sprintf("REDUNDANT — paying duplicate fees ($%.0f/yr combined)", combinedFee)
+				actionable = true
+			} else if corr >= 0.95 {
+				note = "identical exposure, no fee impact"
+			} else if corr >= 0.85 && eitherHasFees {
+				note = fmt.Sprintf("HIGH OVERLAP — consolidating saves fees ($%.0f/yr)", combinedFee)
+				actionable = true
 			} else if corr >= 0.85 {
-				note = "HIGH OVERLAP — consider consolidating"
+				note = "high overlap, no fee impact"
+			} else if eitherHasFees {
+				note = "moderate overlap with fee drag"
 			} else {
-				note = "moderate overlap"
+				note = "moderate overlap, no fee impact"
 			}
 
 			pairs = append(pairs, overlapPair{
@@ -460,6 +478,8 @@ func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string,
 				SymB:        b,
 				Correlation: corr,
 				Note:        note,
+				CombinedFee: combinedFee,
+				Actionable:  actionable,
 			})
 		}
 	}
@@ -508,19 +528,34 @@ func printOverlapAnalysis(overlaps []overlapPair) {
 		return
 	}
 
-	fmt.Println("═══ OVERLAP ANALYSIS ═══")
-	fmt.Printf("%-8s %-8s %8s  %s\n", "SYMBOL", "SYMBOL", "CORR", "NOTE")
-	fmt.Println(strings.Repeat("─", 70))
+	var actionable, informational []overlapPair
 	for _, o := range overlaps {
-		flag := " "
-		if o.Correlation >= 0.95 {
-			flag = "!!"
-		} else if o.Correlation >= 0.85 {
-			flag = "!"
+		if o.Actionable {
+			actionable = append(actionable, o)
+		} else {
+			informational = append(informational, o)
 		}
-		fmt.Printf("%-8s %-8s %7.1f%%  %s %s\n", o.SymA, o.SymB, o.Correlation*100, flag, o.Note)
 	}
-	fmt.Println()
+
+	if len(actionable) > 0 {
+		fmt.Println("═══ OVERLAP — ACTIONABLE (fee savings) ═══")
+		fmt.Printf("%-8s %-8s %8s  %s\n", "SYMBOL", "SYMBOL", "CORR", "NOTE")
+		fmt.Println(strings.Repeat("─", 80))
+		for _, o := range actionable {
+			fmt.Printf("%-8s %-8s %7.1f%%  %s\n", o.SymA, o.SymB, o.Correlation*100, o.Note)
+		}
+		fmt.Println()
+	}
+
+	if len(informational) > 0 {
+		fmt.Println("═══ OVERLAP — INFORMATIONAL (no fee impact) ═══")
+		fmt.Printf("%-8s %-8s %8s  %s\n", "SYMBOL", "SYMBOL", "CORR", "NOTE")
+		fmt.Println(strings.Repeat("─", 80))
+		for _, o := range informational {
+			fmt.Printf("%-8s %-8s %7.1f%%  %s\n", o.SymA, o.SymB, o.Correlation*100, o.Note)
+		}
+		fmt.Println()
+	}
 }
 
 func loadCoreTiltConfig(path string) (*coreTiltConfig, error) {
