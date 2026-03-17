@@ -557,6 +557,60 @@ func printOverlapAnalysis(overlaps []overlapPair) {
 		fmt.Println()
 	}
 
+	if len(actionable) > 0 {
+		type sellRec struct {
+			Fund    string
+			Value   float64
+			ER      int
+			Keep    string
+			KeepER  int
+			Corr    float64
+			Savings float64
+		}
+		best := make(map[string]sellRec)
+		for _, o := range actionable {
+			var sell, keep string
+			if strings.Contains(o.Note, "sell "+o.SymA) {
+				sell, keep = o.SymA, o.SymB
+			} else {
+				sell, keep = o.SymB, o.SymA
+			}
+			existing, exists := best[sell]
+			if !exists || o.Correlation > existing.Corr {
+				savings := o.CombinedFee
+				best[sell] = sellRec{
+					Fund: sell, Keep: keep,
+					Corr: o.Correlation, Savings: savings,
+				}
+			}
+		}
+
+		type sortable struct {
+			key string
+			rec sellRec
+		}
+		var sorted []sortable
+		for k, v := range best {
+			sorted = append(sorted, sortable{k, v})
+		}
+		sort.Slice(sorted, func(i, j int) bool { return sorted[i].rec.Savings > sorted[j].rec.Savings })
+
+		totalSavings := 0.0
+		fmt.Println()
+		fmt.Println("═══ CONSOLIDATION PLAN (deduplicated) ═══")
+		fmt.Printf("%-8s %6s → %-8s %6s  %7s %10s\n", "SELL", "ER", "INTO", "ER", "CORR", "SAVINGS")
+		fmt.Println(strings.Repeat("─", 60))
+		for _, s := range sorted {
+			r := s.rec
+			fmt.Printf("%-8s        → %-8s         %6.1f%% %10s\n",
+				s.key, r.Keep, r.Corr*100, formatCurrency(r.Savings))
+			totalSavings += r.Savings
+		}
+		fmt.Println(strings.Repeat("─", 60))
+		fmt.Printf("%-35s         %10s\n", "Net annual savings", formatCurrency(totalSavings))
+		fmt.Println()
+	}
+
 	if len(informational) > 0 {
 		fmt.Println("═══ OVERLAP — INFORMATIONAL (no fee impact) ═══")
 		fmt.Printf("%-8s %-8s %8s  %s\n", "SYMBOL", "SYMBOL", "CORR", "NOTE")
