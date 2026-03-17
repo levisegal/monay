@@ -406,7 +406,7 @@ func generateReport(ctx context.Context, queries *db.Queries, portfolioURL, outp
 	writeConcentrationSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeReturnsSheet(f, data, headerStyle)
 	writeRiskSheet(f, data, currencyFmt, pctFmt, headerStyle)
-	writeCoreTiltSheet(f, data, currencyFmt, pctFmt, headerStyle)
+	writeCoreTiltSheet(ctx, f, data, portfolioURL, currencyFmt, pctFmt, headerStyle)
 	writePerformanceSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writePlaybookSheet(f, data, currencyFmt, pctFmt, headerStyle)
 	writeTaxHarvestingSheet(f, data, currencyFmt, pctFmt, headerStyle)
@@ -1807,7 +1807,7 @@ func setOptionalPct(f *excelize.File, sheet, col string, row int, v *float64, pc
 	}
 }
 
-func writeCoreTiltSheet(f *excelize.File, data *reportData, currencyFmt, pctFmt, headerStyle int) {
+func writeCoreTiltSheet(ctx context.Context, f *excelize.File, data *reportData, portfolioURL string, currencyFmt, pctFmt, headerStyle int) {
 	if data.coreTiltCfg == nil {
 		return
 	}
@@ -1985,10 +1985,46 @@ func writeCoreTiltSheet(f *excelize.File, data *reportData, currencyFmt, pctFmt,
 		row++
 	}
 
+	allSymbols := make([]string, 0)
+	for sym := range data.coreTiltCfg.Core {
+		allSymbols = append(allSymbols, sym)
+	}
+	for _, td := range data.coreTiltCfg.Tilts {
+		allSymbols = append(allSymbols, td.Symbols...)
+	}
+	overlaps := computeOverlaps(ctx, portfolioURL, allSymbols, posMap)
+
+	if len(overlaps) > 0 {
+		row += 2
+		f.SetCellValue(sheet, cell("A", row), "OVERLAP ANALYSIS")
+		f.SetCellStyle(sheet, cell("A", row), cell("A", row), sectionStyle)
+		row++
+		for _, h := range []struct{ col, label string }{{"A", "Symbol"}, {"B", "Symbol"}, {"C", "Correlation"}, {"D", "Note"}} {
+			f.SetCellValue(sheet, cell(h.col, row), h.label)
+			f.SetCellStyle(sheet, cell(h.col, row), cell(h.col, row), headerStyle)
+		}
+		row++
+
+		corrFmt, _ := f.NewStyle(&excelize.Style{NumFmt: 10})
+		warnStyle, _ := f.NewStyle(&excelize.Style{Font: &excelize.Font{Color: "#CC0000", Bold: true}})
+		for _, o := range overlaps {
+			f.SetCellValue(sheet, cell("A", row), o.SymA)
+			f.SetCellValue(sheet, cell("B", row), o.SymB)
+			f.SetCellValue(sheet, cell("C", row), o.Correlation)
+			f.SetCellStyle(sheet, cell("C", row), cell("C", row), corrFmt)
+			f.SetCellValue(sheet, cell("D", row), o.Note)
+			if o.Correlation >= 0.90 {
+				f.SetCellStyle(sheet, cell("A", row), cell("A", row), warnStyle)
+				f.SetCellStyle(sheet, cell("B", row), cell("B", row), warnStyle)
+			}
+			row++
+		}
+	}
+
 	f.SetColWidth(sheet, "A", "A", 12)
 	f.SetColWidth(sheet, "B", "B", 30)
 	f.SetColWidth(sheet, "C", "C", 14)
-	f.SetColWidth(sheet, "D", "D", 14)
+	f.SetColWidth(sheet, "D", "D", 40)
 	f.SetColWidth(sheet, "E", "E", 10)
 	f.SetColWidth(sheet, "F", "F", 10)
 	f.SetColWidth(sheet, "G", "G", 12)

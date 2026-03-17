@@ -2,10 +2,14 @@ package cmd
 
 import (
 	"context"
+	"encoding/json"
 	"fmt"
+	"math"
+	"net/http"
 	"os"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -172,8 +176,32 @@ func runCoreTilt(ctx context.Context, queries *db.Queries, portfolioURL, configP
 	sort.Slice(corePositions, func(i, j int) bool { return corePositions[i].Value > corePositions[j].Value })
 	sort.Slice(unclassified, func(i, j int) bool { return unclassified[i].Value > unclassified[j].Value })
 
+	allClassified := make([]string, 0, len(corePositions))
+	for _, cp := range corePositions {
+		allClassified = append(allClassified, cp.Symbol)
+	}
+	for _, tiltName := range sortedTiltNames(tiltGroups) {
+		for _, cp := range tiltGroups[tiltName].Positions {
+			if cp.SecurityType == "etf" || cp.SecurityType == "" {
+				allClassified = append(allClassified, cp.Symbol)
+			}
+		}
+	}
+
+	overlaps := computeOverlaps(ctx, portfolioURL, allClassified, positionsBySymbol)
+
 	printCoreTiltReport(corePositions, tiltGroups, unclassified, totalValue, ctConfig)
+	printOverlapAnalysis(overlaps)
 	return nil
+}
+
+func sortedTiltNames(tilts map[string]*tiltGroup) []string {
+	names := make([]string, 0, len(tilts))
+	for n := range tilts {
+		names = append(names, n)
+	}
+	sort.Slice(names, func(i, j int) bool { return tilts[names[i]].Value > tilts[names[j]].Value })
+	return names
 }
 
 func aggregatePositions(positions []db.ListPositionsRow, quotes map[string]quoteData, totalValue float64) map[string]classifiedPosition {
@@ -353,6 +381,146 @@ func truncate(s string, maxLen int) string {
 		return s
 	}
 	return s[:maxLen-1] + "…"
+}
+
+type overlapPair struct {
+	SymA, SymB  string
+	Correlation float64
+	Note        string
+}
+
+func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string, posMap map[string]classifiedPosition) []overlapPair {
+	returnsBySymbol := make(map[string][]float64)
+	datesBySymbol := make(map[string][]string)
+
+	client := &http.Client{Timeout: 30 * time.Second}
+	for _, sym := range symbols {
+		url := fmt.Sprintf("%s/api/v1/chart/%s?range=1y", portfolioURL, sym)
+		req, err := http.NewRequestWithContext(ctx, http.MethodGet, url, nil)
+		if err != nil {
+			continue
+		}
+		resp, err := client.Do(req)
+		if err != nil {
+			continue
+		}
+		var chart struct {
+			Points []struct {
+				Timestamp string   `json:"timestamp"`
+				Close     *float64 `json:"close"`
+			} `json:"points"`
+		}
+		json.NewDecoder(resp.Body).Decode(&chart)
+		resp.Body.Close()
+
+		if len(chart.Points) < 30 {
+			continue
+		}
+
+		var dates []string
+		var returns []float64
+		for i := 1; i < len(chart.Points); i++ {
+			if chart.Points[i].Close == nil || chart.Points[i-1].Close == nil || *chart.Points[i-1].Close == 0 {
+				continue
+			}
+			ret := (*chart.Points[i].Close - *chart.Points[i-1].Close) / *chart.Points[i-1].Close
+			returns = append(returns, ret)
+			dates = append(dates, chart.Points[i].Timestamp)
+		}
+		returnsBySymbol[sym] = returns
+		datesBySymbol[sym] = dates
+	}
+
+	var pairs []overlapPair
+	for i := 0; i < len(symbols); i++ {
+		for j := i + 1; j < len(symbols); j++ {
+			a, b := symbols[i], symbols[j]
+			rA, okA := returnsBySymbol[a]
+			rB, okB := returnsBySymbol[b]
+			if !okA || !okB {
+				continue
+			}
+
+			corr := pearsonCorrelation(rA, rB, datesBySymbol[a], datesBySymbol[b])
+			if corr < 0.80 {
+				continue
+			}
+
+			note := ""
+			if corr >= 0.95 {
+				note = "REDUNDANT — nearly identical exposure"
+			} else if corr >= 0.85 {
+				note = "HIGH OVERLAP — consider consolidating"
+			} else {
+				note = "moderate overlap"
+			}
+
+			pairs = append(pairs, overlapPair{
+				SymA:        a,
+				SymB:        b,
+				Correlation: corr,
+				Note:        note,
+			})
+		}
+	}
+
+	sort.Slice(pairs, func(i, j int) bool { return pairs[i].Correlation > pairs[j].Correlation })
+	return pairs
+}
+
+func pearsonCorrelation(a, b []float64, datesA, datesB []string) float64 {
+	dateMapA := make(map[string]float64, len(datesA))
+	for i, d := range datesA {
+		dateMapA[d] = a[i]
+	}
+
+	var xVals, yVals []float64
+	for i, d := range datesB {
+		if va, ok := dateMapA[d]; ok {
+			xVals = append(xVals, va)
+			yVals = append(yVals, b[i])
+		}
+	}
+
+	n := float64(len(xVals))
+	if n < 30 {
+		return 0
+	}
+
+	sumX, sumY, sumXY, sumX2, sumY2 := 0.0, 0.0, 0.0, 0.0, 0.0
+	for i := range xVals {
+		sumX += xVals[i]
+		sumY += yVals[i]
+		sumXY += xVals[i] * yVals[i]
+		sumX2 += xVals[i] * xVals[i]
+		sumY2 += yVals[i] * yVals[i]
+	}
+
+	denom := math.Sqrt((n*sumX2 - sumX*sumX) * (n*sumY2 - sumY*sumY))
+	if denom == 0 {
+		return 0
+	}
+	return (n*sumXY - sumX*sumY) / denom
+}
+
+func printOverlapAnalysis(overlaps []overlapPair) {
+	if len(overlaps) == 0 {
+		return
+	}
+
+	fmt.Println("═══ OVERLAP ANALYSIS ═══")
+	fmt.Printf("%-8s %-8s %8s  %s\n", "SYMBOL", "SYMBOL", "CORR", "NOTE")
+	fmt.Println(strings.Repeat("─", 70))
+	for _, o := range overlaps {
+		flag := " "
+		if o.Correlation >= 0.95 {
+			flag = "!!"
+		} else if o.Correlation >= 0.85 {
+			flag = "!"
+		}
+		fmt.Printf("%-8s %-8s %7.1f%%  %s %s\n", o.SymA, o.SymB, o.Correlation*100, flag, o.Note)
+	}
+	fmt.Println()
 }
 
 func loadCoreTiltConfig(path string) (*coreTiltConfig, error) {
