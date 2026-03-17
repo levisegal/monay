@@ -449,21 +449,31 @@ func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string,
 				continue
 			}
 
-			feeA := posMap[a].AnnualFee
-			feeB := posMap[b].AnnualFee
-			combinedFee := feeA + feeB
-			bothHaveFees := posMap[a].ExpenseBps > 0 && posMap[b].ExpenseBps > 0
-			eitherHasFees := posMap[a].ExpenseBps > 0 || posMap[b].ExpenseBps > 0
+			erA := posMap[a].ExpenseBps
+			erB := posMap[b].ExpenseBps
+			valA := posMap[a].Value
+			valB := posMap[b].Value
+			bothHaveFees := erA > 0 && erB > 0
+			eitherHasFees := erA > 0 || erB > 0
+
+			keep, sell := a, b
+			if erA > erB || (erA == erB && valA < valB) {
+				keep, sell = b, a
+			}
+			keepER := posMap[keep].ExpenseBps
+			sellER := posMap[sell].ExpenseBps
+			sellVal := posMap[sell].Value
+			savings := sellVal * float64(sellER-keepER) / 10000.0
 
 			note := ""
 			actionable := false
-			if corr >= 0.95 && bothHaveFees {
-				note = fmt.Sprintf("REDUNDANT — paying duplicate fees ($%.0f/yr combined)", combinedFee)
+			if corr >= 0.95 && bothHaveFees && savings >= 5 {
+				note = fmt.Sprintf("REDUNDANT — sell %s, keep %s → save $%.0f/yr", sell, keep, savings)
 				actionable = true
 			} else if corr >= 0.95 {
 				note = "identical exposure, no fee impact"
-			} else if corr >= 0.85 && eitherHasFees {
-				note = fmt.Sprintf("HIGH OVERLAP — consolidating saves fees ($%.0f/yr)", combinedFee)
+			} else if corr >= 0.85 && eitherHasFees && savings >= 10 {
+				note = fmt.Sprintf("HIGH OVERLAP — sell %s, keep %s → save $%.0f/yr", sell, keep, savings)
 				actionable = true
 			} else if corr >= 0.85 {
 				note = "high overlap, no fee impact"
@@ -478,7 +488,7 @@ func computeOverlaps(ctx context.Context, portfolioURL string, symbols []string,
 				SymB:        b,
 				Correlation: corr,
 				Note:        note,
-				CombinedFee: combinedFee,
+				CombinedFee: savings,
 				Actionable:  actionable,
 			})
 		}
